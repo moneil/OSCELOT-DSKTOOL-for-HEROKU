@@ -22,6 +22,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('isup', views.isup, name='isup'),
     path('learnlogout', views.learnlogout, name='learnlogout'),
+    path('notauthorized', views.notauthorized, name='notauthorized'),
 ]
 
 from django.conf import settings

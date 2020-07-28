@@ -38,22 +38,23 @@ def index(request):
     version_json = resp.json()
 
     bb_json = request.session.get('bb_json')
+    print(f"VIEWS.py: index request: bb_json: {bb_json}")
     if (bb_json is None):
         bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
         bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
+        print("VIEWS.py: index request: pickled BbRest and putting it on session")
         request.session['bb_json'] = bb_json
         request.session['target_view'] = 'index'
     else:
-        print('got BbRest from session')
+        print('VIEWS.py: index request: got BbRest from session')
         bb = jsonpickle.decode(bb_json)
         if bb.is_expired():
-            print('expired token')
+            print('VIEWS.py: index request: expired token')
             request.session['bb_json'] = None
             index(request)
         bb.supported_functions() # This and the following are required after
         bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+        print(f'VIEWS.py: index request: expiration: {bb.expiration()}')
 
     context = {
         'learn_server': LEARNFQDN,
@@ -110,6 +111,7 @@ def whoami(request):
     return render(request, 'whoami.html', context=context)
 
 def learnlogout(request):
+    print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
     request.session.flush()
     return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
 
@@ -141,7 +143,7 @@ def get_access_token(request):
     # Part II. Get an access token for the user that logged in. Put that on their session.
     bb_json = request.session.get('bb_json')
     target_view = request.session.get('target_view')
-    print('got BbRest from session')
+    print('VIEWS: get_access_token: got BbRest from session')
     bb = jsonpickle.decode(bb_json)
     bb.supported_functions() # This and the following are required after
     bb.method_generator()    # unpickling the pickled object.
@@ -150,9 +152,9 @@ def get_access_token(request):
     absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
 
     state = request.GET.get('state', default= "NOSTATE")
-    print(f'GOT BACK state: {state}')
+    print(f'VIEWS: get_access_token: GOT BACK state: {state}')
     stored_state = request.session.get('state')
-    print(f'STORED STATE: {stored_state}')
+    print(f'VIEWS: get_access_token: STORED STATE: {stored_state}')
     if (stored_state != state):
         return HttpResponseRedirect(reverse('notauthorized'))
 
@@ -162,6 +164,6 @@ def get_access_token(request):
     #Rebuild a new BbRest object to get an access token with the user's authcode.
     user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
     bb_json = jsonpickle.encode(user_bb)
-    print('pickled BbRest putting it on session')
+    print('VIEWS: get_access_token: pickled BbRest and putting it on session')
     request.session['bb_json'] = bb_json
     return HttpResponseRedirect(reverse(f'{target_view}'))
