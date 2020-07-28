@@ -23,6 +23,9 @@ except:
     SECRET = os.environ['APPLICATION_SECRET']
     LEARNFQDN = os.environ['BLACKBOARD_LEARN_INSTANCE']
 
+def isup(request):
+    return renderer(request, 'isup.html')
+
 def index(request):
     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
     resp = bb.GetVersion()
