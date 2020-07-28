@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('isup', views.isup, name='isup'),
+    path('learnlogout', views.learnlogout, name='learnlogout'),
 ]
 
 from django.conf import settings
