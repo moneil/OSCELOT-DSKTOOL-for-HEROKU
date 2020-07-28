@@ -1,0 +1,31 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>OSCELOT DSK Tool Home</h1>
+  <p>Welcome to the OSCELOT DSK Tool, a REST-based version of the original York DSK Tool</p>
+  <Thead></Thead>The OSCELOT DSK Tool is a secure cloud-based data source and availability managment tool that utilizes 3-legged authentication.
+  <p></p>
+  <h2>Version Information</h2>
+  Documentation is available via the project site located at:<p><a href='https://github.com/moneil/DSKTool'>https://github.com/moneil/DSKTool</a></p>
+<h3>Release Notes</h3>
+<h4>v1.0 (07/26/2020)</h4>
+<ul>
+  <li> Supports Data Source Key and Availability status for **single** User, Course, and Enrollment Records. </li>
+  <li> Supports non-TLS (SSL) local python and Docker Desktop deployments
+  <li> Supports TLS (SSL) deployments (see below TLS section)
+</ul>
+
+**ToDo:**
+  <ul>
+    <li>clean up/simplify project layout</li>
+    <li>add search and update for multiple records</li>
+    <li>add logging support</li>
+    <li>add date timeboxing</li>
+  </ul>
+  <hr>
+  <h4>Your System Information:</h4>
+  <ul>
+    <li><strong>Learn Server:</strong> {{ learn_server }}</li>
+    <li><strong>Version JSON:</strong> {{ version_json }}</li>
+  </ul>
+{% endblock %}
