@@ -18,6 +18,9 @@ def index(request):
     # This is key for 3LO web applications so that when you use the app, your
     # session has your object for accessing 
     
-
+    context = {
+        'learn_server': "testfqdn",
+        'version_json' : "testversion",
+    }
     # Render the HTML template index.html with the data in the context variable
-    return render(request, 'index.html')
+    return render(request, 'index.html', context=context)
