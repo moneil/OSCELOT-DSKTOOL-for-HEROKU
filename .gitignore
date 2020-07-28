@@ -3,3 +3,5 @@ db.sqlite3
 .python-version
 __pycache__
 local_settings.py
+
+dsktool/Heroku_dsktool.code-workspace
