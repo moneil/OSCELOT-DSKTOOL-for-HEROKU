@@ -15,8 +15,30 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
+    # path('isup', views.isup, name='isup'),
+    # path('whoami', views.whoami, name='whoami'),
+    # path('courses', views.courses, name='courses'),
+    # path('users', views.users, name='users'),
+    # path('enrollments', views.enrollments, name='enrollments'),
+    # path('getusers', views.getusers, name='getusers'),
+    # path('get_auth_code', views.get_auth_code, name='get_auth_code'),
+    # path('get_access_token', views.get_access_token, name='get_access_token'),
+    # path('learnlogout', views.learnlogout, name='learnlogout'),
+    # path('notauthorized', views.notauthorized, name='notauthorized')
+]
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', views.index, name='index'),
+]
+
+#Add URL maps to redirect the base URL, /, to our twoleg application
+from django.views.generic import RedirectView
+urlpatterns += [
+    path('', RedirectView.as_view(url=' /', permanent=True)),
 ]
