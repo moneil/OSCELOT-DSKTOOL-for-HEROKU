@@ -45,6 +45,7 @@ def index(request):
         print("VIEWS.py: index request: pickled BbRest and putting it on session")
         request.session['bb_json'] = bb_json
         request.session['target_view'] = 'index'
+        return HttpResponseRedirect(reverse('get_auth_code'))
     else:
         print('VIEWS.py: index request: got BbRest from session')
         bb = jsonpickle.decode(bb_json)
@@ -52,8 +53,8 @@ def index(request):
             print('VIEWS.py: index request: expired token')
             request.session['bb_json'] = None
             index(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
+        bb.supported_functions() 
+        bb.method_generator()
         print(f'VIEWS.py: index request: expiration: {bb.expiration()}')
 
     context = {
