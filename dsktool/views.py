@@ -110,6 +110,10 @@ def whoami(request):
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'whoami.html', context=context)
 
+def notauthorized(request):
+    context = {}
+    return render(request, 'notauthorized.html', context=context )
+
 def learnlogout(request):
     print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
     request.session.flush()
