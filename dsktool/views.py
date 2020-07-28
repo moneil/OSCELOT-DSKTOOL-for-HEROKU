@@ -8,6 +8,9 @@ import json
 import os
 import uuid
 
+def isup(request):
+    return render(request, 'isup.html')
+
 def index(request):
     """View function for home page of site."""
 
