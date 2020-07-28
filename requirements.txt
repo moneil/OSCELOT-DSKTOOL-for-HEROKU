@@ -6,7 +6,6 @@ psycopg2-binary==2.8.5
 pytz==2020.1
 sqlparse==0.3.1
 whitenoise==5.1.0
-## The following requirements were added by pip freeze:
 aiohttp==3.6.2
 appdirs==1.4.4
 async-timeout==3.0.1
@@ -45,3 +44,6 @@ urllib3==1.25.10
 w3lib==1.22.0
 websockets==8.1
 yarl==1.5.0
+importlib-metadata==1.7.0
+jsonpickle==1.4.1
+zipp==3.1.0
