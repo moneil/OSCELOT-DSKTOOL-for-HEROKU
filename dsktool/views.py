@@ -40,3 +40,10 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
+
+def learnlogout(request):
+    request.session.flush()
+    return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
+
+def sortDsk(dsks):
+  return sorted(dsks, key=lambda x: x['externalId'])
