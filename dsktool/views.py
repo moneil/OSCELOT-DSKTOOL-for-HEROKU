@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import render
 from django.urls import reverse
 
+
 def index(request):
     
 
