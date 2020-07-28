@@ -4,4 +4,7 @@ db.sqlite3
 __pycache__
 local_settings.py
 
+*/.DS_Store
+.DS_Store
+
 dsktool/Heroku_dsktool.code-workspace
