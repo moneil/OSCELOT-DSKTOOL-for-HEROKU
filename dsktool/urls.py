@@ -37,8 +37,4 @@ urlpatterns = [
     path('', views.index, name='index'),
 ]
 
-#Add URL maps to redirect the base URL, /, to our twoleg application
-from django.views.generic import RedirectView
-urlpatterns += [
-    path('', RedirectView.as_view(url=' /', permanent=True)),
-]
+
