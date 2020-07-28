@@ -24,7 +24,7 @@ except:
     LEARNFQDN = os.environ['BLACKBOARD_LEARN_INSTANCE']
 
 def isup(request):
-    return renderer(request, 'isup.html')
+    return render(request, 'isup.html')
 
 def index(request):
     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
