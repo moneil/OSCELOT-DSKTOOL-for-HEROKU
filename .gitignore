@@ -1,0 +1,5 @@
+*.pyc
+db.sqlite3
+.python-version
+__pycache__
+local_settings.py
