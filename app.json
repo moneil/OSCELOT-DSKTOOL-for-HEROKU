@@ -10,7 +10,7 @@
     ],
     "website": "https://github.com/moneil/DSKTool",
     "repository": "https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU",
-    "success_url": "/is_up",
+    "success_url": "/isup",
     "env": {
       "BLACKBOARD_LEARN_INSTANCE": {
         "description": "The FQDN for your Blackboard Learn instance. E.g.: demo.blackboard.com. Do NOT include the protocol (http:// or https://)",
