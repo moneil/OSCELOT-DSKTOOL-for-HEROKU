@@ -33,8 +33,5 @@
         "required": true,
         "value": "1"
       }
-    },
-    "scripts": {
-      "postdeploy": "python manage.py migrate",
     }
   }
