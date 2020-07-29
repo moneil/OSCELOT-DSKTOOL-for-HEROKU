@@ -430,7 +430,7 @@ def isup(request):
 
 def learnlogout(request):
     print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
-    print("Site domain: {request.META['HTTP_HOST']})
+    print("Site domain: {request.META['HTTP_HOST']}")
     request.session.flush()
     return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
 
