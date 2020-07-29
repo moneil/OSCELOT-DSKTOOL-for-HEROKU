@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Search for an Enrollment</h1>
 <div name="enrollmentSearchForm" id="enrollmentSearchForm">
-  <form id=searchEnrollment action="/threeleg/enrollments">
+  <form id=searchEnrollment action="/enrollments">
     <!-- this form is for searching -->
     {% csrf_token %}
     Select search parameters:
@@ -88,7 +88,7 @@
 
   <!-- PROCESS REQUEST BLOCK -->
   <div id="processBlock" style="display:none">
-    <form id=processSelections action="/threeleg/enrollments">
+    <form id=processSelections action="/enrollments">
       <input type="hidden" id="task" name="task" value="process">
       <input type="hidden" id="searchBy" name="searchBy" value={{member_json.searchBy}}>
       <input type="hidden" id="crsExternalId" name="crsExternalId" value={{member_json.crsExternalId}}>

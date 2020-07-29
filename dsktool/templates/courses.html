@@ -7,7 +7,7 @@
   <p>
   Enter Text in the textfield to search. (All searches are equal to)
   </p>
-  <form id="searchCourse" action="/threeleg/courses">
+  <form id="searchCourse" action="/courses">
     {% csrf_token %}
     <select name="searchBy" id="searchBy">
       <option value="externalId">External Id</option>
@@ -36,7 +36,7 @@
 
 <!-- PROCESS REQUEST (UPDATE) BLOCK -->
 <div id="processBlock" style="display:none">
-  <form id=processSelections action="/threeleg/courses">
+  <form id=processSelections action="/courses">
     {% csrf_token %}
     <input type="hidden" id="task" name="task" value="process">
     <input type="hidden" id="searchBy" name="searchBy" value={{ course_json.searchBy }}>
