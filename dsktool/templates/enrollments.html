@@ -1,0 +1,290 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Search for an Enrollment</h1>
+<div name="enrollmentSearchForm" id="enrollmentSearchForm">
+  <form id=searchEnrollment action="/threeleg/enrollments">
+    <!-- this form is for searching -->
+    {% csrf_token %}
+    Select search parameters:
+    <div>
+      <input type="radio" id="byCrsUsrRb" name="searchBy" value="byCrsUsr" onclick="toggleDivs('byCrsUsr'); hideElement('processBlock'); document.getElementById('submitSearch').disabled=false" checked>
+      <label for="byCrsUsrRb">Course and User</label> &nbsp;&nbsp;
+      <input type="radio" id="byUsrRb" name="searchBy" value="byUsr" onclick="toggleDivs('byUsr'); hideElement('processBlock'); document.getElementById('submitSearchByUsr').disabled=true"> 
+      <label for="byUsrRb">User</label>&nbsp;&nbsp;
+        <input type="radio" id="byCrsRb" name="searchBy" value="byCrs" onclick="toggleDivs('byCrs'); hideElement('processBlock'); document.getElementById('submitSearchByCrs').disabled=true">
+      <label for="byCrsRb">Course</label>
+    </div>
+
+    <!-- COURSE and USER SEARCH -->
+    <div id=byCrsUsr style=display:inline>
+      <h5>Search by Course and User external id</h5>
+      <p>Should return a single result</p>
+      <p>
+      Enter Text in the textfield to search. All searches are "equal to".
+      </p>
+      <input type="hidden" id="task" name="task" value="search">
+        Course/Org External Id:
+        &nbsp;
+        <input type="text" id="searchValueCrs" name="searchValueCrs">
+        &nbsp;&nbsp;
+        User External Id
+        &nbsp;
+        <input type="text" id="searchValueUsr" name="searchValueUsr"></br>
+          <div style="text-align:right; width:100%; padding:0;">
+            <input id="submitSearch" type="submit" value="Search"/>
+          </div>
+      </div>
+  </form>
+    
+
+  <!-- USR SEARCH FORM DIV-->
+  <div id=byUsr style=display:none>
+    <form>
+      <h5>Search by User external id</h5>
+      <p>Should return multiple results
+      </p>
+      <p>
+      Enter Text in the textfield to search. All searches are "equal to".
+      </p>
+    
+      User External Id
+      &nbsp;
+        <input type="text" id="searchValueUsr" name="searchValueUsr"></br>
+        <div style="text-align:right; width:100%; padding:0;">
+          <input id="submitSearchByUsr" type="submit" value="Search"/>
+        </div>
+    </form>
+  </div>
+  <!-- END USR SEARCH FORM DIV -->
+
+
+  <!-- COURSE SEARCH DIV -->
+  <div id=byCrs style=display:none><h5>Search by Course external id</h5>
+    <form?
+      <p>Should return multiple results
+      </p>
+      <p>
+        Enter Text in the textfield to search. All searches are "equal to".
+      </p>
+        <label for="searchValueCrs">Course/Org External Id:</label>
+        &nbsp;
+        <input type="text" id="searchValueCrs" name="searchValueCrs">
+        <div style="text-align:right; width:100%; padding:0;">
+          <input id="submitSearchByCrs" type="submit" value="Search"/>
+        </div>
+    </form>
+  </div>
+  <!-- END COURSE SEARCH FORM DIV -->
+</div>
+<!-- END SEARCH DIVS -->
+
+<!-- ERROR DIV -->
+  <div id="error" style="display:none">
+    <h3>Error</h3>
+    {{ error_json }}
+  </div>
+  <!-- END ERROR DIV -->
+
+  <!-- PROCESS REQUEST BLOCK -->
+  <div id="processBlock" style="display:none">
+    <form id=processSelections action="/threeleg/enrollments">
+      <input type="hidden" id="task" name="task" value="process">
+      <input type="hidden" id="searchBy" name="searchBy" value={{member_json.searchBy}}>
+      <input type="hidden" id="crsExternalId" name="crsExternalId" value={{member_json.crsExternalId}}>
+      <input type="hidden" id="usrExternalId" name="usrExternalId" value={{member_json.usrExternalId}}>
+      {% csrf_token %}
+      <div id="searchResult" style="display:none">
+        <hr>
+        <h3>Records Available to Update</h3>    
+        <p>Selecting a row readys it for processing.</p>
+        {% if member_json %}
+        <table>
+          <thead>
+            <tr>
+              <th style="padding:10px" valign="top"></th>
+              <th style="padding:10px" valign="top">Available</th>
+              <th style="padding:10px" valign="top">External Id</th>
+              <th style="padding:10px" valign="top">Username</th>
+              <th style="padding:10px" valign="top">User First Name</th>
+              <th style="padding:10px" valign="top">User Middle Name</th>
+              <th style="padding:10px" valign="top">User Last Name</th>
+              <th style="padding:10px" valign="top">User Email</th>
+              <th style="padding:10px" valign="top">Membership Data Source</th>
+              <th style="padding:10px" valign="top">Date Membership Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td styl="padding:10px;text-align:center"><input type="checkbox" name=processMembership checked value="{{ member_json.id }}" disabled></td>
+              <td style="padding:10px">{{member_json.availability.available}}</td>
+              <td style="padding:10px">{{member_json.externalId}}</td>
+              <td style="padding:10px">{{member_json.user.userName}}</td>
+              <td style="padding:10px">{{member_json.user.name.given}}</td>
+              <td style="padding:10px">{{member_json.user.name.middle}}</td>
+              <td style="padding:10px">{{member_json.user.name.family}}</td>
+              <td style="padding:10px">{{member_json.user.contact.email}}</td>
+              <td style="padding:10px">{{member_json.dataSourceId}}</td>
+              <td style="padding:10px">{{member_json.created}}</td>
+            </tr>
+          </tbody>
+        </table>
+        {% endif %}
+        <h6>details json:</h6>
+        {{ member_json }}
+        <hr>
+      </div>
+      <div id="multipleResults" style="display:none">
+        {% if memberSelectedData %}
+        <h3>Search Results</h3>
+        <!-- add table of results with next page button -->>
+        <hr>
+        {% endif %}
+      </div>
+      <div id="searchUpdate" style="display:none">
+        <h3>Update Selected Records</h3>
+        <p>
+          First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
+        </p>  
+        <div class="field">
+          <table>
+            <thead>
+              <tr style="padding:10px">
+                <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+                </th>
+                <th style="padding:10px">
+                  <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Availability
+                </th>
+                <th style="padding:10px">
+                  <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Data Source Key
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:10px"> </td>
+                <td style="padding:10px">
+                  <select id="selectedAvailability" name="selectedAvailability">
+                    <option value="Yes">Available</option>
+                    <option value="No">Unavailable</option>
+                    <option value="Disabled">Disabled</option>
+                  </select>
+                </td>
+                <td style="padding:10px">
+                  <select id="selectedDataSourceKey" name="selectedDataSourceKey">
+                    <!-- <option>Choose a DSK or use field to right.</option> -->
+                    {% if dsks_json %}
+                      {% for dsk in dsks_json %}
+                        <option value={{ dsk.id }}>{{ dsk.externalId }}</option>
+                      {% endfor %}
+                    {% endif %}
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </br>
+        <!--   <h3>Change Comments</h3>
+        <div id="comments" name="comments">
+        <p>
+        Please comment the change in plain text. Comments entered here will be stored in a database table.</p>
+        <p>
+        <textarea id="commentsTxt" name="commentsTxt" rows="4" cols="50">
+  
+        </textarea></p> -->
+  
+        <div style="text-align:right; width:100%; padding:0;">
+          <input id="processSubmit" name="processSubmit" type="submit" value="Update" disabled/>
+          </br>
+          </br>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="results" style="display:none">
+    <h3>Results:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="padding:10px" valign="top">Available</th>
+          <th style="padding:10px" valign="top">External Id</th>
+          <th style="padding:10px" valign="top">Username</th>
+          <th style="padding:10px" valign="top">User First Name</th>
+          <th style="padding:10px" valign="top">User Middle Name</th>
+          <th style="padding:10px" valign="top">User Last Name</th>
+          <th style="padding:10px" valign="top">User Email</th>
+          <th style="padding:10px" valign="top">Membership Data Source</th>
+          <th style="padding:10px" valign="top">Date Membership Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:10px">{{result_json.availability.available}}</td>
+          <td style="padding:10px">{{result_json.user.externalId}}</td>
+          <td style="padding:10px">{{result_json.user.userName}}</td>
+          <td style="padding:10px">{{result_json.user.name.given}}</td>
+          <td style="padding:10px">{{result_json.user.name.middle}}</td>
+          <td style="padding:10px">{{result_json.user.name.family}}</td>
+          <td style="padding:10px">{{result_json.user.contact.email}}</td>
+          <td style="padding:10px">{{result_json.dataSourceId}}</td>
+          <td style="padding:10px">{{result_json.created}}</td>
+        </tr>
+      </tbody>
+    </table>
+    <h6>details json:</h6>
+    {{ result_json }}
+  </div>
+
+<script>
+var isProcessable=false;
+
+function setIsProcessable() {
+  if ((document.getElementById('isUpdateRequired1').checked == true) &&
+      (document.getElementById('isAvailabilityUpdateRequired1').checked == true || 
+       document.getElementById('isDataSourceKeyUpdateRequired1').checked == true)) {
+    document.getElementById('processSubmit').disabled=false;
+  } else {
+    document.getElementById('processSubmit').disabled=true;
+  }
+}
+
+function showElement(showme) {
+  document.getElementById(showme).style.display = "inline";
+}
+function hideElement(hideme) {
+  document.getElementById(hideme).style.display = "none";
+}
+function toggleDivs(activeDiv) {
+  divArray = ['byCrsUsr', 'byCrs', 'byUsr'];
+
+  for (index = 0; index < divArray.length; index++) { 
+    if (divArray[index] === activeDiv) {
+      document.getElementById(divArray[index]).style.display = "inline";
+    } else {
+      document.getElementById(divArray[index]).style.display = "none";
+    }
+  }
+} 
+
+{% if error_json %}
+  showElement('error')
+{% endif %}
+
+{% if result_json %}
+  showElement('results')
+{% endif %}
+
+
+{% if member_json %}
+  showElement('processBlock')
+  showElement('searchResult')
+  showElement('searchUpdate')  
+{% endif %}
+</script>
+
+{% endblock %}
