@@ -9,8 +9,7 @@
       "DSKTOOL"
     ],
     "website": "https://github.com/moneil/DSKTool",
-    "repository": "https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU
-    ",
+    "repository": "https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU",
     "success_url": "/is_up",
     "env": {
       "BLACKBOARD_LEARN_INSTANCE": {
