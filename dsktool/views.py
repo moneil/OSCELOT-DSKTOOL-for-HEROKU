@@ -38,7 +38,6 @@ def index(request):
     version_json = resp.json()
 
     bb_json = request.session.get('bb_json')
-    #print(f"VIEWS.py: index request: bb_json: {bb_json}")
     if (bb_json is None):
         bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
         bb_json = jsonpickle.encode(bb)
