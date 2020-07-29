@@ -420,7 +420,7 @@ def get_auth_code(request):
     absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
     state = str(uuid.uuid4())
     request.session['state'] = state
-    authcodeurl = bb.get_auth_url(redirect_uri=absolute_redirect_uri, state=state)
+    authcodeurl = bb.get_auth_url(scope='read write', redirect_uri=absolute_redirect_uri, state=state)
 
     print(f"AUTHCODEURL:{authcodeurl}")
     return HttpResponseRedirect(authcodeurl)
@@ -430,6 +430,7 @@ def isup(request):
 
 def learnlogout(request):
     print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
+    print("Site domain: {request.META['HTTP_HOST']})
     request.session.flush()
     return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
 
