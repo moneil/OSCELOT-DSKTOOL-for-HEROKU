@@ -11,22 +11,22 @@ import uuid
 try:
     from config import adict
     
-    print("VIEWS.py: using config.py...")
+    print("VIEWS: using config.py...")
 
     KEY = adict['learn_rest_key']
     SECRET = adict['learn_rest_secret']
     LEARNFQDN = adict['learn_rest_fqdn']
 
 except:
-    print("VIEWS.py: using docker-compose env settings...")
+    print("VIEWS: using docker-compose env settings...")
     
     KEY = os.environ['APPLICATION_KEY']
     SECRET = os.environ['APPLICATION_SECRET']
     LEARNFQDN = os.environ['BLACKBOARD_LEARN_INSTANCE']
 
-print("VIEWS.py: KEY: ", KEY)
-print("VIEWS.py: SECRET: ", SECRET)
-print("VIEWS.py: LEARNFQDN: ", LEARNFQDN)
+print("VIEWS: KEY: ", KEY)
+print("VIEWS: SECRET: ", SECRET)
+print("VIEWS: LEARNFQDN: ", LEARNFQDN)
 
 def isup(request):
     return render(request, 'isup.html')
@@ -38,16 +38,16 @@ def index(request):
     version_json = resp.json()
 
     bb_json = request.session.get('bb_json')
-    print(f"VIEWS.py: index request: bb_json: {bb_json}")
+    #print(f"VIEWS.py: index request: bb_json: {bb_json}")
     if (bb_json is None):
         bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
         bb_json = jsonpickle.encode(bb)
-        print("VIEWS.py: index request: pickled BbRest and putting it on session")
+        print("VIEWS: index request: pickled BbRest and putting it on session")
         request.session['bb_json'] = bb_json
         request.session['target_view'] = 'index'
         return HttpResponseRedirect(reverse('get_auth_code'))
     else:
-        print('VIEWS.py: index request: got BbRest from session')
+        print('VIEWS: index request: got BbRest from session')
         bb = jsonpickle.decode(bb_json)
         if bb.is_expired():
             print('VIEWS.py: index request: expired token')
@@ -55,7 +55,7 @@ def index(request):
             index(request)
         bb.supported_functions() 
         bb.method_generator()
-        print(f'VIEWS.py: index request: expiration: {bb.expiration()}')
+        print(f'VIEWS: index request: expiration: {bb.expiration()}')
 
     context = {
         'learn_server': LEARNFQDN,
@@ -63,7 +63,6 @@ def index(request):
         'access_token' : access_token,
     }
 
-    # Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
 
 def whoami(request):
