@@ -7,7 +7,7 @@
   <p>
   Enter Text in the textfield to search. All searches are "equal to".
   </p>
-  <form id="searchUser" action="/threeleg/users">
+  <form id="searchUser" action="/users">
     {% csrf_token %}
     <input type="hidden" id="task" name="task" value="search">
     <select name="searchBy" id="searchBy">
@@ -36,7 +36,7 @@
 
 <!-- PROCESS REQUEST (UPDATE) BLOCK -->
 <div id="processBlock" style="display:none">
-  <form id=processSelections action="/threeleg/users">
+  <form id=processSelections action="/users">
     <input type="hidden" id="task" name="task" value="process">
     <input type="hidden" id="searchBy" name="searchBy" value={{ user_json.searchBy }}>
     <input type="hidden" id="searchValueUsr" name="searchValueUsr" value={{ user_json.searchValueUsr }}>
