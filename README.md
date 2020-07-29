@@ -18,15 +18,17 @@ Follow the below installation instructions.
 **Note**: This is an open source community project and *is not supported or sponsored by Blackboard Inc.*. Pull requests welcome! Make a fork and share your work back to the project.
 
 ## Release Notes
-###v1.0.3 (07/29/2020)
+### v1.0.3 (07/29/2020)
 <ul>
   <li>Heroku Deployable!</li>
   <li>3LO required on all pages</li>
-</ul>### v1.0.2 (07/28/2020)
+</ul>
+
+### v1.0.2 (07/28/2020)
 <ul>
   <li>Heroku Enabled!(working out some DB details)</li>
-  <li>3LO required on index load</li>
-  <li>strips spaces from around search terms</li>
+  <li>3LO required on index load
+  <li>strips spaces from around search terms
 </ul>
 
 ### v1.0.1 (07/27/2020)
