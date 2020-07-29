@@ -433,7 +433,7 @@ def logoutUser(request):
     print(f"VIEWS: LogoutUser: Site domain: {request.META['HTTP_HOST']}")
     site_domain = request.META['HTTP_HOST']
     response = HttpResponse("Cookies Cleared")
-    if (request.COOKIES.get(site_domain) is not None):
+    if site_domain not in request.COOKIES.keys():
         #response = HttpResponse("Cookies Cleared")
         print("VIEWS: LogoutUser: clearing cookies")
         response = redirect('/threeleg/learnlogout')
