@@ -24,11 +24,11 @@
       "APPLICATION_SECRET": {
         "description": "Paste the APPLICATION SECRET provided when you registered your Application",
         "required": true
-      }
+      },
       "DJANGO_SECRET_KEY": {
         "description": "Paste the DJANGO SECRET from this website: https://djskgen.herokuapp.com ",
         "required": true
-      }
+      },
       "DJANGO_ALLOWED_HOSTS": {
         "description": "Paste the hosts on which this app is running - space delimited e.g. 127.0.0.1 localhost .heroku.com",
         "required": true
