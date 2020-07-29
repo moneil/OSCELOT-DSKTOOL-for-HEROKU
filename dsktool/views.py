@@ -64,7 +64,9 @@ def index(request):
 def courses(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
-    searchValue = request.GET.get('searchValue').strip()
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
     print ("SEARCHBY: ", searchBy)
     print ("SEARCHVALUE: ", searchValue)
     print ("TASK: ", task)
@@ -91,7 +93,10 @@ def courses(request):
     if (task == 'search'):
         #Process request...
         print (f"COURSE REQUEST: ACTION {task}")
-        searchValue = request.GET.get('searchValue').strip()
+        searchValue = request.GET.get('searchValue')
+        if (searchValue is not None):
+            searchValue = searchValue.strip()
+        
         print (f"COURSE REQUEST: CRS: {searchValue}")
         print (f"Process by {searchBy}")
         if (searchBy == 'externalId'):
@@ -207,8 +212,12 @@ def enrollments(request):
     if (task == 'search'):
         #Process request...
         print (f"ENROLLMENTS REQUEST: ACTION {task}")
-        searchValueCrs = request.GET.get('searchValueCrs').strip()
-        searchValueUsr = request.GET.get('searchValueUsr').strip()
+        searchValueCrs = request.GET.get('searchValueCrs')
+        if (searchValueCrs is not None):
+            searchValueCrs = searchValueCrs.strip()
+        searchValueUsr = request.GET.get('searchValueUsr')
+        if (searchValueUsr is not None):
+            searchValueUsr = searchValueUsr.strip()
         print (f"ENROLLMENTS REQUEST: CRS: {searchValueCrs}")
         print (f"ENROLLMENTS REQUEST: USR: {searchValueUsr}")
 
@@ -432,6 +441,8 @@ def users(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
     searchValueUsr = request.GET.get('searchValueUsr')
+    if (searchValueUsr is not None):
+        searchValueUsr = searchValueUsr.strip()
     print ("SEARCHBY: ", searchBy)
     print ("SEARCHVALUEUSR: ", searchValueUsr)
     print ("TASK: ", task)
@@ -459,7 +470,10 @@ def users(request):
     if (task == 'search'):
         #Process request...
         print (f"USERS REQUEST: ACTION {task}")
-        searchValueUsr = request.GET.get('searchValue').strip()
+        searchBy = request.GET.get('searchBy')
+        searchValueUsr = request.GET.get('searchValue')
+        if (searchValueUsr is not None):
+            searchValueUsr = searchValueUsr.strip()
         print (f"USERS REQUEST: USR: {searchValueUsr}")
         print (f"Process by {searchBy}")
         if (searchBy == 'externalId'):
