@@ -431,7 +431,7 @@ def notauthorized(request):
 def users(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
-    searchValueUsr = request.GET.get('searchValueUsr').strip()
+    searchValueUsr = request.GET.get('searchValueUsr')
     print ("SEARCHBY: ", searchBy)
     print ("SEARCHVALUEUSR: ", searchValueUsr)
     print ("TASK: ", task)
