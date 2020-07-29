@@ -23,6 +23,11 @@
       "APPLICATION_SECRET": {
         "description": "Paste the APPLICATION SECRET provided when you registered your Application",
         "required": true
+      },
+      "DISABLE_COLLECTSTATIC": {
+        "description": "Leave this set as is for successful deploy.",
+        "required": true,
+        "value": "1"
       }
     }
   }
