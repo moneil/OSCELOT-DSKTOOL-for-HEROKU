@@ -81,14 +81,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'dsktool',
-        'USER': '',
+        'USER': 'name',
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
     }
 }
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -135,6 +134,3 @@ STATICFILES_DIRS = (
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
-# Configure Django App for Heroku.
-import django-on-heroku
-django-on-heroku.settings(locals())
