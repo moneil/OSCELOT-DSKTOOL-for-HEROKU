@@ -20,7 +20,7 @@ Follow the below installation instructions.
 ## Release Notes
 ### v1.0.2 (07/28/2020)
 <ul>
-  <li>Heroku Enabled!</li>
+  <li>Heroku Enabled!(working out some DB details)</li>
   <li>3LO required on index load</li>
   <li>strips spaces from around search terms</li>
 </ul>
@@ -67,7 +67,8 @@ NOTE: Make certain to store your Key and Secret as those will be required when y
 1. Set Authorized To Act As User to 'Service Default'.
 2. Click Submit.
 
-Learn is now ready proceed with the installation.
+Learn is now ready proceed with the installation by clickinng the below button:
+(note as of 07/28 this will not work. Incomplete instructions: clone the project and use heroku cli to deploy... $ heroku create, dashboard to set env variables, then heroku push.)
 
 <a href="https://heroku.com/deploy">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
