@@ -17,15 +17,15 @@
         "required": true
       },
       "APPLICATION_KEY": {
-        "description": "Paste the APPLICATION KEY provided when you registered your Application in the Blackboard Developer Portal.",
+        "description": "Paste the APPLICATION KEY provided when you registered your Application in the Blackboard Developer Portal. (Contains hyphens)",
         "required": true
       },
       "APPLICATION_SECRET": {
-        "description": "Paste the APPLICATION SECRET provided when you registered your Application",
+        "description": "Paste the APPLICATION SECRET provided when you registered your Application. (Contains no hyphens)",
         "required": true
       },
       "DJANGO_SECRET_KEY": {
-        "description": "Paste the DJANGO SECRET from this website: https://djskgen.herokuapp.com ",
+        "description": "Paste the DJANGO SECRET from this website: https://djskgen.herokuapp.com (remove the single quotes)",
         "required": true
       },
       "DISABLE_COLLECTSTATIC": {
