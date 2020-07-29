@@ -18,12 +18,11 @@ Follow the below installation instructions.
 **Note**: This is an open source community project and *is not supported or sponsored by Blackboard Inc.*. Pull requests welcome! Make a fork and share your work back to the project.
 
 ## Release Notes
-
 ### v1.0.2 (07/28/2020)
 <ul>
   <li>Heroku Enabled!</li>
   <li>3LO required on index load</li>
-  <li>strips spaces from search around search terms</li>
+  <li>strips spaces from around search terms</li>
 </ul>
 
 ### v1.0.1 (07/27/2020)
