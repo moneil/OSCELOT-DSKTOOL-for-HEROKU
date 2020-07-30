@@ -75,7 +75,7 @@ Learn is now ready and you may proceed with the installation by clicking the bel
 
 ## Heroku
 
-Clicking the below 'Deploy to Heroku' button	 will open Heroku to your application setup screen. 
+Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
 
 Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
 
@@ -93,5 +93,9 @@ On the setup screen you will need to name your application dyno, select a region
 5. Set the BLACKBOARD_LEARN_INSTANCE config variable to the FQDN for your Blackboard Learn instance. E.g.: demo.blackboard.com. DO NOT include the protocol (http:// or https://)
 6. Leave the required DISABLE_COLLECTSTATIC config variable set to the current setting of 1 - this is required for a successful deploy.
 7. Set the required DJANGO_SECRET_KEY config variable using the DJANGO SECRET gennerated from this website: https://djskgen.herokuapp.com NOTE: remove the single quotes e.g.: 
-=)**)-eozw)jt@hh!lkdc3k-h$gty+12sv)i(r8lp6rn9yn9w&
+`=)**)-eozw)jt@hh!lkdc3k-h$gty+12sv)i(r8lp6rn9yn9w&` 
+**NOT** 
+`'=)**)-eozw)jt@hh!lkdc3k-h$gty+12sv)i(r8lp6rn9yn9w&'`
+Retaining the single quotes will cause the install to fail.
 
+After entering the above click the 'Deploy app' button at the bottom of the page. This starts the deployment and on successful completion at the bottom of the page you will see a message 'Your app was successfully deployed.' and two buttons one for Managing your app and one to View - click View to open your app in your browser. This URL is sticky so bookmark it for later use and you are done!
