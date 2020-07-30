@@ -83,7 +83,7 @@ Note: if you do not have a Heroku account you will be prompted to create one. Yo
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
 
-
+### Configuring your application
 On the setup screen you will need to name your application dyno, select a region and set the configuration variables:
  
 1. Enter an application name - Heroku will let you know if it is valid. e.g. PostDSKTOOL.
