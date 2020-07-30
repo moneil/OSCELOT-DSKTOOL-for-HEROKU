@@ -18,6 +18,12 @@ Follow the below installation instructions.
 **Note**: This is an open source community project and *is not supported or sponsored by Blackboard Inc.*. Pull requests welcome! Make a fork and share your work back to the project.
 
 ## Release Notes
+### v1.0.4 (07/29/2020)
+<ul>
+  <li>Delete session cookie when Learn Logout link is used.</li>
+  <li>Moved older release notes from app index page to here.</li>
+</ul>
+
 ### v1.0.3 (07/29/2020)
 <ul>
   <li>Heroku Deployable!</li>
