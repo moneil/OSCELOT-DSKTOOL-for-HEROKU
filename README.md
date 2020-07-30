@@ -98,4 +98,4 @@ On the setup screen you will need to name your application dyno, select a region
 `'=)**)-eozw)jt@hh!lkdc3k-h$gty+12sv)i(r8lp6rn9yn9w&'`
 Retaining the single quotes will cause the install to fail.
 
-After entering the above click the 'Deploy app' button at the bottom of the page. This starts the deployment and on successful completion at the bottom of the page you will see a message 'Your app was successfully deployed.' and two buttons one for Managing your app and one to View - click View to open your app in your browser. This URL is sticky so bookmark it for later use and you are done!
+After entering the above click the 'Deploy app' button at the bottom of the page. This starts the deployment and on successful completion you will see a message at the bottom of the page 'Your app was successfully deployed.' along with two buttons, one for Managing your app and one to View - click View to open your app in your browser. This URL is sticky so bookmark it for later use and you are done!
