@@ -8,14 +8,13 @@ This project is a Django/Python and Learn REST replacement for the Original York
 
 It is built to be deployed on the Heroku. You may read about Heroku here: [https://heroku.com](https://heroku.com) 
 
-
 If you want, this tool may be run on your desktop, on a remote server, or in the cloud on a PaaS of your choosing other than Heroku.
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges (only Users with Admin accounts may post record updates).
 
 Follow the below installation instructions.
 
-**Note**: This is an open source community project and *is not supported or sponsored by Blackboard Inc.*. Pull requests welcome! Make a fork and share your work back to the project.
+**Note**: This is an open source community project and *is not supported or sponsored by Blackboard Inc.*. If you find it of value please contribute! Pull requests welcome! Make a fork and share your work back to this project.
 
 ## Release Notes
 ### v1.0.4 (07/29/2020)
