@@ -75,13 +75,14 @@ Learn is now ready and you may proceed with the installation by clicking the bel
 
 ## Heroku
 
-Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
+Clicking the below 'Deploy to Heroku' button	 will open Heroku to your application setup screen. 
 
 Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
 
 <a href="https://heroku.com/deploy">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
+
 
 On the setup screen you will need to name your application dyno, select a region and set the configuration variables:
  
