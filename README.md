@@ -61,6 +61,7 @@ You ***must*** have registered an application in your Developer Portal ([https:/
 
 NOTE: Make certain to store your Key and Secret as those will be required when you install the application.
 
+## Blackboard Learn
 1. On your Learn instance create a user 'dsktooluser' and assign them a low, to no, privileged Institution role - I used "staff" - you may create a specific role if you choose. Do not assign a System Role. 
 2. Navigate to the System Admin page and select the REST API Integrations link.
 3. Enter your Application Id into the Application Id field
@@ -70,8 +71,26 @@ NOTE: Make certain to store your Key and Secret as those will be required when y
 7. Set Authorized To Act As User to 'Service Default'.
 8. Click Submit.
 
-Learn is now ready and you may proceed with the installation by clicking the below button:
+Learn is now ready and you may proceed with the installation by clicking the below button and following the instuctions.
+
+## Heroku
 
 <a href="https://heroku.com/deploy">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
+
+Clicking the above open Heroku to your application setup screen. 
+
+Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
+
+On the setup screen you will need to name your application dyno, select a region and set the configuration variables:
+ 
+1. Enter an application name - Heroku will let you know if it is valid. e.g. PostDSKTOOL.
+2. Choose a region that applies or is closest to you.
+3. Set the required APPLICATION_KEY config variable using the APPLICATION KEY provided when you registered your Application in the Blackboard Developer Portal. (Contains hyphens)
+4. Set the required APPLICATION_SECRET config variable using the APPLICATION SECRET provided when you registered your Application. (Contains no hyphens)
+5. Set the BLACKBOARD_LEARN_INSTANCE config variable to the FQDN for your Blackboard Learn instance. E.g.: demo.blackboard.com. DO NOT include the protocol (http:// or https://)
+6. Leave the required DISABLE_COLLECTSTATIC config variable set to the current setting of 1 - this is required for a successful deploy.
+7. Set the required DJANGO_SECRET_KEY config variable using the DJANGO SECRET gennerated from this website: https://djskgen.herokuapp.com NOTE: remove the single quotes e.g.: 
+=)**)-eozw)jt@hh!lkdc3k-h$gty+12sv)i(r8lp6rn9yn9w&
+
