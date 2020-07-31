@@ -400,7 +400,12 @@ def get_access_token(request):
     if (code == None):
         exit()
     #Rebuild a new BbRest object to get an access token with the user's authcode.
-    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
+    CUSTOM_LOGIN_URL = "post-stg.blackboard.com/webapps/login/?action=relogin"
+
+    if (CUSTOM_LOGIN_URL):
+        user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
+    else:
+        user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
     bb_json = jsonpickle.encode(user_bb)
     print('VIEWS: get_access_token: pickled BbRest and putting it on session')
     request.session['bb_json'] = bb_json
