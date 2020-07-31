@@ -406,7 +406,7 @@ def get_access_token(request):
     #     print("CUSTOM_LOGIN_URL")
     #     user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
     # else:
-        user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
+    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
     bb_json = jsonpickle.encode(user_bb)
     print('VIEWS: get_access_token: pickled BbRest and putting it on session')
     request.session['bb_json'] = bb_json
