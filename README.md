@@ -61,6 +61,12 @@ This starts the deployment and on successful completion you will see a message a
 
 This URL is sticky so bookmark it for later use and you are done!
 
+**IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, does not work if you are using Direct Portal Entry (where your login is on the community/institution landing page).
+
+**Work Around:** login to your Learn instance before opening your dsktool page.
+
+I have filed a bug ticket with ‘the company’.
+
 #### KeyError
 If on first navigating the Heroku deployed DSK tool you are presented with an error indicating:
 
