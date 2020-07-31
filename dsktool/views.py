@@ -403,6 +403,7 @@ def get_access_token(request):
     CUSTOM_LOGIN_URL = "post-stg.blackboard.com/webapps/login/?action=relogin"
 
     if (CUSTOM_LOGIN_URL):
+        print("CUSTOM_LOGIN_URL")
         user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
     else:
         user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
