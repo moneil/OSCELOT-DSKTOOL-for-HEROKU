@@ -13,7 +13,7 @@ The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted 
 
 # Installation
 
-## Pre-requisiites:
+## Pre-requisites:
 You ***must*** have registered an application in your Developer Portal ([https://developer.blackboard.com](https://developer.blackboard.com)) account and added it to your Learn instance. 
 
 NOTE: Make certain to store your Key and Secret as those will be required when you install the application.
