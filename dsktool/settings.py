@@ -18,17 +18,31 @@ import dj_database_url
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+# # Quick-start development settings - unsuitable for production
+# # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = '9c7cq(30-^yen1j$lt$mdz@_fwudv0^ifv_@ys)abb0f6-0jt('
+
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '9c7cq(30-^yen1j$lt$mdz@_fwudv0^ifv_@ys)abb0f6-0jt('
+try:
+    from config import adict
+    print("\nSETTINGS.py: using config.py...")
+    SECRET_KEY = adict['django_secret_key'].strip("'")
+    print(f"\nSETTINGS.py: config: SECRET_KEY: [ {SECRET_KEY} ]")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+except: #no config file...load from env
+    print("\nSETTINGS.py: using env vars ...")
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY").strip("'")
+    print(f"\nSETTINGS.py: env vars: SECRET_KEY: [ {SECRET_KEY} ]")
 
 ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
-
+DEBUG = True
 
 # Application definition
 
