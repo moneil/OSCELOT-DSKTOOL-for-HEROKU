@@ -19,7 +19,7 @@ try:
     LEARNFQDN = adict['learn_rest_fqdn']
 
 except:
-    print("VIEWS: using docker-compose env settings...")
+    print("VIEWS: using env settings...")
     
     KEY = os.environ['APPLICATION_KEY']
     SECRET = os.environ['APPLICATION_SECRET']
