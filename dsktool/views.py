@@ -405,6 +405,9 @@ def get_access_token(request):
     #     user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
     # else:
     user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
+    if (isGuestUser(user_bb)):
+        return HttpResponseRedirect(reverse('guestusernotallowed'))
+    
     bb_json = jsonpickle.encode(user_bb)
     print('VIEWS: get_access_token: pickled BbRest and putting it on session')
     request.session['bb_json'] = bb_json
@@ -628,3 +631,15 @@ def whoami(request):
 #supporting function - move someday
 def sortDsk(dsks):
   return sorted(dsks, key=lambda x: x['externalId'])
+
+#add test to workaround 3LO 'guest user' problem
+#test for guest user and return true if guest, false if not
+
+def isGuestUser(bbuser):
+    return True
+
+def notauthorized(request):
+    context = {
+        'learn_server': LEARNFQDN,
+    }   
+    return render(request, 'guestusernotallowed.html', context=context )

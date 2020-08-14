@@ -8,3 +8,6 @@ local_settings.py
 .DS_Store
 
 dsktool/Heroku_dsktool.code-workspace
+
+config.py
+.env
