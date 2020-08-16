@@ -419,6 +419,7 @@ def get_access_token(request):
     code =  request.GET.get('code', default = None)
     if (code == None):
         exit()
+
     #Rebuild a new BbRest object to get an access token with the user's authcode.
     # if (CUSTOM_LOGIN_URL):
     #     print("CUSTOM_LOGIN_URL")
@@ -708,3 +709,7 @@ def guestusernotallowed(request):
         'learn_server': LEARNFQDN,
     }   
     return render(request, 'guestusernotallowed.html', context=context )
+
+def error_500(request):
+    data = {}
+    return render(request,'error_500.html', data)
