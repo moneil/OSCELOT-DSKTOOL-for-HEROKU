@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import config
 import dj_database_url
 
 
@@ -41,8 +42,12 @@ except: #no config file...load from env
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY").strip("'")
     print(f"\nSETTINGS.py: env vars: SECRET_KEY: [ {SECRET_KEY} ]")
 
-ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
-DEBUG = True
+ALLOWED_HOSTS = ['127.0.0.1', '.ngrok.io', '.herokuapp.com']
+
+if 'DYNO' in os.environ:
+    DEBUG = False
+else:
+    DEBUG = True
 
 # Application definition
 
@@ -90,17 +95,24 @@ WSGI_APPLICATION = 'dsktool.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dsktool',
-        'USER': 'name',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '',
+if 'DYNO' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'dsktool',
+            'USER': 'name',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation

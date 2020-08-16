@@ -14,9 +14,9 @@ try:
     
     print("VIEWS: using config.py...")
 
-    KEY = adict['learn_rest_key']
-    SECRET = adict['learn_rest_secret']
-    LEARNFQDN = adict['learn_rest_fqdn']
+    KEY = adict['APPLICATION_KEY']
+    SECRET = adict['APPLICATION_SECRET']
+    LEARNFQDN = adict['BLACKBOARD_LEARN_INSTANCE']
 
 except:
     print("VIEWS: using env settings...")
@@ -24,6 +24,8 @@ except:
     KEY = os.environ['APPLICATION_KEY']
     SECRET = os.environ['APPLICATION_SECRET']
     LEARNFQDN = os.environ['BLACKBOARD_LEARN_INSTANCE']
+
+ISGUESTUSER = False
 
 # print("VIEWS: KEY: ", KEY)
 # print("VIEWS: SECRET: ", SECRET)
@@ -54,6 +56,12 @@ def index(request):
         bb.method_generator()
         print(f'VIEWS: index request: expiration: {bb.expiration()}')
 
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+ 
     context = {
         'learn_server': LEARNFQDN,
         'version_json' : version_json,
@@ -90,6 +98,12 @@ def courses(request):
         bb.supported_functions() # This and the following are required after
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
+
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )    
 
     if (task == 'search'):
         #Process request...
@@ -209,7 +223,13 @@ def enrollments(request):
         bb.supported_functions() # This and the following are required after
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
-    
+
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+     
     if (task == 'search'):
         #Process request...
         print (f"ENROLLMENTS REQUEST: ACTION {task}")
@@ -404,11 +424,15 @@ def get_access_token(request):
     #     print("CUSTOM_LOGIN_URL")
     #     user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
     # else:
-    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )
-    if (isGuestUser(user_bb)):
-        return HttpResponseRedirect(reverse('guestusernotallowed'))
-    
+    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )    
     bb_json = jsonpickle.encode(user_bb)
+    if (isGuestUser(bb_json)):
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+        
+
     print('VIEWS: get_access_token: pickled BbRest and putting it on session')
     request.session['bb_json'] = bb_json
     return HttpResponseRedirect(reverse(f'{target_view}'))
@@ -417,9 +441,15 @@ def get_auth_code(request):
     # Happens when the user hits index the first time and hasn't authenticated on Learn
     # Part I. Request an authroization code oauth2/authorizationcode
     print(f"In get_auth_code: REQUEST URI:{request.build_absolute_uri()}")
-    bb_json = request.session.get('bb_json')
-    print('got BbRest from session')
-    bb = jsonpickle.decode(bb_json)
+    try: 
+        bb_json = request.session.get('bb_json')
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+    except:
+        #sideways sesssion go to index page and force get_access_token
+        return HttpResponseRedirect(reverse('index'))
+
+
     bb.supported_functions() # This and the following are required after
     bb.method_generator()    # unpickling the pickled object. 
     # The following gives the path to the resource on the server where we are running, 
@@ -492,7 +522,13 @@ def users(request):
         bb.supported_functions() # This and the following are required after
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
-    
+
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+     
     if (task == 'search'):
         #Process request...
         print (f"USERS REQUEST: ACTION {task}")
@@ -610,14 +646,28 @@ def whoami(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
 
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+        
     resp = bb.call('GetUser', userId = "me", params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, dataSourceId, created'}, sync=True ) #Need BbRest to support "me"
     
     user_json = resp.json()
 
-    dskresp = bb.call('GetDataSource', dataSourceId = user_json['dataSourceId'], sync=True)
-    dsk_json = dskresp.json()
-
-    user_json['dataSourceId'] = dsk_json['externalId']
+    #note: this next call is what is failing with 3LO on non-gateway logins
+    #could probably just wrap the next three lines in a try/except statment 
+    # - handing off to 'guestusernotallowed' if datasource call fails
+    try:
+        dskresp = bb.call('GetDataSource', dataSourceId = user_json['dataSourceId'], sync=True)
+        dsk_json = dskresp.json()
+        user_json['dataSourceId'] = dsk_json['externalId']
+    except:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
 
     context = {
         'user_json': user_json,
@@ -634,11 +684,26 @@ def sortDsk(dsks):
 
 #add test to workaround 3LO 'guest user' problem
 #test for guest user and return true if guest, false if not
+def isGuestUser(bb_json):
+    guestStatus = False
 
-def isGuestUser(bbuser):
-    return True
+    bb = jsonpickle.decode(bb_json)
+    resp = bb.call('GetUser', userId = "me", params = {'fields':'userName'}, sync=True ) 
+    
+    user_json = resp.json()
 
-def notauthorized(request):
+    print(f"ISGUESTUSER::userName: {user_json['userName']}")
+
+    if user_json['userName'] == 'guest':
+        guestStatus = True
+        ISGUESTUSER = True
+    else:
+        guestStatus = False
+        ISGUESTUSER = False
+
+    return guestStatus
+
+def guestusernotallowed(request):
     context = {
         'learn_server': LEARNFQDN,
     }   

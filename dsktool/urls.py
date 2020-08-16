@@ -24,6 +24,7 @@ urlpatterns = [
     path('enrollments', views.enrollments, name='enrollments'),
     path('get_auth_code', views.get_auth_code, name='get_auth_code'),
     path('get_access_token', views.get_access_token, name='get_access_token'),
+    path('guestusernotallowed', views.guestusernotallowed, name='guestusernotallowed'),
     path('isup', views.isup, name='isup'),
     path('learnlogout', views.learnlogout, name='learnlogout'),
     path('notauthorized', views.notauthorized, name='notauthorized'),

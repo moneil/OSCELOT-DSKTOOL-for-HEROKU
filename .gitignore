@@ -11,3 +11,8 @@ dsktool/Heroku_dsktool.code-workspace
 
 config.py
 .env
+Procfile.windows
+settings.json
+
+#pyenv project name
+odfh*
