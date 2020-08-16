@@ -33,6 +33,8 @@ urlpatterns = [
 
 ]
 
+handler500 = views.error_500
+
 from django.conf import settings
 from django.conf.urls.static import static
 
