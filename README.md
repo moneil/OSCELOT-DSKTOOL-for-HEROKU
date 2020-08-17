@@ -88,6 +88,12 @@ The following steps should resolve this issue...
 
 
 ## Release Notes
+### v1.0.5 (08/16/2020)
+<ul>
+  <li>Added 3LO handling for guest user results when target Learn instances use SSO or Direct Entry.</li>
+  <li>Added 3LO and 500 error trapping.</li>
+</ul>
+
 ### v1.0.4 (07/29/2020)
 <ul>
   <li>Delete session cookie when Learn Logout link is used.</li>
