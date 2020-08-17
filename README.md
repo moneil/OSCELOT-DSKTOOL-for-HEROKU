@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU
+# OSCELOT DSKTOOL for HEROKU v1.0.5 08.16.2020
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
