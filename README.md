@@ -61,35 +61,14 @@ This starts the deployment and on successful completion you will see a message a
 
 This URL is sticky so bookmark it for later use and you are done!
 
-**IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, does not work if you are using Direct Portal Entry (where your login is on the community/institution landing page).
+**IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, does not work if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue.
 
 **Work Around:** login to your Learn instance before opening your dsktool page.
-
-I have filed a bug ticket with ‘the company’.
-
-#### KeyError
-If on first navigating the Heroku deployed DSK tool you are presented with an error indicating:
-
-   ````
-1. KeyError at /<page> 
-2. 'dataSourceId'
-...
-   ```` 
-    
-Then you have likely encountered a stale cookie error resulting from previous installation attempts. Post 1.0.3 versions have fixed this error.
-
-The following steps should resolve this issue...
-
-1. Click your browser's back button, 
-2. Click the Learn Logout link to the left of the page, 
-3. clear any cookies referencing herokuapp.com or ngrok, 
-4. *Quit* your browser (don't just close the window),
-5. Restart your browser and open your application URL and you will be asked to login and be redirected to your now functional app page.
-
 
 ## Release Notes
 ### v1.0.5 (08/16/2020)
 <ul>
+  <li>Begin support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.</li>
   <li>Added 3LO handling for guest user results when target Learn instances use SSO or Direct Entry.</li>
   <li>Added 3LO and 500 error trapping.</li>
 </ul>
