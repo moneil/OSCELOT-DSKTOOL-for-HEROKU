@@ -4,7 +4,7 @@ This project is a Django/Python and Learn REST replacement for the Original York
 
 This project is built to be deployed on the Heroku. You may read about Heroku here: [https://heroku.com](https://heroku.com) 
 
-In order to meet the needs for a Heroku deployment there are some differences between this and the companion OSCELOT DSKTool project which supports python and containerized deployment. If those are of interest to you it is best to start with that project ([https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool)). Time and feasibility permiting I would like to merge these into a single project.
+In order to meet the needs for a Heroku deployment there are some differences between this and the companion OSCELOT DSKTool project which supports python and containerized deployment. If those are of interest to you it is best to start with that project ([https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool)). I have begun the process of merging these projects. See the 'docker' and 'local' folders in the repository for installation and usage instructions.
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
