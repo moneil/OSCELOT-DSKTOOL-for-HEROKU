@@ -23,7 +23,7 @@ The installation is performed in three easy steps:
 2. Install Docker
 3. Deploy using `docker-compose.yml` file.
 
-### 1. Provide TLS for https access**
+### 1. Provide TLS for https access
 You may skip this step if you are running the image on a remote server already configured for SSL.
 
 If you are running the Docker image on your desktop using Docker Desktop you need to provide a TLS service to enable SSL for the Docker URL. In this example you will use ngrok a TSL tunnel provider. 
