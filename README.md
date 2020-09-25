@@ -1,4 +1,6 @@
-# OSCELOT DSKTOOL for HEROKU v1.0.5 08.16.2020
+# OSCELOT DSKTOOL for HEROKU v1.0.8 09.25.2020
+
+See below [Release Notes](#Release-Notes).
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
@@ -65,6 +67,25 @@ This URL is sticky so bookmark it for later use and you are done!
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
 ## Release Notes
+### v1.0.8 (09/25/2020)
+This release focuses on improving the user experience for searching and updating Enrollments:
+<ul>
+  <li>Enrollments: Added Course/Org and User membership searches and updating to Enrollments
+  <li>Enrollments: Course/Org and User membership searches support externalId and courseId/Username
+  <li>Enrollments: Improved UI using AJAX
+  <li>Enrollments: Added alerts for entry validation and errors
+  <li>Enrollments: Substantial logging to Javascript console for debugging
+</ul>
+
+**ToDo:**
+  <ul>
+    <li>Change User and Course searches to ajax with improved UI and error checking
+    <li>Continue support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.
+    <li>add logging support</li>
+    <li>analyze ditching Django for Flask</li>
+    <li>add date timeboxing</li>
+  </ul>
+
 ### v1.0.5 (08/16/2020)
 <ul>
   <li>Begin support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.</li>
@@ -104,12 +125,4 @@ This URL is sticky so bookmark it for later use and you are done!
   <li> Supports non-TLS (SSL) local python and Docker Desktop deployments
   <li> Supports TLS (SSL) deployments (see below TLS section)
 </ul>
-
-**ToDo:**
-  <ul>
-    <li>add search and update for multiple records</li>
-    <li>add logging support</li>
-    <li>analyze ditching Django for Flask</li>
-    <li>add date timeboxing</li>
-  </ul>
 <hr>
