@@ -75,6 +75,7 @@ This release focuses on improving the user experience for searching and updating
   <li>Enrollments: Improved UI using AJAX
   <li>Enrollments: Added alerts for entry validation and errors
   <li>Enrollments: Substantial logging to Javascript console for debugging
+  <li>Added Docker deployment support (docker-compose.yml) see docker/README.md for details.
 </ul>
 
 **ToDo:**
