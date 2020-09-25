@@ -4,9 +4,9 @@ See below [Release Notes](#Release-Notes).
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed on the Heroku. You may read about Heroku here: [https://heroku.com](https://heroku.com) 
+This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com/] (https://www.docker.com/)
 
-In order to meet the needs for a Heroku deployment there are some differences between this and the companion OSCELOT DSKTool project which supports python and containerized deployment. If those are of interest to you it is best to start with that project ([https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool)). I have begun the process of merging these projects. See the 'docker' and 'local' folders in the repository for installation and usage instructions.
+With this release I am deprecating [https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool) and will remove that repository by the end of the year.
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
