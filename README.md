@@ -4,7 +4,7 @@ See below [Release Notes](#Release-Notes).
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com/] (https://www.docker.com/)
+This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com/] (https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
 
 With this release I am deprecating [https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool) and will remove that repository by the end of the year.
 
