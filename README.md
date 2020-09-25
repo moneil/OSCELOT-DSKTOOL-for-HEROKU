@@ -79,7 +79,7 @@ This release focuses on improving the user experience for searching and updating
 
 **ToDo:**
   <ul>
-    <li>Change User and Course searches to ajax with improved UI and error checking
+    <li>Change User and Course searches to AJAX with improved UI and error checking
     <li>Continue support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.
     <li>add logging support</li>
     <li>analyze ditching Django for Flask</li>
