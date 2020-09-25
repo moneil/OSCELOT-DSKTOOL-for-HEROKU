@@ -4,7 +4,7 @@ See below [Docker Release Notes](#Release-Notes).
 
 This directory contains the files for building and running the OSCELOT DSKTOOL as a Docker container.
 
-#Installation
+# Installation
 There are two methods for running the OSCELOT DSKTOOL in Docker.
 1. Deploy using a prebuilt image - requires only the docker-compose.yml file
 2. Build and deploy - requires a clone of this repository.
@@ -13,7 +13,7 @@ Both are suitable for local or remote deployment. For the sake of simplicity the
 
 > Note: Both require changes to the default configuration file or environment settings.
 
-##Deploy Using a Prebuilt Image
+## Deploy Using a Prebuilt Image
 With each release starting with 1.0.9 I will be providing a Docker image available at DockerHub.com. The docker-compose.yml file points to that image tagged with the latest version and will contain any changes necessary to support any future project changes.
 
 > Note: The OSCELOT DSKTOOL uses three-legged OAuth (3LO) for authentication. 3LO requires `https`.
@@ -23,7 +23,7 @@ The installation is performed in three easy steps:
 2. Install Docker
 3. Deploy using `docker-compose.yml` file.
 
-###1. Provide TLS for https access
+### 1. Provide TLS for https access**
 You may skip this step if you are running the image on a remote server already configured for SSL.
 
 If you are running the Docker image on your desktop using Docker Desktop you need to provide a TLS service to enable SSL for the Docker URL. In this example you will use ngrok a TSL tunnel provider. 
@@ -62,7 +62,7 @@ The text in bold indicates the URL you should use for securely accessing and usi
 
 Note: ngrok requires your terminal to be open while running. ngrok sessions do expire and will require restarting ngrok when they expire or after computer restarts etc. If ngrok is not running or has expired your browser will display the following: Tunnel the original ngrok https url not found. Just restart ngrok and use the new https url provided.
 
-###2. Docker
+### 2. Docker
 If running on your Desktop (OSX/WINDOWS) then install Docker Desktop : https://www.docker.com/products/docker-desktop
 
 If running on a remote server install docker per your server: https://runnable.com/docker/install-docker-on-linux
@@ -88,7 +88,7 @@ If you changed the file name you would use `$ docker-compose -f <your filename> 
 
 > Note: You may see the following message - `WARNING: The r variable is not set. Defaulting to a blank string.` This may be ignored, it has no impact on operations...tracking that down is on my ToDo list.
 
-**Test**
+### Test
 
 Open your Docker Desktop Dashboard to inspect that the DSKTOOL app is running
 Log out of Learn
