@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from dsktool import views
+from django.conf.urls import url
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +32,15 @@ urlpatterns = [
     path('notauthorized', views.notauthorized, name='notauthorized'),
     path('users', views.users, name='users'),
     path('whoami', views.whoami, name='whoami'),
+
+    url(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
+    url(r'^ajax/validate_courseIdentifier/$', views.validate_courseIdentifier, name='validate_courseIdentifier'),
+    url(r'^ajax/getCourseMembership/$', views.getCourseMembership, name='getCourseMembership'),
+    url(r'^ajax/updateCourseMembership/$', views.updateCourseMembership, name='updateCourseMembership'),
+    url(r'^ajax/getCourseMemberships/$', views.getCourseMemberships, name='getCourseMemberships'),
+    url(r'^ajax/updateCourseMemberships/$', views.updateCourseMemberships, name='updateCourseMemberships'),
+    url(r'^ajax/getUserMemberships/$', views.getUserMemberships, name='getUserMemberships'),
+    url(r'^ajax/updateUserMemberships/$', views.updateUserMemberships, name='updateUserMemberships'),
 
 ]
 

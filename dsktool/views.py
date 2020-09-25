@@ -9,6 +9,13 @@ import json
 import os
 import uuid
 
+from django.http import JsonResponse
+#from django.views.generic import View
+#from django.views.decorators.csrf import csrf_exempt
+#from django.utils.decorators import method_decorator
+#from django.forms.models import model_to_dict
+#from django.shortcuts import render
+
 try:
     from config import adict
     
@@ -249,6 +256,8 @@ def enrollments(request):
             resp = bb.GetMembership(courseId=crs, userId = usr, params = {'expand':'user', 'fields':'id, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email, availability.available, user.availability.available, dataSourceId, created'}, sync=True )
             if (resp.status_code == 200):
                 member_json = resp.json() 
+                print ("MBRJSON:\n", member_json["results"])
+
                 dskresp = bb.GetDataSource(dataSourceId = member_json['dataSourceId'], sync=True)
                 dsk_json = dskresp.json()
                 member_json['dataSourceId'] = dsk_json['externalId']
@@ -678,13 +687,9 @@ def whoami(request):
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'whoami.html', context=context)
 
-
-#supporting function - move someday
 def sortDsk(dsks):
   return sorted(dsks, key=lambda x: x['externalId'])
 
-#add test to workaround 3LO 'guest user' problem
-#test for guest user and return true if guest, false if not
 def isGuestUser(bb_json):
     guestStatus = False
 
@@ -713,3 +718,952 @@ def guestusernotallowed(request):
 def error_500(request):
     data = {}
     return render(request,'error_500.html', data)
+
+def updateCourseMemberships(request):
+    finalResponse = {}
+    print("request method: ", request.method)
+    print("request: ", request)
+    searchValue = request.GET.get("crsSearchValue")
+    print("request searchValue: ", searchValue)
+    searchBy = request.GET.get("crsSearchBy")
+    print("request searchBy: ", searchBy)
+    userArray =  request.GET.getlist('pmcUserId[]')
+    print("request pmcUsersList: \n", userArray)
+
+    if (searchBy == "externalId"):
+        crs = "externalId:"+searchValue
+        print ("COURSE TO UPDATE: ", crs)
+    elif (searchBy == "courseId"):
+        crs = "courseId:"+searchValue
+        print ("COURSE TO UPDATE:", crs)
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks = dsks_json["results"]
+
+    resps = {'results':[]}
+    print("RESPS SET TO EMPTY RESULTS")
+
+    if (request.GET.get('isUpdateRequired1') == 'true'):
+        print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
+
+        for user in userArray:            
+            payload={}
+            if (request.GET.get('isAvailabilityUpdateRequired1')):
+                print(user + ": isAvailabilityUpdateRequired1: ", request.GET.get('isAvailabilityUpdateRequired1'))
+
+                if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
+                    payload={'availability':{"available":request.GET.get('selectedAvailability')}}
+                    print(user + ": availability: ",request.GET.get('selectedAvailability'))
+
+            if (request.GET.get('isDataSourceKeyUpdateRequired1')):
+                print(user + ": isDataSourceKeyUpdateRequired1: ", request.GET.get('isDataSourceKeyUpdateRequired1'))
+            
+                if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
+                    payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
+                    print(user + ": dataSourceId: ",request.GET.get('selectedDataSourceKey'))
+            
+            print("PAYLOAD: \n", payload)
+
+            resp = bb.UpdateMembership(courseId=crs, userId = user, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+            respJSON = resp.json()
+
+            if (resp.status_code == 200):
+                print("RESP:\n", resp.json())
+                #resps["results"].append(respJSON["results"])
+                print ("User:" + user + "UPDATED WITH PAYLOAD: \n", payload)
+                print("RESPJSON:\n", respJSON)
+                print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+
+                for dsk in dsks:
+                    #print("DSK:\n", dsk)
+                    #print("DSKID: ", dsk["id"])
+                    if (dsk["id"] == respJSON["dataSourceId"]):
+                        print("DSKEXTERNALID: ", dsk["externalId"])
+                        respJSON["dataSourceId"] = dsk["externalId"]
+                        print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+
+            else:
+                error_json["results":] = resp.json()
+                print("resp.status_code:", resp.status_code)
+                print (f"RESPONSE:\n", error_json)
+
+            resps["results"].append(respJSON)
+            print("RESPS:\n", resps)
+        
+        finalResponse = {
+            "updateList": userArray,
+            "resps": resps,
+        }
+
+        print("FINAL RESPONSE:\n", finalResponse)
+                   
+    return JsonResponse(finalResponse)
+
+def validate_userIdentifier(request):
+    task = request.GET.get('task')
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+    print ("TASK: ", task)
+    
+    if (searchBy == 'externalId'):
+        usr = "externalId:" + searchValue
+    else:
+        usr = "userName:" + searchValue
+
+    print(f"user pattern: {usr}")
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    
+    validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
+
+    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+    print(f"VALIDATIONRESULT:\n", validationresult.json())
+
+    #Use asynchronous when processing requests
+    # tasks = []
+    # for user in users:
+    #     tasks.append(bb.GetUser(user), sync=False)
+    #     resps = await asynchio.gather(*tasks)
+
+    if (validationresult.status_code == 200):
+        foundStatus = True
+    else:
+        foundStatus = False
+    
+    data = {
+        'is_found': foundStatus
+    }
+
+    return JsonResponse(data)
+
+def validate_courseIdentifier(request):
+    print("validate_courseIdentifier called....")
+    task = request.GET.get('task')
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+    print ("TASK: ", task)
+    
+    if (searchBy == 'externalId'):
+        crs = "externalId:" + searchValue
+    else:
+        crs = "courseId:" + searchValue
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    
+    validationresult = bb.GetCourse(courseId = crs, sync=True )
+
+    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+    print(f"VALIDATIONRESULT:\n", validationresult.json())
+
+    if (validationresult.status_code == 200):
+        foundStatus = True
+    else:
+        foundStatus = False
+    
+    data = {
+        'is_found': foundStatus
+    }
+
+    return JsonResponse(data)
+
+def getCourseMemberships(request):
+    print("getCourseMembers Called...")
+    print("request method: ", request.method)
+
+    task = request.GET.get('task')
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    getThemAll = request.GET.get('getEmAll')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+    print ("TASK: ", task)
+    print ("GET EM ALL?: ", getThemAll)
+    
+    if (searchBy == 'externalId'):
+        crs = "externalId:" + searchValue
+    else:
+        crs = "courseId:" + searchValue
+
+    bb_json = request.session.get('bb_json')
+
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    memberships_result = bb.GetCourseMemberships( courseId = crs, limit = 1500, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+    print("memberships_result status: ", memberships_result.status_code)
+    membershipsResultJSON = memberships_result.json()
+    print(f"\nmemberships_result:\n", membershipsResultJSON)
+
+    if (memberships_result.status_code == 200):
+        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsks_json = dsksResp.json()
+        #print("DSKS_JSON: \n", dsks_json)
+        dsks = dsks_json["results"]
+        #print("DSKS: \n", dsks)
+        dsks = sortDsk(dsks)
+        #print("SORTEDDSKS: \n", dsks)
+        
+        for idx, membership in enumerate(membershipsResultJSON["results"]):
+            print("\nMEMBERSHIP: ", membership["dataSourceId"])
+            for dsk in dsks:
+                #print("DSK:\n", dsk)
+                #print("DSKID: ", dsk["id"])
+                if (dsk["id"] == membership["dataSourceId"]):
+                    print("DSKEXTERNALID: ", dsk["externalId"])
+                    membershipsResultJSON["results"][idx]["dataSourceId"] = dsk["externalId"]
+                    print(membershipsResultJSON["results"][idx]["dataSourceId"])
+        
+        print(f"\nmemberships_result AFTER:\n", membershipsResultJSON)
+
+    #Use asynchronous when processing requests
+    # tasks = []
+    # for user in users:
+    #     tasks.append(bb.GetUser(user), sync=False)
+    #     resps = await asynchio.gather(*tasks)
+
+    context = {
+              'memberships_json': membershipsResultJSON,
+              'dsks_json': dsks,
+            }
+
+    return JsonResponse(context)
+
+# AJAX
+# [DONE]
+def validate_userIdentifier(request):
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+    
+    if (searchBy == 'externalId'):
+        usr = "externalId:" + searchValue
+    else:
+        usr = "userName:" + searchValue
+
+    print(f"user pattern: {usr}")
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    
+    validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
+
+    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+    print(f"VALIDATIONRESULT:\n", validationresult.json())
+
+    #Use asynchronous when processing requests
+    # tasks = []
+    # for user in users:
+    #     tasks.append(bb.GetUser(user), sync=False)
+    #     resps = await asynchio.gather(*tasks)
+
+    if (validationresult.status_code == 200):
+        foundStatus = True
+    else:
+        foundStatus = False
+    
+    data = {
+        'is_found': foundStatus
+    }
+
+    return JsonResponse(data)
+# [DONE]
+def validate_courseIdentifier(request):
+    print("validate_courseIdentifier called....")
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+    
+    if (searchBy == 'externalId'):
+        crs = "externalId:" + searchValue
+    else:
+        crs = "courseId:" + searchValue
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    
+    validationresult = bb.GetCourse(courseId = crs, sync=True )
+
+    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+    print(f"VALIDATIONRESULT:\n", validationresult.json())
+
+    if (validationresult.status_code == 200):
+        foundStatus = True
+    else:
+        foundStatus = False
+    
+    data = {
+        'is_found': foundStatus
+    }
+
+    return JsonResponse(data)
+# [DONE]
+def getCourseMembership(request):
+    #Get a single course membership
+    print("\ngetCourseMember Called...")
+    print("request method: ", request.method)
+
+    #{"searchByCrs":"externalId","searchValueCrs":"moneil-available","searchValueUsr":"moneil","searchByUsr":"externalId"}
+    crsSearchBy = request.GET.get('crsSearchBy') #externalId || userName
+    crsToSearchFor = request.GET.get('crsToSearchFor')
+    usrSearchBy = request.GET.get('usrSearchBy') #externalId || userName
+    usrToSearchFor = request.GET.get('usrToSearchFor')
+    print("getCourseMembership::crsSearchBy", crsSearchBy)
+    print ("getCourseMembership::crsToSearch: ", crsToSearchFor)
+    print ("getCourseMembership::usrSearchBy: ", usrSearchBy)
+    print ("getCourseMembership::usrToSearchFor", usrToSearchFor)
+
+    if (crsSearchBy == 'externalId'):
+        crs = "externalId:" + crsToSearchFor
+    else:
+        crs = "courseId:" + crsToSearchFor
+    if (usrSearchBy == 'externalId'):
+        usr = "externalId:" + usrToSearchFor
+    else:
+        usr = "userName:" + usrToSearchFor
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    membership_result = bb.GetMembership( courseId = crs, userId = usr, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+    print("getCourseMembership::membership_result status: ", membership_result.status_code)
+
+    if (membership_result.status_code == 200):
+        member_json = membership_result.json() 
+        print ("MBRJSON:\n", member_json)
+
+        dskresp = bb.GetDataSource(dataSourceId = member_json['dataSourceId'], sync=True)
+        dsk_json = dskresp.json()
+        member_json['dataSourceId'] = dsk_json['externalId']
+        member_json['crsToSearchFor'] = crsToSearchFor
+        member_json['crsSearchBy'] = crsSearchBy
+        member_json['usrToSearchFor'] = usrToSearchFor
+        member_json['usrSearchBy'] = usrSearchBy
+        print("updated member_json: \n", member_json)
+        dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+        dsks_json = dskresp.json()
+        print ("DSKS:\n", dsks_json["results"])
+        dsks = dsks_json["results"]
+        dsks = sortDsk(dsks)
+        print ("SIZE OF DSK LIST:", len(dsks))
+                
+        context = {
+            'member_json': member_json,
+            'dsks_json': dsks,
+        }
+    else:
+        error_json = membership_result.json()
+        print (f"RESPONSE:\n", error_json)
+        data = {
+            'is_found': False,
+            'error_json': error_json,
+        }
+
+        return JsonResponse(data)
+
+    data = {
+        'is_found': True,
+        'memberships_json': member_json,
+        'dsks_json': dsks,
+    }
+
+    return JsonResponse(data)
+# [DONE]
+def getCourseMemberships(request):
+    print("getCourseMembers Called...")
+    print("request method: ", request.method)
+
+    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+
+    if (searchBy == 'externalId'):
+        crs = "externalId:" + searchValue
+    else:
+        crs = "courseId:" + searchValue
+
+    bb_json = request.session.get('bb_json')
+
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    memberships_result = bb.GetCourseMemberships( courseId = crs, limit = 1500, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+    print("memberships_result status: ", memberships_result.status_code)
+    membershipsResultJSON = memberships_result.json()
+    print(f"\nmemberships_result:\n", membershipsResultJSON)
+
+    if (memberships_result.status_code == 200):
+        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsks_json = dsksResp.json()
+        #print("DSKS_JSON: \n", dsks_json)
+        dsks = dsks_json["results"]
+        #print("DSKS: \n", dsks)
+        dsks = sortDsk(dsks)
+        #print("SORTEDDSKS: \n", dsks)
+        
+        for idx, membership in enumerate(membershipsResultJSON["results"]):
+            print("\nMEMBERSHIP: ", membership["dataSourceId"])
+            for dsk in dsks:
+                #print("DSK:\n", dsk)
+                #print("DSKID: ", dsk["id"])
+                if (dsk["id"] == membership["dataSourceId"]):
+                    print("DSKEXTERNALID: ", dsk["externalId"])
+                    membershipsResultJSON["results"][idx]["dataSourceId"] = dsk["externalId"]
+                    print(membershipsResultJSON["results"][idx]["dataSourceId"])
+        
+        print(f"\nmemberships_result AFTER:\n", membershipsResultJSON)
+
+    #Use asynchronous when processing requests
+    # tasks = []
+    # for user in users:
+    #     tasks.append(bb.GetUser(user), sync=False)
+    #     resps = await asynchio.gather(*tasks)
+
+
+    context = {
+        'is_found': True,
+        'memberships_json': membershipsResultJSON,
+        'dsks_json': dsks,
+    }
+
+    return JsonResponse(context)
+#[DONE]
+def updateCourseMembership(request):
+    finalResponse = {}
+    isFoundStatus = False
+
+    print("\ngetCourseMember Called...")
+    print("request method: ", request.method)
+
+    #{"searchByCrs":"externalId","searchValueCrs":"moneil-available","searchValueUsr":"moneil","searchByUsr":"externalId"}
+    crsSearchBy = request.GET.get('crsSearchBy') #externalId || userName
+    crsToSearchFor = request.GET.get('crsToSearchFor')
+    usrSearchBy = request.GET.get('usrSearchBy') #externalId || userName
+    usrToSearchFor = request.GET.get('usrToSearchFor')
+    userArray =  request.GET.getlist('pmcUserId[]')
+    print("getCourseMembership::crsSearchBy", crsSearchBy)
+    print ("getCourseMembership::crsToSearch: ", crsToSearchFor)
+    print ("getCourseMembership::usrSearchBy: ", usrSearchBy)
+    print ("getCourseMembership::usrToSearchFor", usrToSearchFor)
+    print("request pmcUsersList: \n", userArray)
+
+    if (crsSearchBy == 'externalId'):
+        crs = "externalId:" + crsToSearchFor
+    else:
+        crs = "courseId:" + crsToSearchFor
+    if (usrSearchBy == 'externalId'):
+        usr = "externalId:" + usrToSearchFor
+    else:
+        usr = "userName:" + usrToSearchFor
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks = dsks_json["results"]
+
+    resps = {'results':[]}
+    print("RESPS SET TO EMPTY RESULTS")
+
+    # if (request.GET.get('isUpdateRequired1') == 'true'):
+    print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
+    payload={}
+    if (request.GET.get('isAvailabilityUpdateRequired1')):
+        print("isAvailabilityUpdateRequired1: ", request.GET.get('isAvailabilityUpdateRequired1'))
+
+        if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
+            payload={'availability':{"available":request.GET.get('selectedAvailability')}}
+            print("availability: ",request.GET.get('selectedAvailability'))
+
+    if (request.GET.get('isDataSourceKeyUpdateRequired1')):
+        print("isDataSourceKeyUpdateRequired1: ", request.GET.get('isDataSourceKeyUpdateRequired1'))
+            
+        if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
+            payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
+            print("dataSourceId: ",request.GET.get('selectedDataSourceKey'))
+            
+            print("PAYLOAD: \n", payload)
+
+    resp = bb.UpdateMembership(courseId=crs, userId = usr, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+    respJSON = resp.json()
+
+    if (resp.status_code == 200):
+        print("RESP:\n", resp.json())
+        #resps["results"].append(respJSON["results"])
+        print("RESPJSON:\n", respJSON)
+        print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+        isFoundStatus = True
+
+        for dsk in dsks:
+            #print("DSK:\n", dsk)
+            #print("DSKID: ", dsk["id"])
+            if (dsk["id"] == respJSON["dataSourceId"]):
+                print("DSKEXTERNALID: ", dsk["externalId"])
+                respJSON["dataSourceId"] = dsk["externalId"]
+                print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+            # else:
+            #     error_json["results":] = resp.json()
+            #     print("resp.status_code:", resp.status_code)
+            #     print (f"RESPONSE:\n", error_json)
+
+        resps["results"].append(respJSON)
+        print("RESPS:\n", resps)
+        
+        finalResponse = {
+            "is_found": isFoundStatus,
+            "updateList": resps["results"],
+        }
+
+        print("FINAL RESPONSE:\n", finalResponse)
+                   
+    return JsonResponse(finalResponse)
+#[DONE]
+def updateCourseMemberships(request):
+    finalResponse = {}
+    print("request method: ", request.method)
+    print("request: ", request)
+
+    if (request.GET.get("crsorusr") == 'byCrsUsr'):
+        searchValue = request.GET.get("crsSearchValue")
+        print("request searchValue: ", searchValue)
+        searchBy = request.GET.get("crsSearchBy")
+        print("request searchBy: ", searchBy)
+    elif (request.GET.get("crsorusr") == 'byCrs'):
+        searchValue = request.GET.get("crsToSearchFor")
+        print("request searchValue: ", searchValue)
+        searchBy = request.GET.get("crsSearchBy")
+        print("request searchBy: ", searchBy)
+    elif (request.GET.get("crsorusr") == 'byUsr'):
+        searchValue = request.GET.get("crsToSearchFor")
+        print("request searchValue: ", searchValue)
+        searchBy = request.GET.get("crsSearchBy")
+        print("request searchBy: ", searchBy)
+
+    userArray =  request.GET.getlist('pmcUserId[]')
+    print("request pmcUsersList: \n", userArray)
+
+    if (searchBy == "externalId"):
+        crs = "externalId:"+searchValue
+        print ("COURSE TO UPDATE: ", crs)
+    elif (searchBy == "courseId"):
+        crs = "courseId:"+searchValue
+        print ("COURSE TO UPDATE:", crs)
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks = dsks_json["results"]
+
+    resps = {'results':[]}
+    print("RESPS SET TO EMPTY RESULTS")
+    isFoundStatus = False
+
+    if (request.GET.get('isUpdateRequired1') == 'true'):
+        print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
+
+        for user in userArray:            
+            payload={}
+            if (request.GET.get('isAvailabilityUpdateRequired1')):
+                print(user + ": isAvailabilityUpdateRequired1: ", request.GET.get('isAvailabilityUpdateRequired1'))
+
+                if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
+                    payload={'availability':{"available":request.GET.get('selectedAvailability')}}
+                    print(user + ": availability: ",request.GET.get('selectedAvailability'))
+
+            if (request.GET.get('isDataSourceKeyUpdateRequired1')):
+                print(user + ": isDataSourceKeyUpdateRequired1: ", request.GET.get('isDataSourceKeyUpdateRequired1'))
+            
+                if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
+                    payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
+                    print(user + ": dataSourceId: ",request.GET.get('selectedDataSourceKey'))
+            
+            print("PAYLOAD: \n", payload)
+
+            resp = bb.UpdateMembership(courseId=crs, userId = user, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+            respJSON = resp.json()
+
+            if (resp.status_code == 200):
+                print("RESP:\n", resp.json())
+                #resps["results"].append(respJSON["results"])
+                print ("User:" + user + "UPDATED WITH PAYLOAD: \n", payload)
+                print("RESPJSON:\n", respJSON)
+                print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+                isFoundStatus = True
+
+                for dsk in dsks:
+                    #print("DSK:\n", dsk)
+                    #print("DSKID: ", dsk["id"])
+                    if (dsk["id"] == respJSON["dataSourceId"]):
+                        print("DSKEXTERNALID: ", dsk["externalId"])
+                        respJSON["dataSourceId"] = dsk["externalId"]
+                        print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+
+            else:
+                error_json["results":] = resp.json()
+                print("resp.status_code:", resp.status_code)
+                print (f"RESPONSE:\n", error_json)
+
+            resps["results"].append(respJSON)
+            print("RESPS:\n", resps)
+        
+        print("ISFOUNDSTATUS: ", isFoundStatus)
+        finalResponse = {
+            "is_found": isFoundStatus,
+            "pmcUserId[]": userArray,
+            "updateList": resps["results"],
+        }
+
+        print("FINAL RESPONSE:\n", finalResponse)
+                   
+    return JsonResponse(finalResponse)
+
+def getUserMemberships(request):
+    print("getUserMemberships Called...")
+    print("request method: ", request.method)
+
+    searchBy = request.GET.get('searchBy')
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print("LEARNFQDN", LEARNFQDN)
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+
+    if (searchBy == 'externalId'):
+        usr = "externalId:" + searchValue
+    else:
+        usr = "userName:" + searchValue
+
+    bb_json = request.session.get('bb_json')
+
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    memberships_result = bb.GetUserMemberships( userId = usr, limit = 1500, params = {'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, course.name, course.externalId'}, sync=True )
+
+    print("memberships_result status: ", memberships_result.status_code)
+    membershipsResultJSON = memberships_result.json()
+    print(f"\nmemberships_result:\n", membershipsResultJSON)
+
+    if (memberships_result.status_code == 200):
+        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsks_json = dsksResp.json()
+        #print("DSKS_JSON: \n", dsks_json)
+        dsks = dsks_json["results"]
+        #print("DSKS: \n", dsks)
+        dsks = sortDsk(dsks)
+        #print("SORTEDDSKS: \n", dsks)
+        
+        for idx, membership in enumerate(membershipsResultJSON["results"]):
+            print("\nMEMBERSHIP: ", membership["dataSourceId"])
+            for dsk in dsks:
+                #print("DSK:\n", dsk)
+                #print("DSKID: ", dsk["id"])
+                if (dsk["id"] == membership["dataSourceId"]):
+                    print("DSKEXTERNALID: ", dsk["externalId"])
+                    membershipsResultJSON["results"][idx]["dataSourceId"] = dsk["externalId"]
+                    print(membershipsResultJSON["results"][idx]["dataSourceId"])
+        
+        print(f"\nmemberships_result AFTER:\n", membershipsResultJSON)
+
+    #Use asynchronous when processing requests
+    # tasks = []
+    # for user in users:
+    #     tasks.append(bb.GetUser(user), sync=False)
+    #     resps = await asynchio.gather(*tasks)
+
+
+    context = {
+        'is_found': True,
+        'memberships_json': membershipsResultJSON,
+        'dsks_json': dsks,
+    }
+
+    return JsonResponse(context)
+
+def updateUserMemberships(request):
+    # {"crsSearchBy":"not_required","crsToSearchFor":"not_required","usrToSearchFor":"moneil","usrSearchBy":"externalId","isUpdateRequired1":"true","isAvailabilityUpdateRequired1":"true","selectedAvailability":"Yes","isDataSourceKeyUpdateRequired1":"true","selectedDataSourceKey":"_7_1","pmcUserId[]":["_9682_1:_1354_1","_9681_1:_1354_1"],"crsorusr":"byUsr"}
+    finalResponse = {}
+    print("request method: ", request.method)
+    print("request: ", request)
+
+    crsArray =  request.GET.getlist('pmcUserId[]')
+    print("REQUEST pmcUsersList: \n", crsArray)
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks = dsks_json["results"]
+
+    resps = {'results':[]}
+    print("RESPS SET TO EMPTY RESULTS")
+    isFoundStatus = False
+
+    if (request.GET.get('isUpdateRequired1') == 'true'):
+        print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
+
+        for crs in crsArray:            
+            payload={}
+            #print("COURSE RECORD: ", crs)
+            passedCrsId, passedUsrId = crs.split(':', 1)
+            #print("COURSE ID: ", passedCrsId)
+            #print("USER ID: ", passedUsrId)
+            if (request.GET.get('isAvailabilityUpdateRequired1')):
+                print("isAvailabilityUpdateRequired1: ", request.GET.get('isAvailabilityUpdateRequired1'))
+
+                if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
+                    payload={'availability':{"available":request.GET.get('selectedAvailability')}}
+                    print("availability: ",request.GET.get('selectedAvailability'))
+
+            if (request.GET.get('isDataSourceKeyUpdateRequired1')):
+                print("isDataSourceKeyUpdateRequired1: ", request.GET.get('isDataSourceKeyUpdateRequired1'))
+            
+                if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
+                    payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
+                    print("dataSourceId: ",request.GET.get('selectedDataSourceKey'))
+            
+            print("PAYLOAD: \n", payload)
+
+            resp = bb.UpdateMembership(courseId=passedCrsId, userId=passedUsrId, payload=payload, params = {'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, course.name, course.externalId'}, sync=True )
+
+            respJSON = resp.json()
+
+            if (resp.status_code == 200):
+                #print("RESP:\n", resp.json())
+                #resps["results"].append(respJSON["results"])
+                print ("UPDATED MEMBERSHIP WITH PAYLOAD: \n", payload)
+                #print("RESPJSON:\n", respJSON)
+                #print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+                isFoundStatus = True
+
+                for dsk in dsks:
+                    #print("DSK:\n", dsk)
+                    #print("DSKID: ", dsk["id"])
+                    if (dsk["id"] == respJSON["dataSourceId"]):
+                        #print("DSKEXTERNALID: ", dsk["externalId"])
+                        respJSON["dataSourceId"] = dsk["externalId"]
+                        #print("RESPJSON:dataSourceId", respJSON["dataSourceId"])
+
+                    # add course name...
+                    crsResp = bb.GetCourse(courseId=passedCrsId, params = {'fields': 'name, externalId'})
+                    
+                    if (resp.status_code == 200):
+                        #print("CRSRESP:\n", crsResp.json())
+                        respJSON["course"] = crsResp.json()
+                        #print("RESPRESP:\n", respJSON)
+            else:
+                error_json["results":] = resp.json()
+                print("resp.status_code:", resp.status_code)
+                print (f"RESPONSE:\n", error_json)
+
+            resps["results"].append(respJSON)
+            #print("RESPS:\n", resps)
+        
+        print("ISFOUNDSTATUS: ", isFoundStatus)
+        finalResponse = {
+            "is_found": isFoundStatus,
+            "updateList": resps["results"],
+        }
+
+        print("FINAL RESPONSE:\n", finalResponse)
+                   
+    return JsonResponse(finalResponse)
+
