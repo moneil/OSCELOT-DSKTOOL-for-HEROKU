@@ -1,0 +1,24 @@
+version: "3.3"
+
+services:
+    
+    DSKTOOL:
+        container_name: DSKTOOL
+        image: oscelot/oscelot-dsktool:1.0.8
+        ports:
+            - "8000:8000"
+        networks:   
+            - dsktool
+        restart: unless-stopped
+        environment:
+            DJANGO_DEBUG: "True" #May set to False
+            # if you are using a remote host add it to the below list:
+            DJANGO_ALLOWED_HOSTS: 127.0.0.1 localhost .ngrok.io
+            # A django-secret-key-generator: https://djskgen.herokuapp.com             
+            DJANGO_SECRET_KEY: 'secret from above generator' #enclose with single quotes only e.g. 'mydjangosecretkey'
+            BLACKBOARD_LEARN_INSTANCE: "your Learn FQDN no protocol e.g. my.learn.server.com"
+            APPLICATION_KEY: "your application key"
+            APPLICATION_SECRET: "your application secret"
+networks:
+    dsktool:
+        driver: bridge
