@@ -86,9 +86,10 @@ Open a terminal, cd to the directory where you saved the docker-compose.yaml fil
 
 If you changed the file name you would use `$ docker-compose -f <your filename> up -d`
 
-> You may see a message: `WARNING: The r variable is not set. Defaulting to a blank string.` This may be ignored, it has no impact on operations...tracking that down is on my ToDo list.
+> Note: You may see the following message - `WARNING: The r variable is not set. Defaulting to a blank string.` This may be ignored, it has no impact on operations...tracking that down is on my ToDo list.
 
-##Test
+**Test**
+
 Open your Docker Desktop Dashboard to inspect that the DSKTOOL app is running
 Log out of Learn
 Browse to https URL provided by ngrok and click the whoami link to view the https site and ensure the site is functioning. You should be asked to login to the configured Learn instance.
