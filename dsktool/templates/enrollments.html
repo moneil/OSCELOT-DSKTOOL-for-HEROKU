@@ -64,27 +64,27 @@
           <input id="submitSearchByCrs" name="submitSearchByCrs" type="submit" value="New Search"/>
         </div>
       </form>
-    </div>
+  </div>
 
-    <!-- USR SEARCH DIV -->
-    <div id=byUsr style=display:none>  
-      <h5>Search by User Identifier</h5>
-      <form id="searchEnrollmentsByUsrForm" name="searchEnrollmentsByUsrForm">
-        {% csrf_token %}
-        User Identifier:
-          &nbsp;
-          <select class="searchBy" name="searchBy" id="searchByUsrUSRID">
-            <option value="externalId">External Id</option>
-            <option value="userName">Username</option>
-          </select>
-          &nbsp;
-          <input type="text" class="searchValue" id="searchValueUsr" name="searchValueUsr"><p></p>
-          <p></p>
-          <div style="text-align:right; width:100%; padding:0;">
-            <input id="submitSearchByUsr" name="submitSearchByUsr" type="submit" value="New Search"/>
-          </div>
-      </form>
-    </div>
+<!-- USR SEARCH DIV -->
+  <div id=byUsr style=display:none>  
+    <h5>Search by User Identifier</h5>
+    <form id="searchEnrollmentsByUsrForm" name="searchEnrollmentsByUsrForm">
+      {% csrf_token %}
+      User Identifier:
+      &nbsp;
+      <select class="searchBy" name="searchBy" id="searchByUsrUSRID">
+        <option value="externalId">External Id</option>
+        <option value="userName">Username</option>
+      </select>
+      &nbsp;
+      <input type="text" class="searchValue" id="searchValueUsr" name="searchValueUsr"><p></p>
+      <p></p>
+      <div style="text-align:right; width:100%; padding:0;">
+        <input id="submitSearchByUsr" name="submitSearchByUsr" type="submit" value="New Search"/>
+      </div>
+    </form>
+  </div>
 
 <div id="processBlock" style="display:none">
   <div id="searchResultsBlock">
@@ -96,62 +96,63 @@
       {% csrf_token %}
       <input type="hidden" id="crsSearchValue" name="crsSearchValue" value="0">
       <input type="hidden" id="crsSearchBy" name="crsSearchBy" value="0">
-        <div name="resultsTable" id="resultsTable" style="display:inline;" class="results_found">
+        <div name="resultsTable" id="resultsTable" style="display:inline;">
           <div id="selectAllInput" style="display:none;">
             <input type="checkbox" id="checkAll" name="checkAll"><label for="checkAll">&nbsp;&lt;-- Click to toggle all records for processing.</label>
           </div>
-          <div id="resp-table" >
-            <div id="resp-table-header">
+          <div class="outerTable" id="resp-table" >
+            <div class="divTable ajaxTable">
+              <div class="divTableHeading" id="resp-table-header">
               
-            </div>
-            <div id="resultsTableBody" name="resultsTableBody">
+              </div>
+              <div class="divTableBody" id="resultsTableBody">
         
+              </div>
             </div>
           </div>
-        </div>
-        <div id="searchUpdate" style="display:inline;">
-          <p></p>
-          <h3>Update Above Selected Records</h3>
-          <p>
+        
+          <div id="searchUpdate" style="display:inline;">
+            <p></p>
+            <h3>Update Above Selected Records</h3>
+            <p>
             First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
-          </p>  
-          <div class="field">
+            </p>  
             <table>
-                <thead>
-                  <tr style="padding:10px">
-                    <th style="padding:10px">
-                      <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                      <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
-                    </th>
-                    <th style="padding:10px">
-                      <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1"  type="checkbox" value="true" onclick="setIsProcessable();" />
-                      Availability
-                    </th>
-                    <th style="padding:10px">
-                      <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1"  type="checkbox" value="true"  onclick="setIsProcessable();" />
-                      Data Source Key
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="padding:10px"> </td>
-                    <td style="padding:10px">
-                      <select id="selectedAvailability" name="selectedAvailability">
-                        <option value="Yes">Available</option>
-                        <option value="No">Unavailable</option>
-                        <option value="Disabled">Disabled</option>
-                      </select>
-                    </td>
-                    <td style="padding:10px">
-                      <select id="selectedDataSourceKey" name="selectedDataSourceKey">
-                      <!-- <option>Choose a DSK or use field to right.</option> -->
+              <thead>
+                <tr style="padding:10px">
+                  <th style="padding:10px">
+                    <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true"  onclick="setIsProcessable();"/>
+                    <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+                  </th>
+                  <th style="padding:10px">
+                    <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1"   type="checkbox" value="true" onclick="setIsProcessable();" />
+                    Availability
+                  </th>
+                  <th style="padding:10px">
+                    <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1"  type="checkbox" value="true"  onclick="setIsProcessable();" />
+                    Data Source Key
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:10px"> </td>
+                  <td style="padding:10px">
+                    <select id="selectedAvailability" name="selectedAvailability">
+                      <option value="Yes">Available</option>
+                      <option value="No">Unavailable</option>
+                      <option value="Disabled">Disabled</option>
+                    </select>
+                  </td>
+                  <td style="padding:10px">
+                    <select id="selectedDataSourceKey" name="selectedDataSourceKey">
+                    <!-- <option>Choose a DSK or use field to right.</option> -->
                   
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <!-- End search update -->
           
@@ -162,26 +163,28 @@
         </div>
       </form>
   </div>
-
   <div id="updateResults" name="updateResults" style="display:none;" >
     <p></p>
-    <hr>
-    <p></p>
-    <h3>Update Results</h3>
-    <div class="results_found">
-      <div name="updateResultsTable" id="updateResultsTable" class="results_found">
-        <div id="update-table" >
-          <div id="update-table-header">
-            n
+      <hr>
+      <p></p>
+      <h3>Update Results</h3>
+      <div class="outerTable" name="updateResultsTable" id="updateResultsTable">
+        <div class="divTable ajaxTable" id="update-table" >
+          <div class="divTableHeading" id="update-table-header">
+            
           </div>
-          <div id="updateTableBody" name="updateTableBody">
-            n   
+          <div class="divTableBody" id="updateTableBody" name="updateTableBody">
+            
           </div>
         </div>
       </div>
-    </div>
   </div>
-</div>
+<p></p>
+<p></p>
+<hr>
+<p></p>
+<p></p>
+<p></p>
 
 
 {% block javascript %}
@@ -261,6 +264,7 @@ $("#searchValueCrstoSearch").change(function(){
       if (!data.is_found) {
         alert("A course with this identifier was not found.");
       }
+      document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value="";
     }
   }).done(function() {
     $("#overlay").fadeOut(300);
@@ -302,6 +306,7 @@ $("#searchValueUsrtoSearch").change(function(){
       if (!data.is_found) {
         alert("A user with this identifier was not found.");
       }
+      document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value="";
     }
   }).done(function() {
     $("#overlay").fadeOut(300);
@@ -505,17 +510,17 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
         var modified = newResults["modified"];
         var pmcId="pmc"+userId;
 
-        var tableRow = '<div class="table-body-row">' +
-          '<div class="table-body-cell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
-          '<div class="table-body-cell">' + available + '</div>' +
-          '<div class="table-body-cell">' + externalId + '</div>'+ 
-          '<div class="table-body-cell">' + userName + '</div>'+
-          '<div class="table-body-cell">' + firstName + '</div>'+
-          '<div class="table-body-cell">' + middleName + '</div>'+
-          '<div class="table-body-cell">' + lastName + '</div>'+
-          '<div class="table-body-cell">' + email + '</div>'+
-          '<div class="table-body-cell">' + dsk + '</div>' +
-          '<div class="table-body-cell">' + modified + '</div>' +
+        var tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
           $("#resultsTableBody").append(tableRow);
@@ -736,17 +741,17 @@ $('#selectCourseForm').on('submit', function(e) {
                     var modified = newResults[row]["modified"];
                     var pmcId="pmc"+userId;
 
-                    var tableRow = '<div class="table-body-row">' +
-                      '<div class="table-body-cell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
-                      '<div class="table-body-cell">' + available + '</div>' +
-                      '<div class="table-body-cell">' + externalId + '</div>'+ 
-                      '<div class="table-body-cell">' + userName + '</div>'+
-                      '<div class="table-body-cell">' + firstName + '</div>'+
-                      '<div class="table-body-cell">' + middleName + '</div>'+
-                      '<div class="table-body-cell">' + lastName + '</div>'+
-                      '<div class="table-body-cell">' + email + '</div>'+
-                      '<div class="table-body-cell">' + dsk + '</div>' +
-                      '<div class="table-body-cell">' + modified + '</div>' +
+                    var tableRow = '<div class="divTableRow">' +
+                      '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
+                      '<div class="divTableCell">' + available + '</div>' +
+                      '<div class="divTableCell">' + externalId + '</div>'+ 
+                      '<div class="divTableCell">' + userName + '</div>'+
+                      '<div class="divTableCell">' + firstName + '</div>'+
+                      '<div class="divTableCell">' + middleName + '</div>'+
+                      '<div class="divTableCell">' + lastName + '</div>'+
+                      '<div class="divTableCell">' + email + '</div>'+
+                      '<div class="divTableCell">' + dsk + '</div>' +
+                      '<div class="divTableCell">' + modified + '</div>' +
                       '</div>';
 
                     $("#resultsTableBody").append(tableRow);
@@ -854,11 +859,17 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
   console.log("ACTIVE DIV: " + activeDiv);
   console.log("AJXURL: " + ajxUrl);
   
+  if (!selectionCount > 0 ) {
+    alert("You must select at least one record.")
+    return;
+  }
+
   $.ajax({
     type: 'GET',
     url: ajxUrl,
     data: searchData,
 		success: function (data) {
+
         if (!data.is_found) {
           alert("There was an error processing this request. Reload page and try again.");
         } else {
@@ -996,28 +1007,27 @@ function toggleDivs(anyDiv) {
         $("#resp-table-header").empty();
         $("#update-table-header").empty();
 
-        let respTableHdr = '<div class="table-header-cell">Select to Process</div>' +
-          '<div class="table-header-cell">Available</div>' +
-          '<div class="table-header-cell">External Id</div>' +
-          '<div class="table-header-cell">Username</div>' +
-          '<div class="table-header-cell">User First Name</div>' +
-          '<div class="table-header-cell">User Middle Name</div>' +
-          '<div class="table-header-cell">User Last Name</div>' +
-          '<div class="table-header-cell">User Email</div>' +
-          '<div class="table-header-cell">Membership Data Source</div>' +
-          '<div class="table-header-cell">Date Membership Modified</div>';
+        let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
+          '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">External Id</div>' +
+          '<div class="divTableHead">Username</div>' +
+          '<div class="divTableHead">User First Name</div>' +
+          '<div class="divTableHead">User Middle Name</div>' +
+          '<div class="divTableHead">User Last Name</div>' +
+          '<div class="divTableHead">User Email</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
         
-        let updateTableHdr = '<div class="table-header-cell"></div>' +
-          '<div class="table-header-cell">Available</div>' +
-          '<div class="table-header-cell">External Id</div>' +
-          '<div class="table-header-cell">Username</div>' +
-          '<div class="table-header-cell">User First Name</div>' +
-          '<div class="table-header-cell">User Middle Name</div>' +
-          '<div class="table-header-cell">User Last Name</div>' +
-          '<div class="table-header-cell">User Email</div>' +
-          '<div class="table-header-cell">Membership Data Source</div>' +
-          '<div class="table-header-cell">Date Membership Modified</div>';
+        let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">External Id</div>' +
+          '<div class="divTableHead">Username</div>' +
+          '<div class="divTableHead">User First Name</div>' +
+          '<div class="divTableHead">User Middle Name</div>' +
+          '<div class="divTableHead">User Last Name</div>' +
+          '<div class="divTableHead">User Email</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
 
 
@@ -1026,22 +1036,21 @@ function toggleDivs(anyDiv) {
         $("#resp-table-header").empty();
         $("#update-table-header").empty();
 
-        let respTableHdr = '<div class="table-header-cell">Select to Process</div>' +
-          '<div class="table-header-cell">Available</div>' +
-          '<div class="table-header-cell">Course External Id</div>' +
-          '<div class="table-header-cell">Course Name</div>' +
-          '<div class="table-header-cell">User Course Role</div>' +
-          '<div class="table-header-cell">Membership Data Source</div>' +
-          '<div class="table-header-cell">Date Membership Modified</div>';
+        let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
+          '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
 
-        let updateTableHdr = '<div class="table-header-cell"></div>' +
-          '<div class="table-header-cell">Available</div>' +
-          '<div class="table-header-cell">Course External Id</div>' +
-          '<div class="table-header-cell">Course Name</div>' +
-          '<div class="table-header-cell">User Course Role</div>' +
-          '<div class="table-header-cell">Membership Data Source</div>' +
-          '<div class="table-header-cell">Date Membership Modified</div>';
+        let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
 
       }
@@ -1091,17 +1100,17 @@ function setCrsMembershipResultsTableBody(newResults) {
     let pmcId="pmc"+userId;
     console.log("pmcId: " + pmcId);
 
-    let tableRow = '<div class="table-body-row">' +
-          '<div class="table-body-cell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
-          '<div class="table-body-cell">' + available + '</div>' +
-          '<div class="table-body-cell">' + externalId + '</div>'+ 
-          '<div class="table-body-cell">' + userName + '</div>'+
-          '<div class="table-body-cell">' + firstName + '</div>'+
-          '<div class="table-body-cell">' + middleName + '</div>'+
-          '<div class="table-body-cell">' + lastName + '</div>'+
-          '<div class="table-body-cell">' + email + '</div>'+
-          '<div class="table-body-cell">' + dsk + '</div>' +
-          '<div class="table-body-cell">' + modified + '</div>' +
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
     contents += tableRow;
     }
@@ -1137,17 +1146,16 @@ function setCrsMembershipUpdatesTableBody(newResults) {
     let modified = newResults[row]["modified"];
     let pmcId="pmc"+userId;
 
-    let tableRow = '<div class="table-body-row">' +
-          '<div class="table-body-cell"></div>' +
-          '<div class="table-body-cell">' + available + '</div>' +
-          '<div class="table-body-cell">' + externalId + '</div>'+ 
-          '<div class="table-body-cell">' + userName + '</div>'+
-          '<div class="table-body-cell">' + firstName + '</div>'+
-          '<div class="table-body-cell">' + middleName + '</div>'+
-          '<div class="table-body-cell">' + lastName + '</div>'+
-          '<div class="table-body-cell">' + email + '</div>'+
-          '<div class="table-body-cell">' + dsk + '</div>' +
-          '<div class="table-body-cell">' + modified + '</div>' +
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
     contents += tableRow;
@@ -1185,14 +1193,14 @@ function setUsrMembershipResultsTableBody(newResults) {
 
     //let pmcId="pmc"+userId;
 
-    let tableRow = '<div class="table-body-row">' +
-          '<div class="table-body-cell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + crsId + ':' + userId + '"></div>' +
-          '<div class="table-header-cell">'+ available +'</div>' +
-          '<div class="table-header-cell">'+ externalId +'</div>' +
-          '<div class="table-header-cell">'+ name +'</div>' +
-          '<div class="table-header-cell">'+ role +'</div>' +
-          '<div class="table-header-cell">'+ dsk +'</div>' +
-          '<div class="table-header-cell">'+ modified +'</div>' +
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + crsId + ':' + userId + '"></div>' +
+          '<div class="divTableCell">'+ available +'</div>' +
+          '<div class="divTableCell">'+ externalId +'</div>' +
+          '<div class="divTableCell">'+ name +'</div>' +
+          '<div class="divTableCell">'+ role +'</div>' +
+          '<div class="divTableCell">'+ dsk +'</div>' +
+          '<div class="divTableCell">'+ modified +'</div>' +
           '</div>';
 
     contents += tableRow;
@@ -1227,14 +1235,13 @@ function setUsrMembershipUpdatesTableBody(newResults) {
     let modified = newResults[row]["modified"];
     console.log("modified: " + modified);
 
-    let tableRow = '<div class="table-body-row">' +
-          '<div class="table-header-cell">&nbsp;</div>' +
-          '<div class="table-header-cell">'+ available +'</div>' +
-          '<div class="table-header-cell">'+ externalId +'</div>' +
-          '<div class="table-header-cell">'+ name +'</div>' +
-          '<div class="table-header-cell">'+ role +'</div>' +
-          '<div class="table-header-cell">'+ dsk +'</div>' +
-          '<div class="table-header-cell">'+ modified +'</div>' +
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableHead">'+ available +'</div>' +
+          '<div class="divTableHead">'+ externalId +'</div>' +
+          '<div class="divTableHead">'+ name +'</div>' +
+          '<div class="divTableHead">'+ role +'</div>' +
+          '<div class="divTableHead">'+ dsk +'</div>' +
+          '<div class="divTableHead">'+ modified +'</div>' +
           '</div>';
     contents = contents + tableRow;
     console.log("CONTENTS: \n" + contents);

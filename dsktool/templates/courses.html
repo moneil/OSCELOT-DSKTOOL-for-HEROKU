@@ -44,26 +44,24 @@
     <div id="searchResult" style="display:none">
       <hr>
       <h3>Records Available to Update</h3>    
-      <p>Selecting a row readys it for processing.</p>
+      <p>Select a row for processing.</p>
       {% if course_json %}
-      <table>
-        <thead>
-          <tr>
-            <th style="padding:10px" valign="top"></th>
-            <th style="padding:10px" valign="top">Available</th>
-            <th style="padding:10px" valign="top">Service Level</th>
-            <th style="padding:10px" valign="top">External Id</th>
-            <th style="padding:10px" valign="top">Course Id</th>
-            <th style="padding:10px" valign="top">Course Name</th>
-            <th style="padding:10px" valign="top">Data Source</th>
-            <th style="padding:10px" valign="top">Date Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td styl="padding:10px;text-align:center"><input type="checkbox" name=processMembership checked value="{{ member_json.id }}" disabled></td>
-            <td style="padding:10px">{{course_json.availability.available}}</td>
-            <td style="padding:10px">
+      <div class="divTable ajaxTable">
+        <div class="divTableHeading">
+          <div class="divTableHead"></div>
+          <div class="divTableHead">Available</div>
+          <div class="divTableHead">Service Level</div>
+          <div class="divTableHead">External Id</div>
+          <div class="divTableHead">Course Id</div>
+          <div class="divTableHead">Course Name</div>
+          <div class="divTableHead">Data Source</div>
+          <div class="divTableHead">Date Created</div>
+        </div>
+        <div class="divTableBody" id="resultsTableBody">
+          <div class="divTableRow">
+            <div class="divTableCell"><input type="checkbox" name=processMembership checked value="{{ member_json.id }}" disabled></div>
+            <div class="divTableCell">{{course_json.availability.available}}</div>
+            <div class="divTableCell">
               {% if course_json %} 
                 {% if course_json.organization == 'true' %} 
                   Organization 
@@ -71,16 +69,17 @@
                   Course 
                 {% endif %}
               {% endif %} 
-            </td>
-            <td style="padding:10px">{{course_json.externalId}}</td>
-            <td style="padding:10px">{{course_json.courseId}}</td>
-            <td style="padding:10px">{{course_json.name}}</td>
-            <td style="padding:10px">{{course_json.dataSourceId}}</td>
-            <td style="padding:10px">{{course_json.created}}</td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+            <div class="divTableCell">{{course_json.externalId}}</div>
+            <div class="divTableCell">{{course_json.courseId}}</div>
+            <div class="divTableCell">{{course_json.name}}</div>
+            <div class="divTableCell">{{course_json.dataSourceId}}</div>
+            <div class="divTableCell">{{course_json.created}}</div>
+        </div>
+      </div>
+      </div>
       {% endif %}
+      <p></p> <p></p> <p></p>
       <h6>details json:</h6>
       {{ course_json }}
       <hr>
@@ -172,41 +171,42 @@
 <div id="results" style="display:none">
   <h3>Results:</h3>
   {% if result_json %}
-      <table>
-        <thead>
-          <tr>
-            <th style="padding:10px" valign="top">Available</th>
-            <th style="padding:10px" valign="top">Service Level</th>
-            <th style="padding:10px" valign="top">External Id</th>
-            <th style="padding:10px" valign="top">Course Id</th>
-            <th style="padding:10px" valign="top">Course Name</th>
-            <th style="padding:10px" valign="top">Data Source</th>
-            <th style="padding:10px" valign="top">Date Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="padding:10px">{{result_json.availability.available}}</td>
-            <td style="padding:10px">
-              {% if result_json %} 
-                {% if result_json.organization == 'true' %} 
-                  Organization 
-                {% else %} 
-                  Course 
-                {% endif %}
-              {% endif %} 
-            </td>
-            <td style="padding:10px">{{result_json.externalId}}</td>
-            <td style="padding:10px">{{result_json.courseId}}</td>
-            <td style="padding:10px">{{result_json.name}}</td>
-            <td style="padding:10px">{{result_json.dataSourceId}}</td>
-            <td style="padding:10px">{{result_json.created}}</td>
-          </tr>
-        </tbody>
-      </table>
-      {% endif %}
+  <div class="divTable ajaxTable" id="update-table" >
+    <div class="divTableHeading" id="update-table-header">
+      <div class="divTableHead">Available</div>
+      <div class="divTableHead">Service Level</div>
+      <div class="divTableHead">External Id</div>
+      <div class="divTableHead">Course Id</div>
+      <div class="divTableHead">Course Name</div>
+      <div class="divTableHead">Data Source</div>
+      <div class="divTableHead">Date Created</div>
+    </div>
+    <div class="divTableBody" id="updateTableBody" name="updateTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell">{{result_json.availability.available}}</div>
+          <div class="divTableCell">
+            {% if result_json %} 
+              {% if result_json.organization == 'true' %} 
+                Organization 
+              {% else %} 
+                Course 
+              {% endif %}
+            {% endif %} 
+          </div>
+          <div class="divTableCell">{{result_json.externalId}}</div>
+          <div class="divTableCell">{{result_json.courseId}}</div>
+          <div class="divTableCell">{{result_json.name}}</div>
+          <div class="divTableCell">{{result_json.dataSourceId}}</div>
+          <div class="divTableCell">{{result_json.created}}</div>
+        </div>
+    </div>
+  </div>
+  <p></p> <p></p> <p></p>
   <h6>details json:</h6>
   {{ result_json }}
+
+      {% endif %}
+
 </div>
 <!-- END RESULTS DIV -->
 

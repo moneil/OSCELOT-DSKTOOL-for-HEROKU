@@ -44,42 +44,41 @@
     <div id="searchResult" style="display:none">
       <hr>
       <h3>Records Available to Update</h3>    
-      <p>Selecting a row readys it for processing.</p>
+      <p>Select a row for processing.</p>
       {% if user_json %}
-      <table>
-        <thead>
-          <tr>
-            <th style="padding:10px" valign="top"></th>
-            <th style="padding:10px" valign="top">Available</th>
-            <th style="padding:10px" valign="top">External Id</th>
-            <th style="padding:10px" valign="top">Username</th>
-            <th style="padding:10px" valign="top">First Name</th>
-            <th style="padding:10px" valign="top">Middle Name</th>
-            <th style="padding:10px" valign="top">Last Name</th>
-            <th style="padding:10px" valign="top">Email</th>
-            <th style="padding:10px" valign="top">Data Source</th>
-            <th style="padding:10px" valign="top">Date Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td styl="padding:10px;text-align:center"><input type="checkbox" name=processMembership checked value="{{ user_json.id }}" disabled></td>
-            <td style="padding:10px">{{user_json.availability.available}}</td>
-            <td style="padding:10px">{{user_json.externalId}}</td>
-            <td style="padding:10px">{{user_json.userName}}</td>
-            <td style="padding:10px">{{user_json.name.given}}</td>
-            <td style="padding:10px">{{user_json.name.middle}}</td>
-            <td style="padding:10px">{{user_json.name.family}}</td>
-            <td style="padding:10px">{{user_json.contact.email}}</td>
-            <td style="padding:10px">{{user_json.dataSourceId}}</td>
-            <td style="padding:10px">{{user_json.created}}</td>
-          </tr>
-        </tbody>
-      </table>
-      {% endif %}
+      <div class="divTable ajaxTable">
+        <div class="divTableHeading">
+          <div class="divTableHead"></div>
+          <div class="divTableHead">Available</div>
+          <div class="divTableHead">External Id</div>
+          <div class="divTableHead">Username</div>
+          <div class="divTableHead">First Name</div>
+          <div class="divTableHead">Middle Name</div>
+          <div class="divTableHead">Last Name</div>
+          <div class="divTableHead">Email</div>
+          <div class="divTableHead">Data Source</div>
+          <div class="divTableHead">Date Created</div>
+        </div>
+        <div class="divTableBody" id="resultsTableBody">
+          <div class="divTableRow">
+            <div class="divTableCell"><input type="checkbox" name=processMembership checked value="{{ user_json.id }}" disabled></div>
+            <div class="divTableCell">{{user_json.availability.available}}</div>
+            <div class="divTableCell">{{user_json.externalId}}</div>
+            <div class="divTableCell">{{user_json.userName}}</div>
+            <div class="divTableCell">{{user_json.name.given}}</div>
+            <div class="divTableCell">{{user_json.name.middle}}</div>
+            <div class="divTableCell">{{user_json.name.family}}</div>
+            <div class="divTableCell">{{user_json.contact.email}}</div>
+            <div class="divTableCell">{{user_json.dataSourceId}}</div>
+            <div class="divTableCell">{{user_json.created}}</div>
+          </div>
+        </div>
+      </div>
+      <p></p><p></p><p></p>
       <h6>details json:</h6>
       {{ user_json }}
       <hr>
+      {% endif %}
     </div>
     <div id="multipleResults" style="display:none">
       {% if memberSelectedData %}
@@ -167,36 +166,39 @@
 <!-- RESULTS DIV -->
 <div id="results" style="display:none">
   <h3>Results:</h3>
-  <table>
-    <thead>
-      <tr>
-        <th style="padding:10px" valign="top">Available</th>
-        <th style="padding:10px" valign="top">External Id</th>
-        <th style="padding:10px" valign="top">Username</th>
-        <th style="padding:10px" valign="top">First Name</th>
-        <th style="padding:10px" valign="top">Middle Name</th>
-        <th style="padding:10px" valign="top">Last Name</th>
-        <th style="padding:10px" valign="top">Email</th>
-        <th style="padding:10px" valign="top">Data Source</th>
-        <th style="padding:10px" valign="top">Date Created</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding:10px">{{result_json.availability.available}}</td>
-        <td style="padding:10px">{{result_json.externalId}}</td>
-        <td style="padding:10px">{{result_json.userName}}</td>
-        <td style="padding:10px">{{result_json.name.given}}</td>
-        <td style="padding:10px">{{result_json.name.middle}}</td>
-        <td style="padding:10px">{{result_json.name.family}}</td>
-        <td style="padding:10px">{{result_json.contact.email}}</td>
-        <td style="padding:10px">{{result_json.dataSourceId}}</td>
-        <td style="padding:10px">{{result_json.created}}</td>
-      </tr>
-    </tbody>
-  </table>
+  {% if result_json %}
+  <div class="divTable ajaxTable">
+    <div class="divTableHeading">
+      <div class="divTableHead">Available</div>
+        <div class="divTableHead">External Id</div>
+        <div class="divTableHead">Username</div>
+        <div class="divTableHead">First Name</div>
+        <div class="divTableHead">Middle Name</div>
+        <div class="divTableHead">Last Name</div>
+        <div class="divTableHead">Email</div>
+        <div class="divTableHead">Data Source</div>
+        <div class="divTableHead">Date Created</div>
+      </div>
+    <div class="divTableBody">
+      <div class="divTableRow">
+        <div class="divTableCell">{{result_json.availability.available}}</div>
+        <div class="divTableCell">{{result_json.externalId}}</div>
+        <div class="divTableCell">{{result_json.userName}}</div>
+        <div class="divTableCell">{{result_json.name.given}}</div>
+        <div class="divTableCell">{{result_json.name.middle}}</div>
+        <div class="divTableCell">{{result_json.name.family}}</div>
+        <div class="divTableCell">{{result_json.contact.email}}</div>
+        <div class="divTableCell">{{result_json.dataSourceId}}</div>
+        <div class="divTableCell">{{result_json.created}}</div>
+      </div>
+    </div>
+  </div>
+  
+  <p></p><p></p><p></p>
   <h6>details json:</h6>
   {{ result_json }}
+    <hr>
+  {% endif %}
 </div>
 <!-- END RESULTS DIV -->
 
