@@ -7,20 +7,28 @@
   <p></p>
   <h2>Version Information</h2>
   Documentation is available via the project site located at:<p><a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a></p>
-<h3>Release Notes</h3>
-<h4>v1.0.5 (08/16/2020)</h4>
-<ul>
-  <li>Begin support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.</li>
-  <li>Added 3LO handling for guest user results when target Learn instances use SSO or Direct Entry.</li>
-  <li>Added 3LO and 500 error trapping.</li>
-</ul>
 
-<h3>ToDo:</h3>
+  <h2> Release Notes</h2>
+  <h3> v1.0.8 (09/25/2020)</h3>
+  This release focuses on improving the user experience for searching and updating Enrollments:
   <ul>
-    <li>add search and update for multiple records</li>
-    <li>add logging support</li>
-    <li>add date timeboxing</li>
+    <li>Enrollments: Added Course/Org and User membership searches and updating to Enrollments
+    <li>Enrollments: Course/Org and User membership searches support externalId and courseId/Username
+    <li>Enrollments: Improved UI using AJAX
+    <li>Enrollments: Added alerts for entry validation and errors
+    <li>Enrollments: Substantial logging to Javascript console for debugging
+    <li>Added Docker deployment support (docker-compose.yml) see docker/README.md for details.
   </ul>
+  
+  <h3>ToDo:</h3>
+    <ul>
+      <li>Change User and Course searches to AJAX with improved UI and error checking
+      <li>Continue support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.
+      <li>add logging support</li>
+      <li>analyze ditching Django for Flask</li>
+      <li>add date timeboxing</li>
+    </ul>
+
   <hr>
   <h4>Your System Information:</h4>
   <ul>
