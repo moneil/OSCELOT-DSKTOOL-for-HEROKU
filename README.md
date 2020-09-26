@@ -70,9 +70,12 @@ This URL is sticky so bookmark it for later use and you are done!
 ### v1.0.9 (09/26/2020)
 This release improves readibility of tables:
 <ul>
-  <li>Added static header and inner grid.</li>
-  <li>Also fixed a display bug on loading non-enrollment pages.
+  <li>Added 'sticky' table header and inner grid to all tables.</li>
+  <li>Also fixed a display bug on loading non-enrollment pages.</li>
+  <li>Removed release notes from application index page (you may find them here).</li>
+  <li>Added version info to bottom of application index page.</li>
 </ul>
+Next up - AJAX Course/Org and User pages.
  
 ### v1.0.8 (09/25/2020)
 This release focuses on improving the user experience for searching and updating Enrollments:

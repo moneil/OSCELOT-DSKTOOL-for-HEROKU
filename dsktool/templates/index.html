@@ -8,23 +8,6 @@
   <h2>Version Information</h2>
   Documentation is available via the project site located at:<p><a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a></p>
 
-  <h2> Release Notes</h2>
-  <h3> v1.0.9 (09/26/2020)</h3>
-  This release improves readibility of tables:
-  <ul>
-    <li>Added static header and inner grid to all tables.</li>
-    <li>Fixed display bug on loading non-enrollment pages.
-  </ul>
-  
-  <h3>ToDo:</h3>
-    <ul>
-      <li>Change User and Course searches to AJAX with improved error checking
-      <li>Continue support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.
-      <li>add logging support</li>
-      <li>analyze ditching Django for Flask</li>
-      <li>add date timeboxing</li>
-    </ul>
-
   <hr>
   <h4>Your System Information:</h4>
   <ul>
@@ -32,4 +15,8 @@
     <li><strong>Version JSON:</strong> {{ version_json }}</li>
     <li><strong>Access Token:</strong> {{ access_token }}</li>
   </ul>
+
+  <div style="text-align: center;">
+    OSCELOT DSKTOOL v1.0.9 - released: 09/26/2020 under MIT License
+  </div>
 {% endblock %}
