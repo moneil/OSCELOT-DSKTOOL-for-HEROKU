@@ -67,6 +67,13 @@ This URL is sticky so bookmark it for later use and you are done!
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
 ## Release Notes
+### v1.0.9 (09/26/2020)
+This release improves readibility of tables:
+<ul>
+  <li>Added static header and inner grid.</li>
+  <li>Also fixed a display bug on loading non-enrollment pages.
+</ul>
+ 
 ### v1.0.8 (09/25/2020)
 This release focuses on improving the user experience for searching and updating Enrollments:
 <ul>
