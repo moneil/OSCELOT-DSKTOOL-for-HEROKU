@@ -263,8 +263,9 @@ $("#searchValueCrstoSearch").change(function(){
     success: function (data) {
       if (!data.is_found) {
         alert("A course with this identifier was not found.");
+        document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value="";
       }
-      document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value="";
+      
     }
   }).done(function() {
     $("#overlay").fadeOut(300);
@@ -305,8 +306,9 @@ $("#searchValueUsrtoSearch").change(function(){
     success: function (data) {
       if (!data.is_found) {
         alert("A user with this identifier was not found.");
+        document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value="";
       }
-      document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value="";
+      
     }
   }).done(function() {
     $("#overlay").fadeOut(300);
