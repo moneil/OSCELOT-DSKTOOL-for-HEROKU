@@ -71,6 +71,7 @@ This URL is sticky so bookmark it for later use and you are done!
 This release improves readibility of tables:
 <ul>
   <li>Added 'sticky' table header and inner grid to all tables.</li>
+  <li>Added Course User Role to enrollment results.</li>
   <li>Also fixed a display bug on loading non-enrollment pages.</li>
   <li>Removed release notes from application index page (you may find them here).</li>
   <li>Added version info to bottom of application index page.</li>

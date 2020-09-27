@@ -179,12 +179,13 @@
         </div>
       </div>
   </div>
-<p></p>
-<p></p>
-<hr>
-<p></p>
-<p></p>
-<p></p>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 
 
 {% block javascript %}
@@ -493,6 +494,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
         
         var userId = newResults["userId"];
         var available = newResults["availability"]["available"];
+        let courseRoleId = newResults["courseRoleId"]
         var externalId = newResults["user"]["externalId"];
         var userName = newResults["user"]["userName"];
         var firstName = newResults["user"]["name"]["given"];
@@ -509,12 +511,14 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           email = newResults["user"]["contact"]["email"];
         }
         var dsk = newResults["dataSourceId"];
-        var modified = newResults["modified"];
+        var modified = (newResults["modified"]).substring(0, 10);
         var pmcId="pmc"+userId;
 
         var tableRow = '<div class="divTableRow">' +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + courseRoleId + '</div>' +
+          
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+
           '<div class="divTableCell">' + firstName + '</div>'+
@@ -740,7 +744,7 @@ $('#selectCourseForm').on('submit', function(e) {
                         email = newResults[row]["user"]["contact"]["email"];
                     }
                     var dsk = newResults[row]["dataSourceId"];
-                    var modified = newResults[row]["modified"];
+                    var modified = (newResults[row]["modified"]).substring(0, 10);
                     var pmcId="pmc"+userId;
 
                     var tableRow = '<div class="divTableRow">' +
@@ -1011,6 +1015,7 @@ function toggleDivs(anyDiv) {
 
         let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
           '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">External Id</div>' +
           '<div class="divTableHead">Username</div>' +
           '<div class="divTableHead">User First Name</div>' +
@@ -1022,6 +1027,7 @@ function toggleDivs(anyDiv) {
         $("#resp-table-header").append(respTableHdr);
         
         let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">External Id</div>' +
           '<div class="divTableHead">Username</div>' +
           '<div class="divTableHead">User First Name</div>' +
@@ -1040,17 +1046,17 @@ function toggleDivs(anyDiv) {
 
         let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
           '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">Course External Id</div>' +
           '<div class="divTableHead">Course Name</div>' +
-          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
 
         let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">Course External Id</div>' +
           '<div class="divTableHead">Course Name</div>' +
-          '<div class="divTableHead">User Course Role</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
@@ -1074,6 +1080,8 @@ function setCrsMembershipResultsTableBody(newResults) {
     console.log("userId: " + userId);
     let available = newResults[row]["availability"]["available"];
     console.log("available: " + available);
+    let courseRoleId = newResults[row]["courseRoleId"];
+    console.log("userId: " + userId);
     let externalId = newResults[row]["user"]["externalId"];
     console.log("externalId: " + externalId);
     let userName = newResults[row]["user"]["userName"];
@@ -1097,7 +1105,7 @@ function setCrsMembershipResultsTableBody(newResults) {
     console.log("email: " + email);
     let dsk = newResults[row]["dataSourceId"];
     console.log("dsk: " + dsk);
-    let modified = newResults[row]["modified"];
+    let modified = (newResults[row]["modified"]).substring(0, 10);
     console.log("modified: " + modified);
     let pmcId="pmc"+userId;
     console.log("pmcId: " + pmcId);
@@ -1105,6 +1113,7 @@ function setCrsMembershipResultsTableBody(newResults) {
     let tableRow = '<div class="divTableRow">' +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + courseRoleId + '</div>' +
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+
           '<div class="divTableCell">' + firstName + '</div>'+
@@ -1129,6 +1138,8 @@ function setCrsMembershipUpdatesTableBody(newResults) {
     let userId = newResults[row]["userId"];
     console.log("userId: " + userId);
     let available = newResults[row]["availability"]["available"];
+    let courseRoleId = newResults[row]["courseRoleId"];
+
     let externalId = newResults[row]["user"]["externalId"];
     let userName = newResults[row]["user"]["userName"];
     let firstName = newResults[row]["user"]["name"]["given"];
@@ -1145,11 +1156,12 @@ function setCrsMembershipUpdatesTableBody(newResults) {
       email = newResults[row]["user"]["contact"]["email"];
     }
     let dsk = newResults[row]["dataSourceId"];
-    let modified = newResults[row]["modified"];
+    let modified = (newResults[row]["modified"]).substring(0, 10);
     let pmcId="pmc"+userId;
 
     let tableRow = '<div class="divTableRow">' +
-          '<div class="divTableCell">' + available + '</div>' +
+      '<div class="divTableCell">' + available + '</div>' +
+      '<div class="divTableCell">' + courseRoleId + '</div>' +
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+
           '<div class="divTableCell">' + firstName + '</div>'+
@@ -1190,7 +1202,7 @@ function setUsrMembershipResultsTableBody(newResults) {
     console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     console.log("role: " + role);
-    let modified = newResults[row]["modified"];
+    let modified = (newResults[row]["modified"]).substring(0, 10);
     console.log("modified: " + modified);
 
     //let pmcId="pmc"+userId;
@@ -1198,9 +1210,9 @@ function setUsrMembershipResultsTableBody(newResults) {
     let tableRow = '<div class="divTableRow">' +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + crsId + ':' + userId + '"></div>' +
           '<div class="divTableCell">'+ available +'</div>' +
+          '<div class="divTableCell">'+ role +'</div>' +
           '<div class="divTableCell">'+ externalId +'</div>' +
           '<div class="divTableCell">'+ name +'</div>' +
-          '<div class="divTableCell">'+ role +'</div>' +
           '<div class="divTableCell">'+ dsk +'</div>' +
           '<div class="divTableCell">'+ modified +'</div>' +
           '</div>';
@@ -1234,14 +1246,14 @@ function setUsrMembershipUpdatesTableBody(newResults) {
     console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     console.log("role: " + role);
-    let modified = newResults[row]["modified"];
+    let modified = (newResults[row]["modified"]).substring(0, 10);
     console.log("modified: " + modified);
 
     let tableRow = '<div class="divTableRow">' +
           '<div class="divTableHead">'+ available +'</div>' +
+          '<div class="divTableHead">'+ role +'</div>' +
           '<div class="divTableHead">'+ externalId +'</div>' +
           '<div class="divTableHead">'+ name +'</div>' +
-          '<div class="divTableHead">'+ role +'</div>' +
           '<div class="divTableHead">'+ dsk +'</div>' +
           '<div class="divTableHead">'+ modified +'</div>' +
           '</div>';
