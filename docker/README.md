@@ -102,6 +102,17 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
+### v1.0.9 (09/27/2020)
+This release improves readibility of tables:
+<ul>
+  <li>Added 'sticky' table header and inner grid to all tables.</li>
+  <li>Added Course User Role to enrollment results.</li>
+  <li>Also fixed a display bug on loading non-enrollment pages.</li>
+  <li>Removed release notes from application index page (you may find them here).</li>
+  <li>Added version info to bottom of application index page.</li>
+</ul>
+Next up - AJAX Course/Org and User pages.
+ 
 ### v1.0.8 (09/25/2020)
 This Docker release focuses delivering the files supporting Docker deployment:
 <ul>
