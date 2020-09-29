@@ -102,6 +102,12 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
+### v1.0.10 (09/27/2020)
+<ul>
+  <li>No Docker changes see Release notes at: <a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a> </li>
+</ul>
+
+
 ### v1.0.9 (09/27/2020)
 This release improves readibility of tables:
 <ul>

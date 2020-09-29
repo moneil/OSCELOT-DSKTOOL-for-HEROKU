@@ -1,15 +1,20 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+<div id="overlay">
+  <div class="cv-spinner">
+    <span class="spinner"></span>
+  </div>
+</div>
+
 <h1>Search for a User</h1>
 <!-- SEARCH DIVS -->
 <div name="userSearchForm" id="userSearchForm">
   <p>
   Enter Text in the textfield to search. All searches are "equal to".
   </p>
-  <form id="searchUser" action="/users">
+  <form id="searchUserForm">
     {% csrf_token %}
-    <input type="hidden" id="task" name="task" value="search">
     <select name="searchBy" id="searchBy">
       <option value="externalId">External Id</option>
       <option value="userName">Username</option>
@@ -18,9 +23,9 @@
       <!-- <option value="DSK">Data Source  </option> -->
     </select>
     &nbsp;
-    <input type="text" id="searchValue" name="searchValue"></br>
+    <input type="text" id="searchValueUsrtoSearch" name="searchValueUsrtoSearch"></br>
     <div style="text-align:right; width:100%; padding:0;">
-      <input type="submit" value="Search"/>
+      <input id="submitSearchUserForm" type="submit" value="New Search"/>
     </div>
   </form>
 </div>
@@ -36,17 +41,12 @@
 
 <!-- PROCESS REQUEST (UPDATE) BLOCK -->
 <div id="processBlock" style="display:none">
-  <form id=processSelections action="/users">
-    <input type="hidden" id="task" name="task" value="process">
-    <input type="hidden" id="searchBy" name="searchBy" value={{ user_json.searchBy }}>
-    <input type="hidden" id="searchValueUsr" name="searchValueUsr" value={{ user_json.searchValueUsr }}>
     {% csrf_token %}
-    <div id="searchResult" style="display:none">
-      <hr>
-      <h3>Records Available to Update</h3>    
-      <p>Select a row for processing.</p>
-      {% if user_json %}
-      <div class="divTable ajaxTable">
+    <hr>
+    <h3>Search Results</h3>    
+    <p>Select a row for processing.</p>
+    <form id="processUserForm" name="processUserForm">
+      <div class="divTable ajaxTable" id="resultsTableHeader">
         <div class="divTableHeading">
           <div class="divTableHead"></div>
           <div class="divTableHead">Available</div>
@@ -57,116 +57,78 @@
           <div class="divTableHead">Last Name</div>
           <div class="divTableHead">Email</div>
           <div class="divTableHead">Data Source</div>
-          <div class="divTableHead">Date Created</div>
+          <div class="divTableHead">Date Modified</div>
         </div>
         <div class="divTableBody" id="resultsTableBody">
           <div class="divTableRow">
-            <div class="divTableCell"><input type="checkbox" name=processMembership checked value="{{ user_json.id }}" disabled></div>
-            <div class="divTableCell">{{user_json.availability.available}}</div>
-            <div class="divTableCell">{{user_json.externalId}}</div>
-            <div class="divTableCell">{{user_json.userName}}</div>
-            <div class="divTableCell">{{user_json.name.given}}</div>
-            <div class="divTableCell">{{user_json.name.middle}}</div>
-            <div class="divTableCell">{{user_json.name.family}}</div>
-            <div class="divTableCell">{{user_json.contact.email}}</div>
-            <div class="divTableCell">{{user_json.dataSourceId}}</div>
-            <div class="divTableCell">{{user_json.created}}</div>
+            
           </div>
         </div>
       </div>
-      <p></p><p></p><p></p>
+      <!-- <p></p><p></p><p></p>
       <h6>details json:</h6>
-      {{ user_json }}
+      <div id="searchDetailsJSON">
+
+      </div> -->
       <hr>
-      {% endif %}
-    </div>
-    <div id="multipleResults" style="display:none">
-      {% if memberSelectedData %}
-      <h3>Search Results</h3>
-      <!-- 
-        Add table of results with next page button
-        on checkbox clicked add/remove from list of
-        Available Records = DIV id=searchResult
-        on process sumit check for visibility and count 
-        and process selected results.
-      -->
-      <hr>
-      {% endif %}
-    </div>
-    <div id="searchUpdate" style="display:none">
+      </div>
+      <div id="searchUpdate" style="display:none">
       <h3>Update Selected Records</h3>
       <p>
         First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
       </p>  
-      <div class="field">
-        <table>
-          <thead>
-            <tr style="padding:10px">
-              <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+        {% csrf_token %}
+        <div class="field">
+          <table>
+            <thead>
+              <tr style="padding:10px">
+                <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
                 <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
-              </th>
-              <th style="padding:10px">
-                <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                Availability
-              </th>
-              <th style="padding:10px">
-                <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                Data Source Key
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding:10px"> </td>
-              <td style="padding:10px">
-                <select id="selectedAvailability" name="selectedAvailability">
-                  <option value="Yes">Available</option>
-                  <option value="No">Unavailable</option>
-                  <option value="Disabled">Disabled</option>
-                </select>
-              </td>
-              <td style="padding:10px">
-                <select id="selectedDataSourceKey" name="selectedDataSourceKey">
+                </th>
+                <th style="padding:10px">
+                  <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Availability
+                </th>
+                <th style="padding:10px">
+                  <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Data Source Key
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:10px"> </td>
+                <td style="padding:10px">
+                  <select id="selectedAvailability" name="selectedAvailability">
+                    <option value="Yes">Available</option>
+                    <option value="No">Unavailable</option>
+                    <option value="Disabled">Disabled</option>
+                  </select>
+                </td>
+                <td style="padding:10px">
+                  <select id="selectedDataSourceKey" name="selectedDataSourceKey">
                   <!-- <option>Choose a DSK or use field to right.</option> -->
-                  {% if dsks_json %}
-                    {% for dsk in dsks_json %}
-                      <option value={{ dsk.id }}>{{ dsk.externalId }}</option>
-                    {% endfor %}
-                  {% endif %}
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      </br>
-
-      <!--   
-      ToDo: add logging then a change comments area maaakes sense
-      <h3>Change Comments</h3>
-      <div id="comments" name="comments">
-      <p>
-      Please comment the change in plain text. Comments entered here will be stored in a database table.</p>
-      <p>
-      <textarea id="commentsTxt" name="commentsTxt" rows="4" cols="50">
-
-      </textarea></p> 
-      -->
-
-      <div style="text-align:right; width:100%; padding:0;">
-        <input id="processSubmit" name="processSubmit" type="submit" value="Update" disabled/>
+                
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         </br>
-        </br>
-      </div>
-    </div>
-  </form>
+
+        <div style="text-align:right; width:100%; padding:0;">
+          <input id="processSubmit" name="processSubmit" type="submit" value="Update" disabled/>
+          </br>
+          </br>
+        </div>
+    </form>
 </div>
 <!-- END UPDATE DIV -->
 
 <!-- RESULTS DIV -->
-<div id="results" style="display:none">
+<div id="updateResults" style="display:none">
   <h3>Results:</h3>
-  {% if result_json %}
   <div class="divTable ajaxTable">
     <div class="divTableHeading">
       <div class="divTableHead">Available</div>
@@ -177,28 +139,18 @@
         <div class="divTableHead">Last Name</div>
         <div class="divTableHead">Email</div>
         <div class="divTableHead">Data Source</div>
-        <div class="divTableHead">Date Created</div>
+        <div class="divTableHead">Date Modified</div>
       </div>
-    <div class="divTableBody">
-      <div class="divTableRow">
-        <div class="divTableCell">{{result_json.availability.available}}</div>
-        <div class="divTableCell">{{result_json.externalId}}</div>
-        <div class="divTableCell">{{result_json.userName}}</div>
-        <div class="divTableCell">{{result_json.name.given}}</div>
-        <div class="divTableCell">{{result_json.name.middle}}</div>
-        <div class="divTableCell">{{result_json.name.family}}</div>
-        <div class="divTableCell">{{result_json.contact.email}}</div>
-        <div class="divTableCell">{{result_json.dataSourceId}}</div>
-        <div class="divTableCell">{{result_json.created}}</div>
-      </div>
+    <div class="divTableBody" id="updateResultsTableBody">
+      
     </div>
   </div>
   
-  <p></p><p></p><p></p>
+  <!-- <p></p><p></p><p></p>
   <h6>details json:</h6>
-  {{ result_json }}
-    <hr>
-  {% endif %}
+  <div id="updateDetailsJSON">
+        
+  </div> -->
 </div>
 <!-- END RESULTS DIV -->
 <br>
@@ -206,8 +158,8 @@
 <br>
 <br>
 <br>
-<br>
 
+{% block javascript %}
 <script>
 function setIsProcessable() {
   if ((document.getElementById('isUpdateRequired1').checked == true) &&
@@ -226,20 +178,335 @@ function hideElement(hideme) {
   document.getElementById(hideme).style.display = "none";
 }
 
-{% if error_json %}
-  showElement('error')
-{% endif %}
 
-{% if result_json %}
-  showElement('results')
-{% endif %}
+/* AJAX!! */
+// [DONE] Process Spinner
+$(document).ajaxSend(function() {
+		  $("#overlay").fadeIn(300);　
+    });
 
-{% if user_json %}
-  showElement('processBlock')
-  showElement('searchResult')
-  showElement('searchUpdate')  
-{% endif %}
+// user Id validation request
+// [DONE] Validate User Value: search:searchValueUsrtoSearch
+$("#searchValueUsrtoSearch").change(function(){
+  console.log("searchValueUsrtoSearch: Validate change");
+  console.log("User: " + document.getElementById("searchUserForm").searchValueUsrtoSearch.value);
+  console.log("By: " + document.getElementById("searchUserForm").searchBy.value);
+
+  // Validate User Id: call function that validates user ids based on serialized form data
+
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  
+
+  var data = {
+    "searchBy": document.getElementById("searchUserForm").searchBy.value, 
+    "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+  }
+
+  console.log("VALIDATE: searchUserForm:\n" + JSON.stringify(data));
+
+  $.ajax({
+    //type: 'POST',
+    url: '/ajax/validate_userIdentifier/',
+    data: data, //$('#selectCourseForm').serialize(),
+    dataType: 'json',
+    success: function (data) {
+      if (!data.is_found) {
+        alert("A user with this identifier was not found.");
+        document.getElementById("searchUserForm").searchValueUsrtoSearch.value="";
+      }
+      
+    }
+  }).done(function() {
+    console.log("OVERLAY TIME")
+    $("#overlay").fadeOut(300);
+  });
+});
+
+// usr searchBy change cleanup: 
+// [DONE]   clears forms when changing from externalId to userName
+$("#searchBy").change(function () {
+  console.log("searchUserForm: searchBy changed");
+  // manage divs - clear and hide because we have a new search
+  $("#searchValueUsrtoSearch").val("")
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  // clear checkboxes
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  
+});
+// user search request
+$('#searchUserForm').on('submit', function(e){
+  console.log("START searchUserForm");
+  // form id="searchUserForm"
+  // submit id="submitSearchUserForm"
+  // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
+  // "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+  e.preventDefault();
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#updateTable").hide();
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
+  $("#isDataSourceKeyUpdateRequired1").checked=false;
+
+
+  if (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") {
+    alert("You must provide a User identifier.");
+    return;
+  }
+
+  var formData = {
+    "searchBy": document.getElementById("searchUserForm").searchBy.value, 
+    "searchValueUsr": document.getElementById("searchUserForm").searchValueUsrtoSearch.value,
+  }
+
+  console.log("FORMDATA: \n" + JSON.stringify(formData));
+
+  $.ajax({
+    type: 'GET',
+    url: '/ajax/getUser/',
+    data: formData, //$('#selectCourseForm').serialize(),
+    //contentType: "application/x-www-form-urlencoded",
+    dataType: 'json',
+    success: function(responseData) {
+      console.log("ajax/getUserMemberships success...");
+      console.log("Full responseData: \n" + JSON.stringify(responseData));
+            
+      newResults = responseData["user_json"];
+      console.log("Results Length: " + newResults.length);
+      console.log("newResults:\n" + JSON.stringify(newResults));
+
+      console.log("Processing results");
+
+      let tableContents = "";
+      tableContents = setUsrResultsTableBody(newResults);
+      console.log("TABLE CONTENTS\n" + tableContents);
+      $("#resultsTableBody").append(tableContents);
+
+      // <option>Choose a DSK or use field to right.</option> -->
+      var dskOption = '';
+      dskList = responseData["dsks_json"]
+                
+      if (typeof dskList == 'undefined') {
+      } else {
+        for ( dsk in dskList) {
+          dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
+          $('#selectedDataSourceKey').append(dskOption);
+        }
+      }
+
+      // $("#searchDetailsJSON").text(JSON.stringify(newResults));
+      $("#processBlock").show();
+      $("#resultsTable").show();
+      $("#resultsTableHeader").show();
+      $("#resultsTableBody").show();
+      $("#searchUpdate").show();
+    }
+    }).done(function() {
+			$("#overlay").fadeOut(300);
+    });      
+  });
+
+// user update request
+$('#processUserForm').on('submit', function(e) {
+  e.preventDefault();
+  console.log("processUserForm:");
+  console.log("FORM: \n" + $("#processUserForm").serialize());
+  console.log("SET results div display to visible");
+
+  $("#updateResults").hide();
+  $("#updateResultsTableBody").empty();
+
+  selectionCount=$(this).find('input[name="pmcUserId[]"]:checked').length;
+
+  // get form data based on active div
+  let searchBy = document.getElementById("searchUserForm").searchBy.value;
+  let searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
+  
+
+  let pmcUserList = [];
+
+  $('input[name="pmcUserId[]"]:checked').each(function() {
+    pmcUserList.push($(this).val());
+  });
+
+
+  var updateData = {
+      "isUpdateRequired1": document.getElementById("processUserForm").isUpdateRequired1.checked,
+      "isAvailabilityUpdateRequired1": document.getElementById("processUserForm").isAvailabilityUpdateRequired1.checked,
+      "selectedAvailability": document.getElementById("processUserForm").selectedAvailability.value,
+      "isDataSourceKeyUpdateRequired1": document.getElementById("processUserForm").isDataSourceKeyUpdateRequired1.checked,
+      "selectedDataSourceKey": document.getElementById("processUserForm").selectedDataSourceKey.value,
+      "pmcUserId[]": pmcUserList,
+      }
+  
+  console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
+
+  var ajxUrl = '/ajax/updateUser/';
+  
+  if (!selectionCount > 0 ) {
+    alert("You must select at least one record.")
+    return;
+  }
+
+  $.ajax({
+    type: 'GET',
+    url: ajxUrl,
+    data: updateData,
+    success: function (data) {
+      if (!data.is_found) {
+        alert("There was an error processing this request. Reload page and try again.");
+      } else {
+        // process selected records
+        //console.log(newResults[row]);
+        console.log("UPDATE RESULT DATA:\n" + JSON.stringify(data));
+            
+        let tableContents = "HELP!!!";
+        newResults = data["result_json"];
+        console.log("PROCESS USR: RESULTS_JSON: \n" + JSON.stringify(newResults));
+        tableContents = setUpdateResultsTableBody(newResults);
+        console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
+
+        
+        // $("#updateDetailsJSON").text(JSON.stringify(newResults));
+        $('#updateResultsTableBody').append(tableContents);
+        $('#updateTableBody').show();
+        $('#updateResults').show();
+        $('#updateResultsTable').show();
+        $('#update-table').show();
+        $('#update-table-header').show();
+      }
+    }
+  }).done(function() {
+		$("#overlay").fadeOut(300);
+  });      
+});
+
+
+// ajax support
+function setUsrResultsTableBody(newResults) {
+  console.log("setUsrResultsTableBody Called...");
+  console.log("newResults: \n" + JSON.stringify(newResults));
+  contents = "";
+  let id = newResults["id"];
+    console.log("id: " + id);
+    let available = newResults["availability"]["available"];
+    console.log("available: " + available);
+    let courseRoleId = newResults["courseRoleId"];
+    console.log("courseRoleId: " + courseRoleId);
+    let externalId = newResults["externalId"];
+    console.log("externalId: " + externalId);
+    let userName = newResults["userName"];
+    console.log("userName: " + userName);
+    let firstName = newResults["name"]["given"];
+    console.log("firstName: " + firstName);
+    let middleName = newResults["name"]["middle"];
+    if (typeof middleName == 'undefined') {
+      middleName = "";
+    }
+    console.log("middleName: " + middleName);
+    let lastName = newResults["name"]["family"];
+    console.log("lastName: " + lastName);
+    let email;
+    let contact = newResults["contact"];
+    if (typeof contact == 'undefined') {
+      email = "N/A";
+    } else {
+      email = newResults["contact"]["email"];
+    }
+    console.log("email: " + email);
+    let dsk = newResults["dataSourceId"];
+    console.log("dsk: " + dsk);
+    let modified = (newResults["modified"]).substring(0, 10);
+    console.log("modified: " + modified);
+    let pmcId="pmc"+id;
+    console.log("pmcId: " + pmcId);
+
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + id + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    
+  return tableRow;
+}
+
+function setUpdateResultsTableBody(newResults) {
+  console.log("setUsrResultsTableBody Called...");
+  console.log("newResults: \n" + JSON.stringify(newResults));
+  contents = "";
+  let id = newResults["id"];
+    console.log("id: " + id);
+    let available = newResults["availability"]["available"];
+    console.log("available: " + available);
+    let courseRoleId = newResults["courseRoleId"];
+    console.log("courseRoleId: " + courseRoleId);
+    let externalId = newResults["externalId"];
+    console.log("externalId: " + externalId);
+    let userName = newResults["userName"];
+    console.log("userName: " + userName);
+    let firstName = newResults["name"]["given"];
+    console.log("firstName: " + firstName);
+    let middleName = newResults["name"]["middle"];
+    if (typeof middleName == 'undefined') {
+      middleName = "";
+    }
+    console.log("middleName: " + middleName);
+    let lastName = newResults["name"]["family"];
+    console.log("lastName: " + lastName);
+    let email;
+    let contact = newResults["contact"];
+    if (typeof contact == 'undefined') {
+      email = "N/A";
+    } else {
+      email = newResults["contact"]["email"];
+    }
+    console.log("email: " + email);
+    let dsk = newResults["dataSourceId"];
+    console.log("dsk: " + dsk);
+    let modified = (newResults["modified"]).substring(0, 10);
+    console.log("modified: " + modified);
+    let pmcId="pmc"+id;
+    console.log("pmcId: " + pmcId);
+
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    
+  return tableRow;
+}
 
 </script>
 
+{% endblock %}
 {% endblock %}

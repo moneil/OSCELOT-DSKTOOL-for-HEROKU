@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.0.9 09.27.2020
+# OSCELOT DSKTOOL for HEROKU v1.0.10 09.27.2020
 
 See below [Release Notes](#Release-Notes).
 
@@ -67,6 +67,15 @@ This URL is sticky so bookmark it for later use and you are done!
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
 ## Release Notes
+### v1.0.10 (09/27/2020)
+<ul>
+  <li>AJAX'd the User page</li>
+  <li>Fixed enrollments availability selection bug</li>
+  <li>Removed json details from pages for application consistency (all that, and much more, is written to the browser JavaScript console)</li>
+  <li>Also fixed a few display issues.</li>
+</ul>
+Next up - AJAX Course/Org page.
+
 ### v1.0.9 (09/27/2020)
 This release improves readibility of tables:
 <ul>

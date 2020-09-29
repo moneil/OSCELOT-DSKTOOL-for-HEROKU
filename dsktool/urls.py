@@ -41,7 +41,9 @@ urlpatterns = [
     url(r'^ajax/updateCourseMemberships/$', views.updateCourseMemberships, name='updateCourseMemberships'),
     url(r'^ajax/getUserMemberships/$', views.getUserMemberships, name='getUserMemberships'),
     url(r'^ajax/updateUserMemberships/$', views.updateUserMemberships, name='updateUserMemberships'),
-
+    
+    url(r'^ajax/getUser/$', views.getUser, name='getUser'),
+    url(r'^ajax/updateUser/$', views.updateUser, name='updateUser'),
 ]
 
 handler500 = views.error_500

@@ -92,6 +92,7 @@
     <hr>
     <p></p>
     <h3>Search Results</h3>
+    Light gray rows indicate enrollment is in a child course. </br></br>
     <form id="processSelectedMembershipsForm" name="processSelectedMembershipsForm">
       {% csrf_token %}
       <input type="hidden" id="crsSearchValue" name="crsSearchValue" value="0">
@@ -119,20 +120,17 @@
             </p>  
             <table>
               <thead>
-                <tr style="padding:10px">
-                  <th style="padding:10px">
-                    <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true"  onclick="setIsProcessable();"/>
-                    <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
-                  </th>
-                  <th style="padding:10px">
-                    <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1"   type="checkbox" value="true" onclick="setIsProcessable();" />
-                    Availability
-                  </th>
-                  <th style="padding:10px">
-                    <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1"  type="checkbox" value="true"  onclick="setIsProcessable();" />
-                    Data Source Key
-                  </th>
-                </tr>
+                <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+                </th>
+                <th style="padding:10px">
+                  <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Availability
+                </th>
+                <th style="padding:10px">
+                  <input id="isDataSourceKeyUpdateRequired1" name="isDataSourceKeyUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
+                  Data Source Key
+                </th>
               </thead>
               <tbody>
                 <tr>
@@ -179,6 +177,7 @@
         </div>
       </div>
   </div>
+</div>
 <br>
 <br>
 <br>
@@ -250,7 +249,7 @@ $("#searchValueCrstoSearch").change(function(){
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
   var data = {
-    "selectBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUsrIdByCRSID.value, 
+    "searchBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUsrIdByCRSID.value, 
     "searchValue": document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value
   }
 
@@ -293,7 +292,7 @@ $("#searchValueUsrtoSearch").change(function(){
   
 
   var data = {
-    "selectBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUserIdByUSRID.value, 
+    "searchBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUserIdByUSRID.value, 
     "searchValue": document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value
   }
 
@@ -368,7 +367,7 @@ $("#searchByCrsCRSID").change(function () {
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
 });
 
-// [DONE] Validate: entered crsId searchEnrollmentsByUsrForm:searchValueCrs
+// [DONE] Validate: entered crsId searchEnrollmentsByCrsForm:searchValueCrs
 $("#searchValueCrs").change(function(){
   console.log("searchValueCrs: Validate change");
   console.log("Course Id: " + document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value);
@@ -385,7 +384,7 @@ $("#searchValueCrs").change(function(){
   // Validate CrsId: call ajax function that validates course ids based on serialized form data
 
   var data = {
-    "selectBy": document.getElementById("searchEnrollmentByCrsForm").searchByCrsCRSID.value, 
+    "searchBy": document.getElementById("searchEnrollmentByCrsForm").searchByCrsCRSID.value, 
     "searchValue": document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value
   }
   $.ajax({
@@ -423,7 +422,7 @@ $("#searchValueUsr").change(function(){
   // Validate CrsId: call ajax function that validates course ids based on serialized form data
 
   var data = {
-    "selectBy": document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value, 
+    "searchBy": document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value, 
     "searchValue": document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value
   }
   $.ajax({
@@ -618,7 +617,7 @@ $('#searchEnrollmentByCrsForm').on('submit', function(e){
     });      
   });
 
-// [IN PROGRESS] Search by User:
+// [DONE] Search by User:
 $('#searchEnrollmentsByUsrForm').on('submit', function(e){
   console.log("START searchEnrollmentsByUsrForm");
   // form id="searchEnrollmentByCrsForm"
@@ -690,14 +689,29 @@ $('#searchEnrollmentsByUsrForm').on('submit', function(e){
 // Manage divs: searchEnrollmentsByUsrForm:searchByUsrUSRID
 $("#searchByUsrUSRID").change(function () {
   console.log("searchByUsrUSRID: searchBy changed");
-  console.log(document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value)
+  console.log(document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
+  console.log("searchByUsrUSRID: Validate change");
+  console.log("USER Id: " + document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
+  // manage divs - clear and hide because we have a new search
+  $("#resultsTableBody").empty();
+  $("#updateTableBody").empty();
+  $("#searchValueUsr").val("");
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+
 });
 
 // Validate: searchEnrollmentsByUsrForm:searchValueUsr
 $("#searchValueUsr").change(function(){
   console.log("searchValueUsr: searchBy changed");
-  console.log(document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value)
+  console.log(document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value);
   // Validate Usr Id: call ajax function that validates course ids based on serialized form data
+  
 });
 
 // ===== PROCESS SELECTIONS ===== //
@@ -838,10 +852,10 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
       "crsToSearchFor": crsToSearchFor,
       "usrToSearchFor": usrToSearchFor,
       "usrSearchBy": usrSearchBy,
-      "isUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isUpdateRequired1.value,
-      "isAvailabilityUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isAvailabilityUpdateRequired1.value,
+      "isUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isUpdateRequired1.checked,
+      "isAvailabilityUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isAvailabilityUpdateRequired1.checked,
       "selectedAvailability": document.getElementById("processSelectedMembershipsForm").selectedAvailability.value,
-      "isDataSourceKeyUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isDataSourceKeyUpdateRequired1.value,
+      "isDataSourceKeyUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processSelectedMembershipsForm").selectedDataSourceKey.value,
       "pmcUserId[]": pmcUserList,
       "crsorusr": activeDiv
@@ -950,8 +964,6 @@ $("#searchValue").change(function () {
           $("#overlay").fadeOut(300);
       });
     });
-
-
 
 // ================= //
 // General Functions //
@@ -1076,6 +1088,14 @@ function setCrsMembershipResultsTableBody(newResults) {
   for(var row in newResults) {
     //console.log(newResults[row]);
     //set vars
+    let childCourseId = newResults[row]["childCourseId"];
+    let tRow = "";
+    console.log("CHILDCOURSEID: " + childCourseId);
+    if (childCourseId === undefined) {
+      tRow = '<div class="divTableRow">';
+    } else {
+      tRow = '<div class="divTableRow" style="background-color: whitesmoke;">';
+    }
     let userId = newResults[row]["userId"];
     console.log("userId: " + userId);
     let available = newResults[row]["availability"]["available"];
@@ -1110,7 +1130,9 @@ function setCrsMembershipResultsTableBody(newResults) {
     let pmcId="pmc"+userId;
     console.log("pmcId: " + pmcId);
 
-    let tableRow = '<div class="divTableRow">' +
+    
+
+    let tableRow = tRow +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + courseRoleId + '</div>' +
@@ -1177,7 +1199,6 @@ function setCrsMembershipUpdatesTableBody(newResults) {
 
   return contents;
 }
-
 
 function setUsrMembershipResultsTableBody(newResults) {
   console.log("setUsrMembershipResultsTableBody Called...")
