@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.0.10 09.27.2020
+# OSCELOT DSKTOOL for HEROKU v1.0.10 (09/29/2020)
 
 See below [Release Notes](#Release-Notes).
 
