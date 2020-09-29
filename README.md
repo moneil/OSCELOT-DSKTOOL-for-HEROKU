@@ -67,7 +67,7 @@ This URL is sticky so bookmark it for later use and you are done!
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
 ## Release Notes
-### v1.0.10 (09/27/2020)
+### v1.0.10 (09/29/2020)
 <ul>
   <li>AJAX'd the User page</li>
   <li>Fixed enrollments availability selection bug</li>
