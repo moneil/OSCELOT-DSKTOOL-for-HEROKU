@@ -12,7 +12,7 @@ function toggleDivs(anyDiv) {
     for (index = 0; index < divArray.length; index++) { 
       if (divArray[index] === anyDiv) {
         document.getElementById(divArray[index]).style.display = "inline";
-        console.log("ACTIVE DIV: " + divArray[index]);
+        // console.log("ACTIVE DIV: " + divArray[index]);
         activeDiv = divArray[index];
         $("#resultsTableBody").empty();
         $("#updateTableBody").empty();
@@ -33,7 +33,7 @@ function toggleDivs(anyDiv) {
         // if byUsr set result-table-header and update-table-header to reflect course info \not\ user-centric info
   
         if ( (activeDiv == "byCrsUsr") || (activeDiv == "byCrs")) {
-          console.log("SETTING result-table and update-table headers for Course Memberships");
+          // console.log("SETTING result-table and update-table headers for Course Memberships");
           $("#resp-table-header").empty();
           $("#update-table-header").empty();
   
@@ -62,7 +62,7 @@ function toggleDivs(anyDiv) {
   
   
         } else if (activeDiv == "byUsr") {
-          console.log("SETTING result-table and update-table headers for User Memberships");
+          // console.log("SETTING result-table and update-table headers for User Memberships");
           $("#resp-table-header").empty();
           $("#update-table-header").empty();
   

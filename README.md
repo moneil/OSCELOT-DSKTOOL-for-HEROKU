@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.0.10 (09/29/2020)
+# OSCELOT DSKTOOL for HEROKU v1.0.11 (10/04/2020)
 
 See below [Release Notes](#Release-Notes).
 
@@ -67,6 +67,12 @@ This URL is sticky so bookmark it for later use and you are done!
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
 ## Release Notes
+### v1.0.11 (10/04/2020)
+<ul>
+  <li>AJAX'd the Course page</li>
+  <li>Cleaned up JS console logging</li>
+</ul>
+
 ### v1.0.10 (09/29/2020)
 <ul>
   <li>AJAX'd the User page</li>

@@ -7,7 +7,9 @@
   </div>
 </div>
 <h1>Search for an Enrollment</h1>
-
+<p>
+  Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
+</p>
 <h5>Select Search Parameters</h5>
 <!-- [DONE] Search Parameter DIVS -->
 <div>
@@ -200,8 +202,8 @@ $(document).ajaxSend(function() {
 // ===== COURSE AND USER ===== //
 // [DONE] Manage divs: searchEnrollmentByCrsandUsrForm:searchEnrollmentByCrsandUsrIdByCRSID
 $("#searchEnrollmentByCrsandUsrIdByCRSID").change(function () {
-  console.log("searchEnrollmentByCrsandUsrIdByCRSID: searchBy changed");
-  console.log("Course Identifier: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUsrIdByCRSID.value);
+  // console.log("searchEnrollmentByCrsandUsrIdByCRSID: searchBy changed");
+  // console.log("Course Identifier: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUsrIdByCRSID.value);
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -217,8 +219,8 @@ $("#searchEnrollmentByCrsandUsrIdByCRSID").change(function () {
 
 // [DONE] Manage divs: searchEnrollmentByCrsandUsrForm:searchEnrollmentByCrsandUserIdByUSRID
 $("#searchEnrollmentByCrsandUserIdByUSRID").change(function () {
-  console.log("searchEnrollmentByCrsandUserIdByUSRID: searchBy changed");
-  console.log("User Identifier: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUserIdByUSRID.value)
+  // console.log("searchEnrollmentByCrsandUserIdByUSRID: searchBy changed");
+  // console.log("User Identifier: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUserIdByUSRID.value)
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -234,8 +236,8 @@ $("#searchEnrollmentByCrsandUserIdByUSRID").change(function () {
 
 // [DONE] Validate course: searchEnrollmentByCrsandUsrForm:search:searchEnrollmentByCrsandUserIdByCRSID
 $("#searchValueCrstoSearch").change(function(){
-  console.log("searchValueCrstoSearch: Validate change");
-  console.log("Course: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value);
+  // console.log("searchValueCrstoSearch: Validate change");
+  // console.log("Course: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value);
   // Validate Crs Id: call ajax function that validates course ids based on serialized form data
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -253,7 +255,7 @@ $("#searchValueCrstoSearch").change(function(){
     "searchValue": document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value
   }
 
-  console.log("VALIDATE: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(data));
+  // console.log("VALIDATE: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(data));
 
   $.ajax({
     //type: 'POST',
@@ -274,8 +276,8 @@ $("#searchValueCrstoSearch").change(function(){
 
 // [DONE] Validate User Value: searchEnrollmentByCrsandUsrForm:search:searchValueUsrtoSearch
 $("#searchValueUsrtoSearch").change(function(){
-  console.log("searchValueUsrtoSearch: Validate change");
-  console.log("User: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value);
+  // console.log("searchValueUsrtoSearch: Validate change");
+  // console.log("User: " + document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value);
 
   // Validate User Id: call function that validates user ids based on serialized form data
 
@@ -296,7 +298,7 @@ $("#searchValueUsrtoSearch").change(function(){
     "searchValue": document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value
   }
 
-  console.log("VALIDATE: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(data));
+  // console.log("VALIDATE: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(data));
 
   $.ajax({
     //type: 'POST',
@@ -320,9 +322,9 @@ $("#searchValueUsrtoSearch").change(function(){
 $("#searchValue").change(function () {
       var searchBy = document.getElementById("selectUserForm").searchByUserOnlyId.value;
       var searchValue = document.getElementById("selectUserForm").searchValueForUserOnlySearch.value;
-      console.log("searchBy: " + searchByUserOnlyId);
-      console.log("searchValue: " + searchValueForUserOnlySearch);
-      console.log("SERIALIZED FORM:\n" + $('#selectCourseForm').serialize());
+      //console.log("searchBy: " + searchByUserOnlyId);
+      //console.log("searchValue: " + searchValueForUserOnlySearch);
+      // console.log("SERIALIZED FORM:\n" + $('#selectCourseForm').serialize());
 
       $("#resultsTableBody").empty();
       $("#updateTableBody").empty();
@@ -352,8 +354,8 @@ $("#searchValue").change(function () {
 // ===== COURSE ===== //
 // Manage divs and validate entries on form changes: searchEnrollmentByCrsForm:searchByCrsCRSID
 $("#searchByCrsCRSID").change(function () {
-  console.log("searchByCrsCRSID: Validate change");
-  console.log("Course Id: " + document.getElementById("searchEnrollmentByCrsForm").searchByCrsCRSID.value);
+  // console.log("searchByCrsCRSID: Validate change");
+  // console.log("Course Id: " + document.getElementById("searchEnrollmentByCrsForm").searchByCrsCRSID.value);
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -369,8 +371,8 @@ $("#searchByCrsCRSID").change(function () {
 
 // [DONE] Validate: entered crsId searchEnrollmentsByCrsForm:searchValueCrs
 $("#searchValueCrs").change(function(){
-  console.log("searchValueCrs: Validate change");
-  console.log("Course Id: " + document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value);
+  // console.log("searchValueCrs: Validate change");
+  // console.log("Course Id: " + document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value);
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -407,8 +409,8 @@ $("#searchValueCrs").change(function(){
 // validate user search value
 // [DONE] Validate: entered userId searchEnrollmentsByUsrForm:searchValueUsr
 $("#searchValueUsr").change(function(){
-  console.log("searchValueUsr: Validate change");
-  console.log("User Id: " + document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value);
+  // console.log("searchValueUsr: Validate change");
+  // console.log("User Id: " + document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value);
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -474,7 +476,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
       "usrSearchBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUserIdByUSRID.value
     }
 
-  console.log("VALIDATE: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(searchData));
+  console.log("SEARCH: searchEnrollmentByCrsandUsrForm:\n" + JSON.stringify(searchData));
 
   $.ajax({
   	type: 'GET',
@@ -486,10 +488,10 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
       if (!data.is_found) {
         alert("No memberships were found for this course and user.");
       } else { // process results
-        console.log("data: " + JSON.stringify(data));
+        console.log("FULL RESULTS: " + JSON.stringify(data));
         newResults = data["memberships_json"];
-        console.log("newResults:\n", JSON.stringify(newResults));
-        console.log("Results Length: " + Object.keys(newResults).length);
+        console.log("MEMBERSHIPS RESULTS:\n", JSON.stringify(newResults));
+        // console.log("Results Length: " + Object.keys(newResults).length);
         
         var userId = newResults["userId"];
         var available = newResults["availability"]["available"];
@@ -578,7 +580,7 @@ $('#searchEnrollmentByCrsForm').on('submit', function(e){
     "searchValue": document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value,
   }
 
-  console.log("ACTIVE DIV: " + activeDiv);
+  // console.log("ACTIVE DIV: " + activeDiv);
 
   $.ajax({
     type: 'GET',
@@ -588,10 +590,12 @@ $('#searchEnrollmentByCrsForm').on('submit', function(e){
     dataType: 'json',
     success: function(responseData) {
       console.log("ajax/getCourseMemberships success...");
-      console.log("Full responseData: \n" + JSON.stringify(responseData));
+      console.log("Full RESULTS: \n" + JSON.stringify(responseData));
             
       newResults = responseData["memberships_json"]["results"];
-      console.log("Results Length: " + newResults.length);
+      console.log("MEMBERSHIPS RESULTS:\n", JSON.stringify(newResults));
+
+      //console.log("Results Length: " + newResults.length);
 
       let tableContents = "";
       tableContents = setCrsMembershipResultsTableBody(newResults);
@@ -619,7 +623,7 @@ $('#searchEnrollmentByCrsForm').on('submit', function(e){
 
 // [DONE] Search by User:
 $('#searchEnrollmentsByUsrForm').on('submit', function(e){
-  console.log("START searchEnrollmentsByUsrForm");
+  console.log("searchEnrollmentsByUsrForm");
   // form id="searchEnrollmentByCrsForm"
   // searchBy...id="searchByCrsCRSID"
   // searchValue...id="searchValueCrs"
@@ -643,8 +647,8 @@ $('#searchEnrollmentsByUsrForm').on('submit', function(e){
     "searchValue": document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value,
   }
 
-  console.log("FORMDATA: \n" + JSON.stringify(formData));
-  console.log("ACTIVE DIV: " + activeDiv);
+  console.log("REQUEST DATA: \n" + JSON.stringify(formData));
+  // console.log("ACTIVE DIV: " + activeDiv);
 
   $.ajax({
     type: 'GET',
@@ -654,13 +658,13 @@ $('#searchEnrollmentsByUsrForm').on('submit', function(e){
     dataType: 'json',
     success: function(responseData) {
       console.log("ajax/getUserMemberships success...");
-      console.log("Full responseData: \n" + JSON.stringify(responseData));
+      console.log("FULL RESULTS: \n" + JSON.stringify(responseData));
             
       newResults = responseData["memberships_json"]["results"];
-      console.log("Results Length: " + newResults.length);
-      console.log("newResults:\n" + JSON.stringify(newResults));
+      // console.log("Results Length: " + newResults.length);
+      console.log("MEMBERSHIPS RESULTS:\n" + JSON.stringify(newResults));
 
-      console.log("Processing results");
+      // console.log("Processing results");
 
       let tableContents = "";
       tableContents = setUsrMembershipResultsTableBody(newResults);
@@ -688,10 +692,10 @@ $('#searchEnrollmentsByUsrForm').on('submit', function(e){
 
 // Manage divs: searchEnrollmentsByUsrForm:searchByUsrUSRID
 $("#searchByUsrUSRID").change(function () {
-  console.log("searchByUsrUSRID: searchBy changed");
-  console.log(document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
-  console.log("searchByUsrUSRID: Validate change");
-  console.log("USER Id: " + document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
+  // console.log("searchByUsrUSRID: searchBy changed");
+  // console.log(document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
+  // console.log("searchByUsrUSRID: Validate change");
+  // console.log("USER Id: " + document.getElementById("searchEnrollmentsByUsrForm").searchByUsrUSRID.value);
   // manage divs - clear and hide because we have a new search
   $("#resultsTableBody").empty();
   $("#updateTableBody").empty();
@@ -716,6 +720,7 @@ $("#searchValueUsr").change(function(){
 
 // ===== PROCESS SELECTIONS ===== //
 $('#selectCourseForm').on('submit', function(e) {
+  console.log("selectCourseForm (SEARCH) on submit");
         e.preventDefault();
         $("#resultsTableBody").empty();
         $("#updateTableBody").empty();
@@ -732,10 +737,11 @@ $('#selectCourseForm').on('submit', function(e) {
             dataType: 'json',
             success: function(responseData) {
                 console.log("ajax/getCourseMemberships success...");
-                //console.log("responseData: " + JSON.stringify(responseData["memberships_json"]));
+                console.log("FULL RESULTS: " + JSON.stringify(responseData["memberships_json"]));
             
                 newResults = responseData["memberships_json"]["results"];
-                console.log("Memberships resulsts length: " + newResults.length);
+                // console.log("Memberships resulsts length: " + newResults.length);
+                console.log("MEMBERSHIPS RESULTS:\n" + JSON.stringify(newResults));
 
                 for(var row in newResults) {
                     //console.log(newResults[row]);
@@ -779,9 +785,9 @@ $('#selectCourseForm').on('submit', function(e) {
 
                   // $("#memberships_results").append(JSON.stringify(responseData["memberships_json"]["results"])+"<br>");
                 }
-                if (typeof responseData["memberships_json"]["paging"] != 'undefined'){
-                    console.log("NEXTPAGE? " + responseData["memberships_json"]["paging"]["nextPage"]);
-                }
+                // if (typeof responseData["memberships_json"]["paging"] != 'undefined'){
+                //     console.log("NEXTPAGE? " + responseData["memberships_json"]["paging"]["nextPage"]);
+                // }
 
                 // <option>Choose a DSK or use field to right.</option> -->
                 var dskOption = '';
@@ -802,10 +808,12 @@ $('#selectCourseForm').on('submit', function(e) {
 
 // ===== [DONE]Process selected memberships ===== //
 $('#processSelectedMembershipsForm').on('submit', function(e) {
+  console.log("processSelectedMembershipsForm (UPDATES) on submit");
+
   e.preventDefault();
-  console.log("processSelectedForm: processSelectedMembershipsForm");
-  console.log("FORM: \n" + $("#processSelectedMembershipsForm").serialize());
-  console.log("SET results div display to visible");
+  // console.log("processSelectedForm: processSelectedMembershipsForm");
+  // console.log("FORM: \n" + $("#processSelectedMembershipsForm").serialize());
+  // console.log("SET results div display to visible");
 
   $("#updateResults").hide();
   $("#updateTableBody").empty();
@@ -845,7 +853,7 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
     pmcUserList.push($(this).val());
   });
 
-  console.log("pmcUserList: " + pmcUserList);
+  // console.log("pmcUserList: " + pmcUserList);
 
   var searchData = {
       "crsSearchBy": crsSearchBy, 
@@ -861,7 +869,7 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
       "crsorusr": activeDiv
     }
   
-  console.log("SEARCHDATA:\n" + JSON.stringify(searchData));
+  console.log("REQUEST DATA:\n" + JSON.stringify(searchData));
 
   var ajxUrl = '/ajax/updateCourseMembership/';
 
@@ -876,8 +884,8 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
       ajxUrl = '/ajax/updateUserMemberships/';
       break;
   }
-  console.log("ACTIVE DIV: " + activeDiv);
-  console.log("AJXURL: " + ajxUrl);
+  // console.log("ACTIVE DIV: " + activeDiv);
+  // console.log("AJXURL: " + ajxUrl);
   
   if (!selectionCount > 0 ) {
     alert("You must select at least one record.")
@@ -902,7 +910,7 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
             
             let tableContents = "HELP!!!";
 
-            console.log("processSelectedMembershipsForm: ACTIVEDIV: " + activeDiv);
+            // console.log("processSelectedMembershipsForm: ACTIVEDIV: " + activeDiv);
 
             if (activeDiv == "byCrs" || activeDiv == "byCrsUsr") {
               newResults = data["updateList"];
@@ -934,10 +942,10 @@ $("#searchValue").change(function () {
       var searchBy = document.getElementById("selectCourseForm").searchBy.value;
       var searchValue = document.getElementById("selectCourseForm").searchValue.value;
       var task = document.getElementById("selectCourseForm").task.value;
-      console.log("searchBy: " + searchBy);
-      console.log("searchValue: " + searchValue);
-      console.log("task: " + task);
-      console.log("SERIALIZED FORM:\n" + $('#selectCourseForm').serialize());
+      // console.log("searchBy: " + searchBy);
+      // console.log("searchValue: " + searchValue);
+      // console.log("task: " + task);
+      // console.log("SERIALIZED FORM:\n" + $('#selectCourseForm').serialize());
 
       $("#resultsTableBody").empty();
       $("#updateTableBody").empty();
@@ -1000,7 +1008,7 @@ function toggleDivs(anyDiv) {
   for (index = 0; index < divArray.length; index++) { 
     if (divArray[index] === anyDiv) {
       document.getElementById(divArray[index]).style.display = "inline";
-      console.log("ACTIVE DIV: " + divArray[index]);
+      // console.log("ACTIVE DIV: " + divArray[index]);
       activeDiv = divArray[index];
       $("#resultsTableBody").empty();
       $("#updateTableBody").empty();
@@ -1083,38 +1091,38 @@ function toggleDivs(anyDiv) {
 
 function setCrsMembershipResultsTableBody(newResults) {
   console.log("setCrsMembershipResultsTableBody Called...");
-  console.log("newResults: \n" + JSON.stringify(newResults));
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
   for(var row in newResults) {
     //console.log(newResults[row]);
     //set vars
     let childCourseId = newResults[row]["childCourseId"];
     let tRow = "";
-    console.log("CHILDCOURSEID: " + childCourseId);
+    // console.log("CHILDCOURSEID: " + childCourseId);
     if (childCourseId === undefined) {
       tRow = '<div class="divTableRow">';
     } else {
       tRow = '<div class="divTableRow" style="background-color: whitesmoke;">';
     }
     let userId = newResults[row]["userId"];
-    console.log("userId: " + userId);
+    // console.log("userId: " + userId);
     let available = newResults[row]["availability"]["available"];
-    console.log("available: " + available);
+    // console.log("available: " + available);
     let courseRoleId = newResults[row]["courseRoleId"];
-    console.log("userId: " + userId);
+    // console.log("userId: " + userId);
     let externalId = newResults[row]["user"]["externalId"];
-    console.log("externalId: " + externalId);
+    // console.log("externalId: " + externalId);
     let userName = newResults[row]["user"]["userName"];
-    console.log("userName: " + userName);
+    // console.log("userName: " + userName);
     let firstName = newResults[row]["user"]["name"]["given"];
-    console.log("firstName: " + firstName);
+    // console.log("firstName: " + firstName);
     let middleName = newResults[row]["user"]["name"]["middle"];
     if (typeof middleName == 'undefined') {
       middleName = "";
     }
-    console.log("middleName: " + middleName);
+    // console.log("middleName: " + middleName);
     let lastName = newResults[row]["user"]["name"]["family"];
-    console.log("lastName: " + lastName);
+    // console.log("lastName: " + lastName);
     let email;
     let contact = newResults[row]["user"]["contact"];
     if (typeof contact == 'undefined') {
@@ -1122,15 +1130,13 @@ function setCrsMembershipResultsTableBody(newResults) {
     } else {
       email = newResults[row]["user"]["contact"]["email"];
     }
-    console.log("email: " + email);
+    // console.log("email: " + email);
     let dsk = newResults[row]["dataSourceId"];
-    console.log("dsk: " + dsk);
+    // console.log("dsk: " + dsk);
     let modified = (newResults[row]["modified"]).substring(0, 10);
-    console.log("modified: " + modified);
+    // console.log("modified: " + modified);
     let pmcId="pmc"+userId;
-    console.log("pmcId: " + pmcId);
-
-    
+    // console.log("pmcId: " + pmcId);
 
     let tableRow = tRow +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + userId + '"></div>' +
@@ -1158,7 +1164,7 @@ function setCrsMembershipUpdatesTableBody(newResults) {
     //console.log(newResults[row]);
     //set vars
     let userId = newResults[row]["userId"];
-    console.log("userId: " + userId);
+    // console.log("userId: " + userId);
     let available = newResults[row]["availability"]["available"];
     let courseRoleId = newResults[row]["courseRoleId"];
 
@@ -1210,21 +1216,21 @@ function setUsrMembershipResultsTableBody(newResults) {
     //console.log(newResults[row]);
     //set vars
     let userId = newResults[row]["userId"];
-    console.log("userId: " + userId);
+    // console.log("userId: " + userId);
     let crsId = newResults[row]["courseId"];
-    console.log("crsId: " + crsId);
+    // console.log("crsId: " + crsId);
     let available = newResults[row]["availability"]["available"];
-    console.log("available: " + available);
+    // console.log("available: " + available);
     let externalId = newResults[row]["course"]["externalId"];
-    console.log("externalId: " + externalId);
+    // console.log("externalId: " + externalId);
     let name = newResults[row]["course"]["name"];
-    console.log("name: " + name);
+    // console.log("name: " + name);
     let dsk = newResults[row]["dataSourceId"];
-    console.log("dsk: " + dsk);
+    // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
-    console.log("role: " + role);
+    // console.log("role: " + role);
     let modified = (newResults[row]["modified"]).substring(0, 10);
-    console.log("modified: " + modified);
+    // console.log("modified: " + modified);
 
     //let pmcId="pmc"+userId;
 
@@ -1254,21 +1260,21 @@ function setUsrMembershipUpdatesTableBody(newResults) {
     //console.log(newResults[row]);
     //set vars
     let userId = newResults[row]["userId"];
-    console.log("userId: " + userId);
+    // console.log("userId: " + userId);
     let crsId = newResults[row]["courseId"];
-    console.log("crsId: " + crsId);
+    // console.log("crsId: " + crsId);
     let available = newResults[row]["availability"]["available"];
-    console.log("available: " + available);
+    // console.log("available: " + available);
     let externalId = newResults[row]["course"]["externalId"];
-    console.log("externalId: " + externalId);
+    // console.log("externalId: " + externalId);
     let name = newResults[row]["course"]["name"];
-    console.log("name: " + name);
+    // console.log("name: " + name);
     let dsk = newResults[row]["dataSourceId"];
-    console.log("dsk: " + dsk);
+    // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
-    console.log("role: " + role);
+    // console.log("role: " + role);
     let modified = (newResults[row]["modified"]).substring(0, 10);
-    console.log("modified: " + modified);
+    // console.log("modified: " + modified);
 
     let tableRow = '<div class="divTableRow">' +
           '<div class="divTableHead">'+ available +'</div>' +

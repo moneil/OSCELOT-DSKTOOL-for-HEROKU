@@ -1003,7 +1003,7 @@ def getCourseMemberships(request):
     return JsonResponse(context)
 
 # AJAX
-# [DONE]
+# [DONE] Reduce error opportunity by validating form entered values
 def validate_userIdentifier(request):
     searchBy = request.GET.get('searchBy') #externalId || userName
     searchValue = request.GET.get('searchValue')
@@ -1058,7 +1058,7 @@ def validate_userIdentifier(request):
     }
 
     return JsonResponse(data)
-# [DONE]
+# [DONE] Reduce error opportunity by validating form entered values
 def validate_courseIdentifier(request):
     print("validate_courseIdentifier called....")
     searchBy = request.GET.get('searchBy') #externalId || userName
@@ -1071,6 +1071,8 @@ def validate_courseIdentifier(request):
     
     if (searchBy == 'externalId'):
         crs = "externalId:" + searchValue
+    elif (searchBy == 'primaryId'):
+        crs=searchValue
     else:
         crs = "courseId:" + searchValue
 
@@ -1106,7 +1108,7 @@ def validate_courseIdentifier(request):
     }
 
     return JsonResponse(data)
-# [DONE]
+# [DONE] Retrieve a single course membership
 def getCourseMembership(request):
     #Get a single course membership
     print("\ngetCourseMember Called...")
@@ -1191,7 +1193,7 @@ def getCourseMembership(request):
     }
 
     return JsonResponse(data)
-# [DONE]
+# [DONE] Retrieve a list of course memberships
 def getCourseMemberships(request):
     print("getCourseMembers Called...")
     print("request method: ", request.method)
@@ -1267,7 +1269,7 @@ def getCourseMemberships(request):
     }
 
     return JsonResponse(context)
-#[DONE]
+#[DONE] Update a single course membership
 def updateCourseMembership(request):
     finalResponse = {}
     isFoundStatus = False
@@ -1372,7 +1374,7 @@ def updateCourseMembership(request):
         print("FINAL RESPONSE:\n", finalResponse)
                    
     return JsonResponse(finalResponse)
-#[DONE]
+#[DONE] Update a list of course memberships
 def updateCourseMemberships(request):
     finalResponse = {}
     print("request method: ", request.method)
@@ -1498,7 +1500,7 @@ def updateCourseMemberships(request):
         print("FINAL RESPONSE:\n", finalResponse)
                    
     return JsonResponse(finalResponse)
-
+#[DONE] Retrieve a list of user memberships
 def getUserMemberships(request):
     print("getUserMemberships Called...")
     print("request method: ", request.method)
@@ -1574,7 +1576,7 @@ def getUserMemberships(request):
     }
 
     return JsonResponse(context)
-
+#[DONE] Update a list of user memberships
 def updateUserMemberships(request):
     # {"crsSearchBy":"not_required","crsToSearchFor":"not_required","usrToSearchFor":"moneil","usrSearchBy":"externalId","isUpdateRequired1":"true","isAvailabilityUpdateRequired1":"true","selectedAvailability":"Yes","isDataSourceKeyUpdateRequired1":"true","selectedDataSourceKey":"_7_1","pmcUserId[]":["_9682_1:_1354_1","_9681_1:_1354_1"],"crsorusr":"byUsr"}
     finalResponse = {}
@@ -1677,7 +1679,7 @@ def updateUserMemberships(request):
         print("FINAL RESPONSE:\n", finalResponse)
                    
     return JsonResponse(finalResponse)
-
+#[DONE] Retrieve User data
 def getUser(request):
     # returns a list of one user - saves on javascript side.
     searchBy = request.GET.get('searchBy')
@@ -1746,7 +1748,7 @@ def getUser(request):
         }
 
     return JsonResponse(context)
-
+#[DONE] Update User data
 def updateUser(request):
     print("UPDATE USER...")
     print ('Request:\n ')
@@ -1797,6 +1799,163 @@ def updateUser(request):
         print(f'bbrest expiration: {bb.expiration()}')
 
     resp = bb.UpdateUser(userId = updateValue, payload=passedPayload, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
+
+    if (resp.status_code == 200):
+        result_json = resp.json() #return actual error
+        dskresp = bb.GetDataSource(dataSourceId = result_json['dataSourceId'], sync=True)
+        dsk_json = dskresp.json()
+        print (f"RESPONSE:\n", result_json)
+        isFoundStatus = True
+
+        result_json['dataSourceId'] = dsk_json['externalId']
+
+        context = {
+          "is_found": isFoundStatus,
+          'result_json': result_json,
+        }
+    else:
+        error_json = resp.json()
+        print (f"RESPONSE:\n", error_json)
+        context = {
+            "is_found": isFoundStatus,
+            'error_json': error_json,
+        }
+
+    return JsonResponse(context)
+#[DONE] Retrieve a single course data
+def getCourse(request):
+    # returns a list of one course - saves on javascript side.
+
+    searchBy = request.GET.get('searchBy')
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    print ("SEARCHBY: ", searchBy)
+    print ("SEARCHVALUE: ", searchValue)
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        request.session['target_view'] = 'users'
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+            whoami(request)
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'expiration: {bb.expiration()}')
+
+    if ISGUESTUSER:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'guestusernotallowed.html', context=context )
+     
+    #Process request...
+    if (searchBy == 'externalId'):
+        crs="externalId:" + searchValue
+    elif (searchBy == 'userName'):
+        crs="userName:" + searchValue
+    else:
+        crs = searchValue
+    
+    print(f"course pattern: {crs}")
+
+    isFoundStatus = False
+
+    resp = bb.GetCourse(courseId = crs, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified'}, sync=True )
+
+    print("GETCOURSE RESP: \n", resp.json())
+
+    if (resp.status_code == 200):
+        course_json = resp.json() 
+
+        dskresp = bb.GetDataSource(dataSourceId = course_json['dataSourceId'], sync=True)
+        dsk_json = dskresp.json()
+        course_json['dataSourceId'] = dsk_json['externalId']
+        course_json['searchValue'] = searchValue
+        course_json['searchBy'] = searchBy
+        dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+        dsks_json = dskresp.json()
+        dsks = dsks_json["results"]
+        dsks = sortDsk(dsks)
+        
+        isFoundStatus = True
+
+        context = {
+            'is_found': isFoundStatus,
+            'course_json': course_json,
+            'dsks_json': dsks,
+        }
+
+    else:
+        error_json = resp.json()
+        print (f"RESPONSE:\n", error_json)
+        context = {
+            'error_json': error_json,
+        }
+
+    return JsonResponse(context)
+
+
+#[] Update a single course
+def updateCourse(request):
+    print("UPDATE COURSE...")
+    print ('Request:\n ')
+    print (request)
+    print("isUpdateRequired1: ", request.GET.get("isUpdateRequired1"))
+    print("isAvailabilityUpdateRequired1:", request.GET.get("isAvailabilityUpdateRequired1"))
+    print("selectedAvailability: ", request.GET.get("selectedAvailability"))
+    print("isDataSourceKeyUpdateRequired1: ", request.GET.get("isDataSourceKeyUpdateRequired1"))
+    selectedDSK = request.GET.get("selectedDataSourceKey")
+    print("selectedDataSourceKey: ", selectedDSK)
+    updateValue = request.GET.get('pmcId[]')
+    print("UPDATE VALUE: ", updateValue)
+
+    isFoundStatus = False
+    passedPayload={}
+
+    if (request.GET.get('isAvailabilityUpdateRequired1')):
+        if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
+            print("AVAILABILITY UPDATE REQUIRED")
+            passedPayload={'availability':{"available":request.GET.get('selectedAvailability')}}
+    if (request.GET.get('isDataSourceKeyUpdateRequired1')):
+        if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
+            passedPayload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
+            print("DATASOURCE UPDATE REQUIRED")
+            
+    print ("PASSABLE PAYLOAD:\n", passedPayload)
+
+    # for x, y in passedPayload.items():
+    #     print(x, y)
+
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        print('pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        request.session['target_view'] = 'users'
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        print('got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            print('expired token')
+            request.session['bb_json'] = None
+            whoami(request)
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        print(f'bbrest expiration: {bb.expiration()}')
+
+    resp = bb.UpdateCourse(courseId = updateValue, payload=passedPayload, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified'}, sync=True )
 
     if (resp.status_code == 200):
         result_json = resp.json() #return actual error

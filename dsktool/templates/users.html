@@ -11,7 +11,7 @@
 <!-- SEARCH DIVS -->
 <div name="userSearchForm" id="userSearchForm">
   <p>
-  Enter Text in the textfield to search. All searches are "equal to".
+    Enter Text in the textfield to search. All searches are 'equal to' and case sensitive.
   </p>
   <form id="searchUserForm">
     {% csrf_token %}
@@ -189,8 +189,8 @@ $(document).ajaxSend(function() {
 // [DONE] Validate User Value: search:searchValueUsrtoSearch
 $("#searchValueUsrtoSearch").change(function(){
   console.log("searchValueUsrtoSearch: Validate change");
-  console.log("User: " + document.getElementById("searchUserForm").searchValueUsrtoSearch.value);
-  console.log("By: " + document.getElementById("searchUserForm").searchBy.value);
+  // console.log("User: " + document.getElementById("searchUserForm").searchValueUsrtoSearch.value);
+  // console.log("By: " + document.getElementById("searchUserForm").searchBy.value);
 
   // Validate User Id: call function that validates user ids based on serialized form data
 
@@ -210,7 +210,7 @@ $("#searchValueUsrtoSearch").change(function(){
     "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
   }
 
-  console.log("VALIDATE: searchUserForm:\n" + JSON.stringify(data));
+  console.log("VALIDATE ENTERED USER IDENTIFIER:searchUserForm:\n" + JSON.stringify(data));
 
   $.ajax({
     //type: 'POST',
@@ -225,15 +225,15 @@ $("#searchValueUsrtoSearch").change(function(){
       
     }
   }).done(function() {
-    console.log("OVERLAY TIME")
+    // console.log("OVERLAY TIME")
     $("#overlay").fadeOut(300);
   });
 });
 
 // usr searchBy change cleanup: 
-// [DONE]   clears forms when changing from externalId to userName
+// [DONE] clears forms when changing from externalId to userName
 $("#searchBy").change(function () {
-  console.log("searchUserForm: searchBy changed");
+  // console.log("searchUserForm: searchBy changed");
   // manage divs - clear and hide because we have a new search
   $("#searchValueUsrtoSearch").val("")
   $("#resultsTableBody").empty();
@@ -248,9 +248,10 @@ $("#searchBy").change(function () {
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
 });
-// user search request
+
+// [DONE] user search request
 $('#searchUserForm').on('submit', function(e){
-  console.log("START searchUserForm");
+  console.log("searchUserForm called");
   // form id="searchUserForm"
   // submit id="submitSearchUserForm"
   // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
@@ -284,18 +285,18 @@ $('#searchUserForm').on('submit', function(e){
     //contentType: "application/x-www-form-urlencoded",
     dataType: 'json',
     success: function(responseData) {
-      console.log("ajax/getUserMemberships success...");
+      console.log("ajax/getUser success...");
       console.log("Full responseData: \n" + JSON.stringify(responseData));
             
       newResults = responseData["user_json"];
-      console.log("Results Length: " + newResults.length);
-      console.log("newResults:\n" + JSON.stringify(newResults));
+      // console.log("Results Length: " + newResults.length);
+      console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
 
-      console.log("Processing results");
+      // console.log("Processing results");
 
       let tableContents = "";
       tableContents = setUsrResultsTableBody(newResults);
-      console.log("TABLE CONTENTS\n" + tableContents);
+      // console.log("TABLE CONTENTS\n" + tableContents);
       $("#resultsTableBody").append(tableContents);
 
       // <option>Choose a DSK or use field to right.</option> -->
@@ -322,12 +323,12 @@ $('#searchUserForm').on('submit', function(e){
     });      
   });
 
-// user update request
+// [DONE] user update request
 $('#processUserForm').on('submit', function(e) {
   e.preventDefault();
-  console.log("processUserForm:");
-  console.log("FORM: \n" + $("#processUserForm").serialize());
-  console.log("SET results div display to visible");
+  console.log("processUserForm");
+  // console.log("FORM: \n" + $("#processUserForm").serialize());
+  // console.log("SET results div display to visible");
 
   $("#updateResults").hide();
   $("#updateResultsTableBody").empty();
@@ -380,7 +381,7 @@ $('#processUserForm').on('submit', function(e) {
         newResults = data["result_json"];
         console.log("PROCESS USR: RESULTS_JSON: \n" + JSON.stringify(newResults));
         tableContents = setUpdateResultsTableBody(newResults);
-        console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
+        // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
         
         // $("#updateDetailsJSON").text(JSON.stringify(newResults));
@@ -401,27 +402,27 @@ $('#processUserForm').on('submit', function(e) {
 // ajax support
 function setUsrResultsTableBody(newResults) {
   console.log("setUsrResultsTableBody Called...");
-  console.log("newResults: \n" + JSON.stringify(newResults));
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
   let id = newResults["id"];
-    console.log("id: " + id);
+    // console.log("id: " + id);
     let available = newResults["availability"]["available"];
-    console.log("available: " + available);
+    // console.log("available: " + available);
     let courseRoleId = newResults["courseRoleId"];
-    console.log("courseRoleId: " + courseRoleId);
+    // console.log("courseRoleId: " + courseRoleId);
     let externalId = newResults["externalId"];
-    console.log("externalId: " + externalId);
+    // console.log("externalId: " + externalId);
     let userName = newResults["userName"];
-    console.log("userName: " + userName);
+    // console.log("userName: " + userName);
     let firstName = newResults["name"]["given"];
-    console.log("firstName: " + firstName);
+    // console.log("firstName: " + firstName);
     let middleName = newResults["name"]["middle"];
     if (typeof middleName == 'undefined') {
       middleName = "";
     }
-    console.log("middleName: " + middleName);
+    // console.log("middleName: " + middleName);
     let lastName = newResults["name"]["family"];
-    console.log("lastName: " + lastName);
+    // console.log("lastName: " + lastName);
     let email;
     let contact = newResults["contact"];
     if (typeof contact == 'undefined') {
@@ -429,13 +430,13 @@ function setUsrResultsTableBody(newResults) {
     } else {
       email = newResults["contact"]["email"];
     }
-    console.log("email: " + email);
+    // console.log("email: " + email);
     let dsk = newResults["dataSourceId"];
-    console.log("dsk: " + dsk);
+    // console.log("dsk: " + dsk);
     let modified = (newResults["modified"]).substring(0, 10);
-    console.log("modified: " + modified);
+    // console.log("modified: " + modified);
     let pmcId="pmc"+id;
-    console.log("pmcId: " + pmcId);
+    // console.log("pmcId: " + pmcId);
 
     let tableRow = '<div class="divTableRow">' +
           '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + id + '"></div>' +
@@ -455,43 +456,43 @@ function setUsrResultsTableBody(newResults) {
 
 function setUpdateResultsTableBody(newResults) {
   console.log("setUsrResultsTableBody Called...");
-  console.log("newResults: \n" + JSON.stringify(newResults));
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
   let id = newResults["id"];
-    console.log("id: " + id);
-    let available = newResults["availability"]["available"];
-    console.log("available: " + available);
-    let courseRoleId = newResults["courseRoleId"];
-    console.log("courseRoleId: " + courseRoleId);
-    let externalId = newResults["externalId"];
-    console.log("externalId: " + externalId);
-    let userName = newResults["userName"];
-    console.log("userName: " + userName);
-    let firstName = newResults["name"]["given"];
-    console.log("firstName: " + firstName);
-    let middleName = newResults["name"]["middle"];
-    if (typeof middleName == 'undefined') {
-      middleName = "";
-    }
-    console.log("middleName: " + middleName);
-    let lastName = newResults["name"]["family"];
-    console.log("lastName: " + lastName);
-    let email;
-    let contact = newResults["contact"];
-    if (typeof contact == 'undefined') {
-      email = "N/A";
-    } else {
-      email = newResults["contact"]["email"];
-    }
-    console.log("email: " + email);
-    let dsk = newResults["dataSourceId"];
-    console.log("dsk: " + dsk);
-    let modified = (newResults["modified"]).substring(0, 10);
-    console.log("modified: " + modified);
-    let pmcId="pmc"+id;
-    console.log("pmcId: " + pmcId);
+    // console.log("id: " + id);
+  let available = newResults["availability"]["available"];
+    // console.log("available: " + available);
+  let courseRoleId = newResults["courseRoleId"];
+    // console.log("courseRoleId: " + courseRoleId);
+  let externalId = newResults["externalId"];
+    // console.log("externalId: " + externalId);
+  let userName = newResults["userName"];
+    // console.log("userName: " + userName);
+  let firstName = newResults["name"]["given"];
+    // console.log("firstName: " + firstName);
+  let middleName = newResults["name"]["middle"];
+  if (typeof middleName == 'undefined') {
+    middleName = "";
+  }
+    // console.log("middleName: " + middleName);
+  let lastName = newResults["name"]["family"];
+    // console.log("lastName: " + lastName);
+  let email;
+  let contact = newResults["contact"];
+  if (typeof contact == 'undefined') {
+    email = "N/A";
+  } else {
+    email = newResults["contact"]["email"];
+  }
+    // console.log("email: " + email);
+  let dsk = newResults["dataSourceId"];
+    // console.log("dsk: " + dsk);
+  let modified = (newResults["modified"]).substring(0, 10);
+    // console.log("modified: " + modified);
+  let pmcId="pmc"+id;
+    // console.log("pmcId: " + pmcId);
 
-    let tableRow = '<div class="divTableRow">' +
+  let tableRow = '<div class="divTableRow">' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+

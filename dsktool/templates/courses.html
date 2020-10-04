@@ -1,18 +1,24 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+<div id="overlay">
+  <div class="cv-spinner">
+    <span class="spinner"></span>
+  </div>
+</div>
+
 <h1>Search for Course or Oganization</h1>
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
   <p>
-  Enter Text in the textfield to search. (All searches are equal to)
+  Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
   </p>
   <form id="searchCourse" action="/courses">
     {% csrf_token %}
     <select name="searchBy" id="searchBy">
+      <option value="courseId">Course/Organization Id</option>
       <option value="externalId">External Id</option>
       <option value="primaryId">Primary Id</option>
-      <option value="courseId">Course/Organization Id</option>
       <!-- <option value="DSK">Data Source Key</option> -->
     </select>
     &nbsp;
@@ -20,7 +26,6 @@
       <div style="text-align:right; width:100%; padding:0;">
         <input id="submitCourseSearch" type="submit" value="Search"/>
       </div>
-    <input type="hidden" id="task" name="task" value="search">
   </form>
 </div>
 <!-- END SEARCH DIV -->
@@ -33,81 +38,49 @@
 </div>
 <!-- END ERROR DIV -->
 
-
 <!-- PROCESS REQUEST (UPDATE) BLOCK -->
 <div id="processBlock" style="display:none">
-  <form id=processSelections action="/courses">
-    {% csrf_token %}
-    <input type="hidden" id="task" name="task" value="process">
-    <input type="hidden" id="searchBy" name="searchBy" value={{ course_json.searchBy }}>
-    <input type="hidden" id="searchValue" name="searchValue" value={{ course_json.searchValue }}>
-    <div id="searchResult" style="display:none">
-      <hr>
-      <h3>Records Available to Update</h3>    
-      <p>Select a row for processing.</p>
-      {% if course_json %}
-      <div class="divTable ajaxTable">
-        <div class="divTableHeading">
-          <div class="divTableHead"></div>
-          <div class="divTableHead">Available</div>
-          <div class="divTableHead">Service Level</div>
-          <div class="divTableHead">External Id</div>
-          <div class="divTableHead">Course Id</div>
-          <div class="divTableHead">Course Name</div>
-          <div class="divTableHead">Data Source</div>
-          <div class="divTableHead">Date Created</div>
-        </div>
-        <div class="divTableBody" id="resultsTableBody">
-          <div class="divTableRow">
-            <div class="divTableCell"><input type="checkbox" name=processMembership checked value="{{ member_json.id }}" disabled></div>
-            <div class="divTableCell">{{course_json.availability.available}}</div>
-            <div class="divTableCell">
-              {% if course_json %} 
-                {% if course_json.organization == 'true' %} 
-                  Organization 
-                {% else %} 
-                  Course 
-                {% endif %}
-              {% endif %} 
-            </div>
-            <div class="divTableCell">{{course_json.externalId}}</div>
-            <div class="divTableCell">{{course_json.courseId}}</div>
-            <div class="divTableCell">{{course_json.name}}</div>
-            <div class="divTableCell">{{course_json.dataSourceId}}</div>
-            <div class="divTableCell">{{course_json.created}}</div>
+  {% csrf_token %}
+  <hr>
+  <h3>Search Results</h3>    
+  <p>Select a row for processing.</p>
+  <form id="processCourseForm" name="processCourseForm">
+    <div class="divTable ajaxTable" id="resultsTableHeader">
+      <div class="divTableHeading">
+        <div class="divTableHead"></div>
+        <div class="divTableHead">Available</div>
+        <div class="divTableHead">Service Level</div>
+        <div class="divTableHead">External Id</div>
+        <div class="divTableHead">Course Id</div>
+        <div class="divTableHead">Course Name</div>
+        <div class="divTableHead">Data Source</div>
+        <div class="divTableHead">Date Modified</div>
+      </div>
+      <div class="divTableBody" id="resultsTableBody">
+        <div class="divTableRow">
+          
         </div>
       </div>
-      </div>
-      {% endif %}
-      <p></p> <p></p> <p></p>
-      <h6>details json:</h6>
-      {{ course_json }}
-      <hr>
     </div>
-    <div id="multipleResults" style="display:none">
-      {% if memberSelectedData %}
-      <h3>Search Results</h3>
-      <!-- 
-        Add table of results with next page button
-        on checkbox clicked add/remove from list of
-        Available Records = DIV id=searchResult
-        on process sumit check for visibility and count 
-        and process selected results.
-      -->
-      <hr>
-      {% endif %}
+    <!-- <p></p><p></p><p></p>
+    <h6>details json:</h6>
+    <div id="searchDetailsJSON">
+
+    </div> -->
+    <hr>
     </div>
     <div id="searchUpdate" style="display:none">
-      <h3>Update Selected Records</h3>
-      <p>
-        First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
-      </p>  
+    <h3>Update Selected Records</h3>
+    <p>
+      First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
+    </p>  
+      {% csrf_token %}
       <div class="field">
         <table>
           <thead>
             <tr style="padding:10px">
               <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+              <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
               </th>
               <th style="padding:10px">
                 <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
@@ -131,12 +104,8 @@
               </td>
               <td style="padding:10px">
                 <select id="selectedDataSourceKey" name="selectedDataSourceKey">
-                  <!-- <option>Choose a DSK or use field to right.</option> -->
-                  {% if dsks_json %}
-                    {% for dsk in dsks_json %}
-                      <option value={{ dsk.id }}>{{ dsk.externalId }}</option>
-                    {% endfor %}
-                  {% endif %}
+                <!-- <option>Choose a DSK or use field to right.</option> -->
+              
                 </select>
               </td>
             </tr>
@@ -145,71 +114,41 @@
       </div>
       </br>
 
-      <!--   
-      ToDo: add logging then a change comments area maaakes sense
-      <h3>Change Comments</h3>
-      <div id="comments" name="comments">
-      <p>
-      Please comment the change in plain text. Comments entered here will be stored in a database table.</p>
-      <p>
-      <textarea id="commentsTxt" name="commentsTxt" rows="4" cols="50">
-
-      </textarea></p> 
-      -->
-
       <div style="text-align:right; width:100%; padding:0;">
         <input id="processSubmit" name="processSubmit" type="submit" value="Update" disabled/>
         </br>
         </br>
       </div>
-    </div>
   </form>
 </div>
 <!-- END UPDATE DIV -->
 
 <!-- RESULTS DIV -->
-<div id="results" style="display:none">
-  <h3>Results:</h3>
-  {% if result_json %}
-  <div class="divTable ajaxTable" id="update-table" >
-    <div class="divTableHeading" id="update-table-header">
-      <div class="divTableHead">Available</div>
-      <div class="divTableHead">Service Level</div>
-      <div class="divTableHead">External Id</div>
-      <div class="divTableHead">Course Id</div>
-      <div class="divTableHead">Course Name</div>
-      <div class="divTableHead">Data Source</div>
-      <div class="divTableHead">Date Created</div>
+<div id="updateResults" style="display:none">
+<h3>Results:</h3>
+<div class="divTable ajaxTable">
+  <div class="divTableHeading">
+    <div class="divTableHead"></div>
+    <div class="divTableHead">Available</div>
+    <div class="divTableHead">Service Level</div>
+    <div class="divTableHead">External Id</div>
+    <div class="divTableHead">Course Id</div>
+    <div class="divTableHead">Course Name</div>
+    <div class="divTableHead">Data Source</div>
+    <div class="divTableHead">Date Modified</div>
     </div>
-    <div class="divTableBody" id="updateTableBody" name="updateTableBody">
-        <div class="divTableRow">
-          <div class="divTableCell">{{result_json.availability.available}}</div>
-          <div class="divTableCell">
-            {% if result_json %} 
-              {% if result_json.organization == 'true' %} 
-                Organization 
-              {% else %} 
-                Course 
-              {% endif %}
-            {% endif %} 
-          </div>
-          <div class="divTableCell">{{result_json.externalId}}</div>
-          <div class="divTableCell">{{result_json.courseId}}</div>
-          <div class="divTableCell">{{result_json.name}}</div>
-          <div class="divTableCell">{{result_json.dataSourceId}}</div>
-          <div class="divTableCell">{{result_json.created}}</div>
-        </div>
-    </div>
+  <div class="divTableBody" id="updateResultsTableBody">
+    
   </div>
-  <p></p> <p></p> <p></p>
-  <h6>details json:</h6>
-  {{ result_json }}
+</div>
 
-      {% endif %}
-
+<!-- <p></p><p></p><p></p>
+<h6>details json:</h6>
+<div id="updateDetailsJSON">
+      
+</div> -->
 </div>
 <!-- END RESULTS DIV -->
-<br>
 <br>
 <br>
 <br>
@@ -235,20 +174,305 @@
     document.getElementById(hideme).style.display = "none";
   }
   
-  {% if error_json %}
-    showElement('error')
-  {% endif %}
+  /* AJAX!! */
+// [DONE] Process Spinner
+$(document).ajaxSend(function() {
+		  $("#overlay").fadeIn(300);　
+    });
+
+// usr searchBy change cleanup: 
+// [DONE] clears forms when changing from externalId to userName
+$("#searchBy").change(function () {
+  // console.log("searchUserForm: searchBy changed");
+  // manage divs - clear and hide because we have a new search
+  $("#searchValue").val("")
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  // clear checkboxes
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
-  {% if result_json %}
-    showElement('results')
-  {% endif %}
+});
+
+// course Id validation request
+// [DONE] Validate Course Value: search:searchValueUsrtoSearch
+$("#searchValue").change(function(){
+  console.log("searchValueCrsSearch: Validate change");
+  console.log("Search for Course: " + document.getElementById("searchCourse").searchValue.value);
+  console.log("By: " + document.getElementById("searchCourse").searchBy.value);
+
+  // Validate User Id: call function that validates user ids based on serialized form data
+
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
-  {% if course_json %}
-    showElement('processBlock')
-    showElement('searchResult')
-    showElement('searchUpdate')  
-  {% endif %}
+
+  var data = {
+    "searchBy": document.getElementById("searchCourse").searchBy.value, 
+    "searchValue": document.getElementById("searchCourse").searchValue.value
+  }
+
+  console.log("VALIDATE ENTERED USER IDENTIFIER:searchUserForm:\n" + JSON.stringify(data));
+
+  $.ajax({
+    //type: 'POST',
+    url: '/ajax/validate_courseIdentifier/',
+    data: data, //$('#selectCourseForm').serialize(),
+    dataType: 'json',
+    success: function (data) {
+      if (!data.is_found) {
+        alert("A course with this identifier was not found.");
+        document.getElementById("searchCourse").searchValue.value="";
+      }
+      
+    }
+  }).done(function() {
+    // console.log("OVERLAY TIME")
+    $("#overlay").fadeOut(300);
+  });
+});
+
+// [DONE] Course search request
+$('#searchCourse').on('submit', function(e){
+  console.log("searchCourse called");
+  // form id="searchUserForm"
+  // submit id="submitSearchUserForm"
+  // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
+  // "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+  e.preventDefault();
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#updateTable").hide();
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
+  $("#isDataSourceKeyUpdateRequired1").checked=false;
+
+
+  if (document.getElementById("searchCourse").searchValue.value === "") {
+    alert("You must provide a User identifier.");
+    return;
+  }
+
+  var formData = {
+    "searchBy": document.getElementById("searchCourse").searchBy.value, 
+    "searchValue": document.getElementById("searchCourse").searchValue.value,
+  }
+
+  console.log("FORMDATA: \n" + JSON.stringify(formData));
+
+  $.ajax({
+    type: 'GET',
+    url: '/ajax/getCourse/',
+    data: formData, //$('#selectCourseForm').serialize(),
+    //contentType: "application/x-www-form-urlencoded",
+    dataType: 'json',
+    success: function(responseData) {
+      console.log("ajax/getCourse success...");
+      console.log("Full responseData: \n" + JSON.stringify(responseData));
+            
+      newResults = responseData["course_json"];
+      // console.log("Results Length: " + newResults.length);
+      console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
+
+      // console.log("Processing results");
+
+      let tableContents = "";
+      tableContents = setCourseResultsTableBody(newResults);
+      // console.log("TABLE CONTENTS\n" + tableContents);
+      $("#resultsTableBody").append(tableContents);
+
+      // <option>Choose a DSK or use field to right.</option> -->
+      var dskOption = '';
+      dskList = responseData["dsks_json"]
+                
+      if (typeof dskList == 'undefined') {
+      } else {
+        for ( dsk in dskList) {
+          dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
+          $('#selectedDataSourceKey').append(dskOption);
+        }
+      }
+
+      // $("#searchDetailsJSON").text(JSON.stringify(newResults));
+      $("#processBlock").show();
+      $("#resultsTable").show();
+      $("#resultsTableHeader").show();
+      $("#resultsTableBody").show();
+      $("#searchUpdate").show();
+    }
+    }).done(function() {
+			$("#overlay").fadeOut(300);
+    });      
+  });
+
+// [DONE] user update request
+$('#processCourseForm').on('submit', function(e) {
+  e.preventDefault();
+  console.log("processCourseForm");
+  // console.log("FORM: \n" + $("#processCourseForm").serialize());
+  // console.log("SET results div display to visible");
+
+  $("#updateResults").hide();
+  $("#updateResultsTableBody").empty();
+
+  selectionCount=$(this).find('input[name="pmcId[]"]:checked').length;
+
+  // get form data based on active div
+  let searchBy = document.getElementById("searchCourse").searchBy.value;
+  let searchValue = document.getElementById("searchCourse").searchValue.value;
   
+
+  let pmcIdList = [];
+
+  $('input[name="pmcId[]"]:checked').each(function() {
+    pmcIdList.push($(this).val());
+  });
+
+
+  var updateData = {
+      "isUpdateRequired1": document.getElementById("processCourseForm").isUpdateRequired1.checked,
+      "isAvailabilityUpdateRequired1": document.getElementById("processCourseForm").isAvailabilityUpdateRequired1.checked,
+      "selectedAvailability": document.getElementById("processCourseForm").selectedAvailability.value,
+      "isDataSourceKeyUpdateRequired1": document.getElementById("processCourseForm").isDataSourceKeyUpdateRequired1.checked,
+      "selectedDataSourceKey": document.getElementById("processCourseForm").selectedDataSourceKey.value,
+      "pmcId[]": pmcIdList,
+      }
+  
+  console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
+
+  var ajxUrl = '/ajax/updateCourse/';
+  
+  if (!selectionCount > 0 ) {
+    alert("You must select at least one record.")
+    return;
+  }
+
+  $.ajax({
+    type: 'GET',
+    url: ajxUrl,
+    data: updateData,
+    success: function (data) {
+      if (!data.is_found) {
+        alert("There was an error processing this request. Reload page and try again.");
+      } else {
+        // process selected records
+        //console.log(newResults[row]);
+        console.log("UPDATE RESULT DATA:\n" + JSON.stringify(data));
+            
+        let tableContents = "HELP!!!";
+        newResults = data["result_json"];
+        console.log("PROCESS USR: RESULTS_JSON: \n" + JSON.stringify(newResults));
+        tableContents = setUpdateResultsTableBody(newResults);
+        // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
+
+        
+        // $("#updateDetailsJSON").text(JSON.stringify(newResults));
+        $('#updateResultsTableBody').append(tableContents);
+        $('#updateTableBody').show();
+        $('#updateResults').show();
+        $('#updateResultsTable').show();
+        $('#update-table').show();
+        $('#update-table-header').show();
+      }
+    }
+  }).done(function() {
+		$("#overlay").fadeOut(300);
+  });      
+});
+
+// [DONE] Set course results table
+function setCourseResultsTableBody(newResults) {
+  console.log("setCourseResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  contents = "";
+  let id = newResults["id"];
+    // console.log("id: " + id);
+    let available = newResults["availability"]["available"];
+    // console.log("available: " + available);
+    let courseId = newResults["courseId"];
+    // console.log("courseRoleId: " + courseRoleId);
+    let externalId = newResults["externalId"];
+    // console.log("externalId: " + externalId);
+    let serviceLevel = "Course";
+    if (newResults["organization"] == "True") {
+      serviceLevel = "Organization";
+    }
+    let name = newResults["name"];
+
+    let dsk = newResults["dataSourceId"];
+    // console.log("dsk: " + dsk);
+    let modified = (newResults["modified"]).substring(0, 10);
+    // console.log("modified: " + modified);
+    let pmcId="pmc"+id;
+    // console.log("pmcId: " + pmcId);
+
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcId[]" class="pmcId" value="' + id + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + serviceLevel + '</div>'+
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + courseId + '</div>'+
+          '<div class="divTableCell">' + name + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    
+  return tableRow;
+}
+
+function setUpdateResultsTableBody(newResults) {
+  console.log("setUsrResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  contents = "";
+  let id = newResults["id"];
+    // console.log("id: " + id);
+    let available = newResults["availability"]["available"];
+    // console.log("available: " + available);
+    let courseId = newResults["courseId"];
+    // console.log("courseRoleId: " + courseRoleId);
+    let externalId = newResults["externalId"];
+    // console.log("externalId: " + externalId);
+    let serviceLevel = "Course";
+    if (newResults["organization"] == "True") {
+      serviceLevel = "Organization";
+    }
+    let name = newResults["name"];
+
+    let dsk = newResults["dataSourceId"];
+    // console.log("dsk: " + dsk);
+    let modified = (newResults["modified"]).substring(0, 10);
+    // console.log("modified: " + modified);
+    let pmcId="pmc"+id;
+    // console.log("pmcId: " + pmcId);
+
+    let tableRow = '<div class="divTableRow">' +
+          '<div class="divTableCell"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + serviceLevel + '</div>'+
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + courseId + '</div>'+
+          '<div class="divTableCell">' + name + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    
+  return tableRow;
+}
   </script>
   
   {% endblock %}
+
+
