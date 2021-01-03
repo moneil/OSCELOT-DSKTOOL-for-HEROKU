@@ -32,6 +32,8 @@ urlpatterns = [
     path('notauthorized', views.notauthorized, name='notauthorized'),
     path('users', views.users, name='users'),
     path('whoami', views.whoami, name='whoami'),
+    
+    url(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
 
     url(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
     url(r'^ajax/validate_courseIdentifier/$', views.validate_courseIdentifier, name='validate_courseIdentifier'),
@@ -41,12 +43,15 @@ urlpatterns = [
     url(r'^ajax/updateCourseMemberships/$', views.updateCourseMemberships, name='updateCourseMemberships'),
     url(r'^ajax/getUserMemberships/$', views.getUserMemberships, name='getUserMemberships'),
     url(r'^ajax/updateUserMemberships/$', views.updateUserMemberships, name='updateUserMemberships'),
-    
+    url(r'^ajax/getUsers/$', views.getUsers, name='getUsers'),
+    url(r'^ajax/updateUsers/$', views.updateUsers, name='updateUsers'),
     url(r'^ajax/getUser/$', views.getUser, name='getUser'),
     url(r'^ajax/updateUser/$', views.updateUser, name='updateUser'),
-
     url(r'^ajax/getCourse/$', views.getCourse, name='getCourse'),
     url(r'^ajax/updateCourse/$', views.updateCourse, name='updateCourse'),
+    url(r'^ajax/getCourses/$', views.getCourses, name='getCourses'),
+    url(r'^ajax/updateCourses/$', views.updateCourses, name='updateCourses'),
+    url(r'^ajax/getMembershipsByDSK/$', views.getMembershipsByDSK, name='getMembershipsByDSK'),
 ]
 
 handler500 = views.error_500

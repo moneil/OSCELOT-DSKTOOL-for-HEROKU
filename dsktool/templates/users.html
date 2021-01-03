@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<h1>Search for a User</h1>
+<h1>Search for Users</h1>
 <!-- SEARCH DIVS -->
 <div name="userSearchForm" id="userSearchForm">
   <p>
@@ -20,10 +20,13 @@
       <option value="userName">Username</option>
       <!-- <option value="givenName">Given Name</option> -->
       <!-- <option valxue="familyName">Family Name</option> -->
-      <!-- <option value="DSK">Data Source  </option> -->
+      <option value="DSK">Data Source Key</option>
     </select>
-    &nbsp;
-    <input type="text" id="searchValueUsrtoSearch" name="searchValueUsrtoSearch"></br>
+    <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all users with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> </div>
+    <div name="nonDSKSearch" id="nonDSKSearch" style="display: inline;">
+      <input type="text" id="searchValueUsrtoSearch" name="searchValueUsrtoSearch"></br>
+    </div>
+
     <div style="text-align:right; width:100%; padding:0;">
       <input id="submitSearchUserForm" type="submit" value="New Search"/>
     </div>
@@ -41,11 +44,15 @@
 
 <!-- PROCESS REQUEST (UPDATE) BLOCK -->
 <div id="processBlock" style="display:none">
-    {% csrf_token %}
     <hr>
     <h3>Search Results</h3>    
-    <p>Select a row for processing.</p>
+    <div id="searchResultsBlock">   
     <form id="processUserForm" name="processUserForm">
+     {% csrf_token %}
+      <div id="selectAllInput" style="display:none;">
+        <input type="checkbox" id="checkAll" name="checkAll"><label for="checkAll">&nbsp;&lt;-- Click to toggle all records for processing.</label> <a href="#updateSection">[&darr;]</a>
+      </div>
+
       <div class="divTable ajaxTable" id="resultsTableHeader">
         <div class="divTableHeading">
           <div class="divTableHead"></div>
@@ -59,7 +66,7 @@
           <div class="divTableHead">Data Source</div>
           <div class="divTableHead">Date Modified</div>
         </div>
-        <div class="divTableBody" id="resultsTableBody">
+        <div class="divTableBody" id="resultsTableBody" name="resultsTableBody">
           <div class="divTableRow">
             
           </div>
@@ -68,15 +75,14 @@
       <!-- <p></p><p></p><p></p>
       <h6>details json:</h6>
       <div id="searchDetailsJSON">
-
       </div> -->
       <hr>
-      </div>
+      <!-- </div> -->
       <div id="searchUpdate" style="display:none">
-      <h3>Update Selected Records</h3>
-      <p>
+        <h3 id="updateSection">Update Selected Records</h3>
+        <div id="instructions">
         First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
-      </p>  
+        </div>  
         {% csrf_token %}
         <div class="field">
           <table>
@@ -115,49 +121,44 @@
             </tbody>
           </table>
         </div>
-        </br>
+        <!-- End search update -->
 
-        <div style="text-align:right; width:100%; padding:0;">
+        <div style="text-align:right; width:100%; padding:0;" id="updateUsersSubmit" name="updateUsersSubmit"><p></p>
+          <p></p>
           <input id="processSubmit" name="processSubmit" type="submit" value="Update" disabled/>
-          </br>
-          </br>
         </div>
+      </div>
     </form>
-</div>
+  </div>
 <!-- END UPDATE DIV -->
 
-<!-- RESULTS DIV -->
-<div id="updateResults" style="display:none">
-  <h3>Results:</h3>
-  <div class="divTable ajaxTable">
-    <div class="divTableHeading">
-      <div class="divTableHead">Available</div>
-        <div class="divTableHead">External Id</div>
-        <div class="divTableHead">Username</div>
-        <div class="divTableHead">First Name</div>
-        <div class="divTableHead">Middle Name</div>
-        <div class="divTableHead">Last Name</div>
-        <div class="divTableHead">Email</div>
-        <div class="divTableHead">Data Source</div>
-        <div class="divTableHead">Date Modified</div>
+<!-- UPDATE RESULTS DIV -->
+<div id="updateResults" name="updateResults" style="display:none;" >
+  <p></p>
+    <hr>
+    <p></p>
+    <h3>Update Results</h3>
+    <div class="outerTable" name="updateResultsTable" id="updateResultsTable">
+      <div class="divTable ajaxTable" id="update-table" >
+        <div class="divTableHeading" id="update-table-header">
+          <div class="divTableHead">Available</div>
+          <div class="divTableHead">External Id</div>
+          <div class="divTableHead">Username</div>
+          <div class="divTableHead">First Name</div>
+          <div class="divTableHead">Middle Name</div>
+          <div class="divTableHead">Last Name</div>
+          <div class="divTableHead">Email</div>
+          <div class="divTableHead">Data Source</div>
+          <div class="divTableHead">Date Modified</div>
       </div>
-    <div class="divTableBody" id="updateResultsTableBody">
+        <div class="divTableBody" id="updateResultsTableBody" name="updateResultsTableBody">
       
     </div>
   </div>
-  
-  <!-- <p></p><p></p><p></p>
-  <h6>details json:</h6>
-  <div id="updateDetailsJSON">
-        
-  </div> -->
+</div>
 </div>
 <!-- END RESULTS DIV -->
-<br>
-<br>
-<br>
-<br>
-<br>
+
 
 {% block javascript %}
 <script>
@@ -178,6 +179,57 @@ function hideElement(hideme) {
   document.getElementById(hideme).style.display = "none";
 }
 
+// [DONE] Check all boxes: Callable when more than one option is available.
+$("#checkAll").click(function(){
+  $(':checkbox.pmcUserId').not(this).prop('checked', this.checked);
+});
+
+$(document).ready(function(){
+      if ( '#searchBy'.value == 'DSK')
+      {
+        $("#dskOptions").show();
+        $("#nonDSKSearch").hide();
+      }
+      else
+      {
+        $("#dskOptions").hide();
+        $("#nonDSKSearch").show();
+      }
+});
+
+$(document).ready(function(){
+  // console.log("Option Change!!")
+    $('#searchBy').on('change', function() {
+      if ( this.value == 'DSK')
+      {
+        let dsklist = "";
+        let x = 0;
+        x = document.getElementById("dataSourceKeyOptions").options.length;
+        //console.log("before:\n" + x)
+        $("#dskOptions").show();
+        $("#nonDSKSearch").hide();
+        alert("Please note: Searching for Users based on Data Source may result in a longer processing time due to the possible number of users associated with the Data Source. \n\nApproximately 30sec to process and display 10K records (500K max).");
+        if (x == 0) {
+          dsklist = getDataSourceKeys();
+          //console.log("dskList: " + dsklist);
+          if (typeof dsklist === undefined) {
+            //do nothing
+          } else {
+            //build dskoptions
+            for ( dsk in dsklist) {
+              dskOption = '<option value ='+ dsklist[dsk]['id'] + '>'+ dsklist[dsk]['externalId'] + '</option>';
+              $('#dataSourceKeyList').append(dskOption);
+            }
+          }
+        }
+      }
+      else
+      {
+        $("#dskOptions").hide();
+        $("#nonDSKSearch").show();
+      }
+    });
+});
 
 /* AJAX!! */
 // [DONE] Process Spinner
@@ -198,11 +250,14 @@ $("#searchValueUsrtoSearch").change(function(){
   $("#updateResultsTableBody").empty();
   $("#resultsTable").hide();
   $("#searchUpdate").hide();
+  $("#selectAllInput").hide();
+  $("#checkAll").prop("checked", false);
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
   
 
   var data = {
@@ -219,7 +274,7 @@ $("#searchValueUsrtoSearch").change(function(){
     dataType: 'json',
     success: function (data) {
       if (!data.is_found) {
-        alert("A user with this identifier was not found.");
+        alert("A user with this identifier was not found.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
         document.getElementById("searchUserForm").searchValueUsrtoSearch.value="";
       }
       
@@ -242,16 +297,41 @@ $("#searchBy").change(function () {
   $("#searchUpdate").hide();
   $("#updateResults").hide();
   $("#processBlock").hide();
+  $("#selectAllInput").hide();
+  $("#checkAll").prop("checked", false);
   // clear checkboxes
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  
+});
+
+$("#dataSourceKeyOptions").change(function () {
+  // console.log("searchUserForm: searchBy changed");
+  // manage divs - clear and hide because we have a new search
+  $("#searchValueUsrtoSearch").val("")
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  $("#selectAllInput").hide();
+  $("#checkAll").prop("checked", false);
+  // clear checkboxes
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
   
 });
 
 // [DONE] user search request
 $('#searchUserForm').on('submit', function(e){
   console.log("searchUserForm called");
+  let t0 = performance.now();
+
   // form id="searchUserForm"
   // submit id="submitSearchUserForm"
   // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
@@ -265,71 +345,122 @@ $('#searchUserForm').on('submit', function(e){
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").checked=false;
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
 
+  // console.log("searchBy: " + document.getElementById("searchUserForm").searchBy.value)
+  // console.log("searchFor: " + document.getElementById("searchUserForm").dataSourceKeyOptions.value)
 
-  if (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") {
+  if ( (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") 
+    && 
+    (document.getElementById("searchUserForm").searchBy.value != "DSK") ) {
     alert("You must provide a User identifier.");
     return;
   }
 
   var formData = {
     "searchBy": document.getElementById("searchUserForm").searchBy.value, 
-    "searchValueUsr": document.getElementById("searchUserForm").searchValueUsrtoSearch.value,
   }
 
-  console.log("FORMDATA: \n" + JSON.stringify(formData));
+  if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+    //use get user endpoint
+    ajaxURL = '/ajax/getUsers/'
+    formData["searchValueUsr"] = document.getElementById("searchUserForm").dataSourceKeyOptions.value
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
+    // console.log("DSK INSTRUCTIONS: " + $("#instructions").text());
+  } else {
+    //use get user endpoint
+    ajaxURL = '/ajax/getUser/'
+    formData["searchValueUsr"] = document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
+    // console.log("NON-DSK INSTRUCTIONS: " + $("#instructions").text());
+  }
+
+  // console.log("FORMDATA: \n" + JSON.stringify(formData));
+  // console.log("AJAXURL: \n" + ajaxURL);
 
   $.ajax({
     type: 'GET',
-    url: '/ajax/getUser/',
+    url: ajaxURL,
     data: formData, //$('#selectCourseForm').serialize(),
     //contentType: "application/x-www-form-urlencoded",
     dataType: 'json',
     success: function(responseData) {
       console.log("ajax/getUser success...");
-      console.log("Full responseData: \n" + JSON.stringify(responseData));
-            
+      // console.log("Full responseData: \n" + JSON.stringify(responseData));
+      if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+        newResults = responseData["users_json"]["results"]
+      } else {
       newResults = responseData["user_json"];
-      // console.log("Results Length: " + newResults.length);
+      }
+
+      console.log("Results Length: " + newResults.length);
       console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
 
       // console.log("Processing results");
-
-      let tableContents = "";
-      tableContents = setUsrResultsTableBody(newResults);
-      // console.log("TABLE CONTENTS\n" + tableContents);
-      $("#resultsTableBody").append(tableContents);
-
-      // <option>Choose a DSK or use field to right.</option> -->
-      var dskOption = '';
-      dskList = responseData["dsks_json"]
-                
-      if (typeof dskList == 'undefined') {
-      } else {
-        for ( dsk in dskList) {
-          dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
-          $('#selectedDataSourceKey').append(dskOption);
-        }
+      if (newResults.length == 0) {
+        alert("No users found under this data source...");
+        return;
       }
 
+      let tableContents = "";
+      if (typeof newResults === 'undefined') {
+      } else {
+        if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+          $("#resultsTableBody").empty();
+          tableContents = setUsrsResultsTableBody(newResults);
+        } else {
+          $("#resultsTableBody").empty();
+          tableContents = setUsrResultsTableBody(newResults);
+        }
+
+        // console.log("TABLE CONTENTS\n" + tableContents);
+        $("#resultsTableBody").append(tableContents);
+
+        // <option>Choose a DSK or use field to right.</option> -->
+        var dskOption = '';
+        dskList = responseData["dsks_json"]
+                
+        if (typeof dskList === 'undefined') {
+        } else {
+          let x=0;
+          x = document.getElementById("selectedDataSourceKey").options.length;
+          if (x == 0) {
+          for ( dsk in dskList) {
+            if ('INTERNAL' != dskList[dsk]['externalId']) {
+              dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
+              $('#selectedDataSourceKey').append(dskOption);
+            }
+          }
+        }
+      }
       // $("#searchDetailsJSON").text(JSON.stringify(newResults));
       $("#processBlock").show();
-      $("#resultsTable").show();
-      $("#resultsTableHeader").show();
-      $("#resultsTableBody").show();
-      $("#searchUpdate").show();
+        if (document.getElementById("searchUserForm").searchBy.value == "DSK") {
+          $("#selectAllInput").show();
+          $("#checkAll").prop("checked", false);
+        } else {
+          $("#selectAllInput").hide();
+          $("#checkAll").prop("checked", false);
+        }
+        $("#selectedDataSourceKey")[0].selectedIndex = 0;
+        $("#resultsTable").show();
+        $("#resultsTableHeader").show();
+        $("#resultsTableBody").show();
+        $("#searchUpdate").show();
+      }
     }
     }).done(function() {
-			$("#overlay").fadeOut(300);
+      $("#overlay").fadeOut(300);
+      let t1 = performance.now()
+      console.log("SEARCH TOOK: " + ((t1 - t0)/1000).toFixed(2) + " SECONDS.")
     });      
   });
 
 // [DONE] user update request
 $('#processUserForm').on('submit', function(e) {
   e.preventDefault();
-  console.log("processUserForm");
-  // console.log("FORM: \n" + $("#processUserForm").serialize());
-  // console.log("SET results div display to visible");
+  console.log("PROCESS USER UPDATE FORM");
+  let t0 = performance.now();
 
   $("#updateResults").hide();
   $("#updateResultsTableBody").empty();
@@ -339,13 +470,22 @@ $('#processUserForm').on('submit', function(e) {
   // get form data based on active div
   let searchBy = document.getElementById("searchUserForm").searchBy.value;
   let searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
-  
+  // console.log("searchBy: " + searchBy);
+  // console.log("searchValueUsr " + searchValueUsr);
 
-  let pmcUserList = [];
-
+  let pmcUserList = "";
+  n = 1;
   $('input[name="pmcUserId[]"]:checked').each(function() {
-    pmcUserList.push($(this).val());
+    //pmcUserList.push($(this).val());
+    pmcUserList += $(this).val();
+    if ((searchBy == 'DSK') && (n < selectionCount)) {
+      pmcUserList += ","
+      n += 1;
+    }
+    // console.log("PMCUSERLIST ADD: " + $(this).val() )
   });
+
+  // console.log("PMCUSERLIST: COUNT:" + pmcUserList.length)
 
 
   var updateData = {
@@ -354,34 +494,69 @@ $('#processUserForm').on('submit', function(e) {
       "selectedAvailability": document.getElementById("processUserForm").selectedAvailability.value,
       "isDataSourceKeyUpdateRequired1": document.getElementById("processUserForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processUserForm").selectedDataSourceKey.value,
-      "pmcUserId[]": pmcUserList,
       }
   
-  console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
+  // console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
 
-  var ajxUrl = '/ajax/updateUser/';
+  let ajaxURL = '';
   
   if (!selectionCount > 0 ) {
     alert("You must select at least one record.")
     return;
   }
+  // searchBy = document.getElementById("searchUserForm").searchBy.value;
+  // searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
+
+  if (searchBy == 'DSK') {
+    //use update users endpoint
+    ajaxURL = '/ajax/updateUsers/'
+    // we are already passing the list so set searchBy to DSK for python logic
+    updateData["pmcUserId[]"] = pmcUserList;
+
+  } else {
+    // console.log("NOT DSK")
+    //use update user endpoint
+    ajaxURL = '/ajax/updateUser/'
+    //set searchBy and searchValueUsr
+    searchBy = document.getElementById("searchUserForm").searchBy.value;
+    searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
+    updateData["searchBy"] = searchBy;
+    updateData["searchValueUsr"] = searchValueUsr; 
+    updateData["pmcUserId[]"] = pmcUserList;
+
+  }
+  // console.log("processUserForm: searchBy: " + searchBy);
+  // console.log("processUserForm: searchValueUsr: " + searchValueUsr);
+  // console.log("processUserForm: ajaxURL: " + ajaxURL)
+  // console.log("processUserForm: pmcUserList:\n" + pmcUserList);
+  // if pmcUsersList is == 1 then set the searchValueUser == pmcUserList[0]
+
+  console.log("UPDATE DATA:\n" + JSON.stringify(updateData));
+
 
   $.ajax({
     type: 'GET',
-    url: ajxUrl,
+    url: ajaxURL,
     data: updateData,
     success: function (data) {
       if (!data.is_found) {
-        alert("There was an error processing this request. Reload page and try again.");
+        alert("There was an error processing this request. Reload page and try again.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
       } else {
         // process selected records
         //console.log(newResults[row]);
-        console.log("UPDATE RESULT DATA:\n" + JSON.stringify(data));
+        // console.log("UPDATE RESULT DATA:\n" + JSON.stringify(data));
             
         let tableContents = "HELP!!!";
+
         newResults = data["result_json"];
-        console.log("PROCESS USR: RESULTS_JSON: \n" + JSON.stringify(newResults));
-        tableContents = setUpdateResultsTableBody(newResults);
+        console.log("PROCESS USR: NEWRESULTS_JSON: \n" + JSON.stringify(newResults));
+
+        if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+          tableContents = setUpdateUsrsResultsTableBody(newResults);
+        } else {
+          tableContents = setUpdateUsrResultsTableBody(newResults);
+        }
+        
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
         
@@ -395,14 +570,115 @@ $('#processUserForm').on('submit', function(e) {
       }
     }
   }).done(function() {
-		$("#overlay").fadeOut(300);
+    $("#overlay").fadeOut(300);
+    let t1 = performance.now()
+    console.log("UPDATE TOOK: " + ((t1 - t0)/1000).toFixed(2) + " SECONDS.")
   });      
 });
 
-
 // ajax support
 function setUsrResultsTableBody(newResults) {
-  console.log("setUsrResultsTableBody Called...");
+  console.log("setUsrsResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  contents = "";
+  tableBody = ""; 
+  
+  if (typeof newResults === undefined){
+  } else {
+      // console.log('newResults["id"]: ' + newResults["id"]);
+      let id = (typeof newResults["id"] == 'undefined') ? '' : newResults["id"];
+      // console.log('newResults["available"]: ' + newResults["availability"]["available"]);
+      let available = (typeof newResults["availability"] == 'undefined') ? '' : newResults["availability"]["available"];
+    
+      let externalId = (typeof newResults["externalId"] == 'undefined') ? '' : newResults["externalId"];
+    
+      let userName = (typeof newResults["userName"] == 'undefined') ? '' : newResults["userName"];
+
+      let firstName = (typeof newResults["name"] == 'undefined') ? '' : newResults["name"]["given"];
+
+      let middleName = (typeof newResults["name"]["middle"] == 'undefined') ? '' : newResults["name"]["middle"];
+
+      let lastName = (typeof newResults["name"]["family"] == 'undefined') ? '' : newResults["name"]["family"];
+
+      let email = (typeof newResults["contact"] == 'undefined') ? 'N/A' : newResults["contact"]["email"];
+
+      let dsk = (typeof newResults["dataSourceId"] == 'undefined') ? '' : newResults["dataSourceId"];
+
+      let modified = (typeof newResults["dataSomodifiedurceId"] == 'undefined') ? '' : (newResults["modified"]).substring(0, 10);
+
+      let pmcId="pmc"+id;
+
+      tableBody += '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + id + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+  }
+
+  return tableBody;
+}
+
+function setUsrsResultsTableBody(newResults) {
+  console.log("setUsrsResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  contents = "";
+  tableBody = ""; 
+  
+  if (typeof newResults === undefined){
+  } else {
+    for ( dataset in newResults) {
+      //console.log("DATASET: [" + newResults[dataset] +"]")
+      let id = (typeof newResults[dataset]["id"] == 'undefined') ? '' : newResults[dataset]["id"];
+    
+      let available = (typeof newResults[dataset]["availability"] == 'undefined') ? '' : newResults[dataset]["availability"]["available"];
+    
+      //let courseRoleId = (typeof newResults["courseRoleId"] == 'undefined') ? '' : newResults["courseRoleId"];
+    
+      let externalId = (typeof newResults[dataset]["externalId"] == 'undefined') ? '' : newResults[dataset]["externalId"];
+    
+      let userName = (typeof newResults[dataset]["userName"] == 'undefined') ? '' : newResults[dataset]["userName"];
+
+      let firstName = (typeof newResults[dataset]["name"]["given"] == 'undefined') ? '' : newResults[dataset]["name"]["given"];
+
+      let middleName = (typeof newResults[dataset]["name"]["middle"] == 'undefined') ? '' : newResults[dataset]["name"]["middle"];
+
+      let lastName = (typeof newResults[dataset]["name"]["family"] == 'undefined') ? '' : newResults[dataset]["name"]["family"];
+
+      let email = (typeof newResults[dataset]["contact"] == 'undefined') ? 'N/A' : newResults[dataset]["contact"]["email"];
+
+      let dsk = (typeof newResults[dataset]["dataSourceId"] == 'undefined') ? '' : newResults[dataset]["dataSourceId"];
+
+      let modified = (typeof newResults[dataset]["dataSomodifiedurceId"] == 'undefined') ? '' : (newResults[dataset]["modified"]).substring(0, 10);
+
+      let pmcId="pmc"+id;
+
+      tableBody += '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + id + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + userName + '</div>'+
+          '<div class="divTableCell">' + firstName + '</div>'+
+          '<div class="divTableCell">' + middleName + '</div>'+
+          '<div class="divTableCell">' + lastName + '</div>'+
+          '<div class="divTableCell">' + email + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    }
+  }
+
+  return tableBody;
+}
+
+function setUpdateUsrResultsTableBody(newResults) {
+  console.log("setUpdateUsrResultsTableBody Called...");
   console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
   let id = newResults["id"];
@@ -440,7 +716,6 @@ function setUsrResultsTableBody(newResults) {
     // console.log("pmcId: " + pmcId);
 
     let tableRow = '<div class="divTableRow">' +
-          '<div class="divTableCell"><input type="checkbox" name="pmcUserId[]" class="pmcUserId" value="' + id + '"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+
@@ -455,45 +730,49 @@ function setUsrResultsTableBody(newResults) {
   return tableRow;
 }
 
-function setUpdateResultsTableBody(newResults) {
-  console.log("setUsrResultsTableBody Called...");
+function setUpdateUsrsResultsTableBody(newResults) {
+  console.log("setUpdateUsrResultsTableBody Called...");
   console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
-  contents = "";
-  let id = newResults["id"];
-    // console.log("id: " + id);
-  let available = newResults["availability"]["available"];
-    // console.log("available: " + available);
-  let courseRoleId = newResults["courseRoleId"];
-    // console.log("courseRoleId: " + courseRoleId);
-  let externalId = newResults["externalId"];
-    // console.log("externalId: " + externalId);
-  let userName = newResults["userName"];
-    // console.log("userName: " + userName);
-  let firstName = newResults["name"]["given"];
-    // console.log("firstName: " + firstName);
-  let middleName = newResults["name"]["middle"];
-  if (typeof middleName == 'undefined') {
-    middleName = "";
-  }
-    // console.log("middleName: " + middleName);
-  let lastName = newResults["name"]["family"];
-    // console.log("lastName: " + lastName);
-  let email;
-  let contact = newResults["contact"];
-  if (typeof contact == 'undefined') {
-    email = "N/A";
+  let tableBody = "";
+  if (typeof newResults === undefined) { 
   } else {
-    email = newResults["contact"]["email"];
-  }
-    // console.log("email: " + email);
-  let dsk = newResults["dataSourceId"];
-    // console.log("dsk: " + dsk);
-  let modified = (newResults["modified"]).substring(0, 10);
-    // console.log("modified: " + modified);
-  let pmcId="pmc"+id;
-    // console.log("pmcId: " + pmcId);
-
-  let tableRow = '<div class="divTableRow">' +
+    // for each element in newResults get add an option for the DSK
+    for (user in newResults) {
+      let id = newResults[user]["id"];
+      // console.log("id: " + id);
+      let available = newResults[user]["availability"]["available"];
+      // console.log("available: " + available);
+      let courseRoleId = newResults[user]["courseRoleId"];
+      // console.log("courseRoleId: " + courseRoleId);
+      let externalId = newResults[user]["externalId"];
+      // console.log("externalId: " + externalId);
+      let userName = newResults[user]["userName"];
+      // console.log("userName: " + userName);
+      let firstName = newResults[user]["name"]["given"];
+      // console.log("firstName: " + firstName);
+      let middleName = newResults[user]["name"]["middle"];
+      if (typeof middleName == 'undefined') {
+        middleName = "";
+      }
+      // console.log("middleName: " + middleName);
+      let lastName = newResults[user]["name"]["family"];
+      // console.log("lastName: " + lastName);
+      let email;
+      let contact = newResults[user]["contact"];
+      if (typeof contact == 'undefined') {
+        email = "N/A";
+      } else {
+        email = newResults[user]["contact"]["email"];
+      }
+      // console.log("email: " + email);
+      let dsk = newResults[user]["dataSourceId"];
+      // console.log("dsk: " + dsk);
+      let modified = (newResults[user]["modified"]).substring(0, 10);
+      // console.log("modified: " + modified);
+      let pmcId="pmc"+id;
+      // console.log("pmcId: " + pmcId);
+    
+      tableBody += '<div class="divTableRow">' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + externalId + '</div>'+ 
           '<div class="divTableCell">' + userName + '</div>'+
@@ -505,7 +784,64 @@ function setUpdateResultsTableBody(newResults) {
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
     
-  return tableRow;
+    }
+  }
+    
+  return tableBody;
+}
+
+// [DONE] getDataSourceKeys: ajax function for retrieving a list of data source keys from target system.
+function getDataSourceKeys() {
+  console.log("Entered getDataSourceKeys");
+  let dskList = undefined;
+  var ajxUrl = '/ajax/getDataSourceKeys/';
+
+  // console.log("getDataSourceKeys: Getting list of Data Source Keys");
+
+  $.ajax({
+    type: 'GET',
+    url: ajxUrl,
+    //data: data,
+    success: function (data) {
+      if (!data.is_found) {
+        alert("Data Sources could not be loaded. Reload page and try again.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
+      } else {            
+        let dskOptions = ""
+        newResults = data["result_json"];
+        console.log("GET DSK LIST: RESULTS_JSON: \n" + JSON.stringify(newResults));
+        dataSourceKeyOptions = setDSKOptionsBody(newResults);
+        $('#dataSourceKeyOptions').append(dataSourceKeyOptions);
+      }
+    }
+  }).done(function() {
+    // console.log("OVERLAY TIME")
+    $("#overlay").fadeOut(300);
+  });
+};
+
+// [DONE] setDSKOptionsBody: ajax function that builds the DSK Options body
+function setDSKOptionsBody(newResults) {
+  console.log("setDSKOptionsBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  dskOptions = "";
+  dskOption = "";
+
+  if (typeof newResults === undefined) { 
+  } else {
+    // for each element in newResults get add an option for the DSK
+    for ( dsk in newResults) {
+      // console.log("option value/label: "+ newResults[dsk]['id'] + "/" + newResults[dsk]['externalId'])
+      id = newResults[dsk]['id']
+      externalId = newResults[dsk]['externalId']
+      if (externalId != 'INTERNAL') {
+        dskOption = '<option value ='+ id + '>'+ externalId + '</option>\n';
+        dskOptions += dskOption;
+      }
+    }    
+  }
+  
+  // console.log("dskOptions: \n" + dskOptions)
+  return dskOptions;
 }
 
 </script>

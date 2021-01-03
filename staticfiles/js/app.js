@@ -89,5 +89,5 @@ function toggleDivs(anyDiv) {
         document.getElementById(divArray[index]).style.display = "none"; 
       }
     }
-}
+  }
 }

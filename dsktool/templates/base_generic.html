@@ -14,29 +14,35 @@
 
 </head>
 <body>
-  <div id="overlay">
-    <div class="cv-spinner">
-      <span class="spinner"></span>
+  <div class="page-wrap" id="top">
+    <div id="overlay">
+      <div class="cv-spinner">
+        <span class="spinner"></span>
+     </div>
     </div>
-  </div>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-sm-2">
-      {% block sidebar %}
-        <ul class="sidebar-nav">
-          <li><a href="{% url 'index' %}">Home</a></li>
-          <li><a href="/users">Users</a></li>
-          <li><a href="/courses">Courses/Orgs</a></li>
-          <li><a href="/enrollments">Enrollments</a></li>
-          <hr></hr>
-          <li><a href="/whoami">Who Am I?</a></li>
-          <li><a href="/learnlogout">Learn Logout</a></li>
-        </ul>
-     {% endblock %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-2">
+          {% block sidebar %}
+          <ul class="sidebar-nav">
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li><a href="/users">Users</a></li>
+            <li><a href="/courses">Courses/Orgs</a></li>
+            <li><a href="/enrollments">Enrollments</a></li>
+            <hr></hr>
+            <li><a href="/whoami">Who Am I?</a></li>
+            <li><a href="/learnlogout">Learn Logout</a></li>
+          </ul>
+          {% endblock %}
+        </div>
+        <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
       </div>
-      <div class="col-sm-10 ">{% block content %}{% endblock %}</div>
     </div>
+    <br>
+    <br>
   </div>
-
+  <footer class="footer">
+OSCELOT DSKTOOL v1.1.0 - released: 01/03/2021 under MIT License
+  </footer> 
 </body>
 </html>

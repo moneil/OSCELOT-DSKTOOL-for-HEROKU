@@ -4,7 +4,7 @@ services:
     
     DSKTOOL:
         container_name: DSKTOOL
-        image: oscelot/oscelot-dsktool:1.0.11
+        image: oscelot/oscelot-dsktool:1.1.0
         ports:
             - "8000:8000"
         networks:   

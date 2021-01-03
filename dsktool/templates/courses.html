@@ -7,22 +7,23 @@
   </div>
 </div>
 
-<h1>Search for Course or Oganization</h1>
+<h1>Search for Courses or Oganizations</h1>
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
   <p>
   Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
   </p>
-  <form id="searchCourse" action="/courses">
+  <form id="searchCourseForm" action="/courses">
     {% csrf_token %}
     <select name="searchBy" id="searchBy">
       <option value="courseId">Course/Organization Id</option>
       <option value="externalId">External Id</option>
-      <option value="primaryId">Primary Id</option>
-      <!-- <option value="DSK">Data Source Key</option> -->
+      <!-- <option value="primaryId">Primary Id</option> -->
+      <option value="DSK">Data Source Key</option>
     </select>
-    &nbsp;
-    <input type="text" id="searchValue" name="searchValue"></br>
+    <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all courses with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> </div>
+
+    <div name="nonDSKSearch" id="nonDSKSearch" style="display: inline;"><input type="text" id="searchValue" name="searchValue"></br></div>
       <div style="text-align:right; width:100%; padding:0;">
         <input id="submitCourseSearch" type="submit" value="Search"/>
       </div>
@@ -44,6 +45,9 @@
   <hr>
   <h3>Search Results</h3>    
   <p>Select a row for processing.</p>
+  <div id="selectAllInput" style="display:none;">
+    <input type="checkbox" id="checkAll" name="checkAll"><label for="checkAll">&nbsp;&lt;-- Click to toggle all records for processing. <i><b>Note:</b> Parent/Child courses are included in results even if they are not associated with the searched data source key.</i></label> <a href="#updateSection">[&darr;]</a>
+  </div>
   <form id="processCourseForm" name="processCourseForm">
     <div class="divTable ajaxTable" id="resultsTableHeader">
       <div class="divTableHeading">
@@ -70,10 +74,10 @@
     <hr>
     </div>
     <div id="searchUpdate" style="display:none">
-    <h3>Update Selected Records</h3>
-    <p>
+    <h3 id="updateSection">Update Selected Records</h3>
+    <div id="instructions">
       First check 'Update the above selected records', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.
-    </p>  
+    </div>  
       {% csrf_token %}
       <div class="field">
         <table>
@@ -124,21 +128,20 @@
 <!-- END UPDATE DIV -->
 
 <!-- RESULTS DIV -->
-<div id="updateResults" style="display:none">
-<h3>Results:</h3>
-<div class="divTable ajaxTable">
-  <div class="divTableHeading">
-    <div class="divTableHead"></div>
-    <div class="divTableHead">Available</div>
-    <div class="divTableHead">Service Level</div>
-    <div class="divTableHead">External Id</div>
-    <div class="divTableHead">Course Id</div>
-    <div class="divTableHead">Course Name</div>
-    <div class="divTableHead">Data Source</div>
-    <div class="divTableHead">Date Modified</div>
+<div id="updateResults" name="updateResults" style="display:none;" >
+  <h3>Update Results:</h3>
+  <div class="divTable ajaxTable">
+    <div class="divTableHeading">
+      <!-- <div class="divTableHead"></div> -->
+      <div class="divTableHead">Available</div>
+      <div class="divTableHead">Service Level</div>
+      <div class="divTableHead">External Id</div>
+      <div class="divTableHead">Course Id</div>
+      <div class="divTableHead">Course Name</div>
+      <div class="divTableHead">Data Source</div>
+      <div class="divTableHead">Date Modified</div>
     </div>
-  <div class="divTableBody" id="updateResultsTableBody">
-    
+    <div class="divTableBody" id="updateResultsTableBody" name="updateResultsTableBody">
   </div>
 </div>
 
@@ -149,11 +152,6 @@
 </div> -->
 </div>
 <!-- END RESULTS DIV -->
-<br>
-<br>
-<br>
-<br>
-<br>
 
 
 <script>
@@ -174,16 +172,71 @@
     document.getElementById(hideme).style.display = "none";
   }
   
-  /* AJAX!! */
+// [DONE] Check all boxes: Callable when more than one option is available.
+$("#checkAll").click(function(){
+  $(':checkbox.pmcCourseId').not(this).prop('checked', this.checked);
+});
+
+  $(document).ready(function(){
+      if ( '#searchBy'.value == 'DSK')
+      {
+        $("#dskOptions").show();
+        $("#nonDSKSearch").hide();
+      }
+      else
+      {
+        $("#dskOptions").hide();
+        $("#nonDSKSearch").show();
+      }
+});
+
+  $(document).ready(function(){
+  // console.log("Option Change!!")
+    $('#searchBy').on('change', function() {
+      if ( this.value == 'DSK')
+      {
+        let dsklist = "";
+        let x = 0;
+        x = document.getElementById("dataSourceKeyOptions").options.length;
+        //console.log("before:\n" + x)
+        $("#dskOptions").show();
+        $("#nonDSKSearch").hide();
+        alert("Please note: Searching for Courses based on Data Source may result in a longer processing time due to the possible number of courses associated with the Data Source.\n\nApproximately 30sec to process and display 10K records (500K max).");
+      
+        if (x == 0) {
+          dsklist = getDataSourceKeys();
+          //console.log("dskList: " + dsklist);
+          if (typeof dsklist === undefined) {
+            //do nothing
+          } else {
+            //build dskoptions
+            for ( dsk in dsklist) {
+              if ('INTERNAL' != dskList[dsk]['externalId']) {
+                dskOption = '<option value ='+ dsklist[dsk]['id'] + '>'+ dsklist[dsk]['externalId'] + '</option>';
+                $('#dataSourceKeyList').append(dskOption);
+              }
+            }
+          }
+        }
+      }
+      else
+      {
+        $("#dskOptions").hide();
+        $("#nonDSKSearch").show();
+      }
+    });
+});
+
+/* AJAX!! */
 // [DONE] Process Spinner
-$(document).ajaxSend(function() {
+  $(document).ajaxSend(function() {
 		  $("#overlay").fadeIn(300);　
     });
 
 // usr searchBy change cleanup: 
 // [DONE] clears forms when changing from externalId to userName
-$("#searchBy").change(function () {
-  // console.log("searchUserForm: searchBy changed");
+  $("#searchBy").change(function () {
+  // console.log("searchCourseForm: searchBy changed");
   // manage divs - clear and hide because we have a new search
   $("#searchValue").val("")
   $("#resultsTableBody").empty();
@@ -194,7 +247,7 @@ $("#searchBy").change(function () {
   $("#processBlock").hide();
   // clear checkboxes
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
 });
@@ -203,8 +256,8 @@ $("#searchBy").change(function () {
 // [DONE] Validate Course Value: search:searchValueUsrtoSearch
 $("#searchValue").change(function(){
   console.log("searchValueCrsSearch: Validate change");
-  console.log("Search for Course: " + document.getElementById("searchCourse").searchValue.value);
-  console.log("By: " + document.getElementById("searchCourse").searchBy.value);
+  console.log("Search for Course: " + document.getElementById("searchCourseForm").searchValue.value);
+  console.log("By: " + document.getElementById("searchCourseForm").searchBy.value);
 
   // Validate User Id: call function that validates user ids based on serialized form data
 
@@ -215,16 +268,16 @@ $("#searchValue").change(function(){
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   
 
   var data = {
-    "searchBy": document.getElementById("searchCourse").searchBy.value, 
-    "searchValue": document.getElementById("searchCourse").searchValue.value
+    "searchBy": document.getElementById("searchCourseForm").searchBy.value, 
+    "searchValue": document.getElementById("searchCourseForm").searchValue.value
   }
 
-  console.log("VALIDATE ENTERED USER IDENTIFIER:searchUserForm:\n" + JSON.stringify(data));
+  console.log("VALIDATE ENTERED USER IDENTIFIER:searchCourseForm:\n" + JSON.stringify(data));
 
   $.ajax({
     //type: 'POST',
@@ -233,8 +286,8 @@ $("#searchValue").change(function(){
     dataType: 'json',
     success: function (data) {
       if (!data.is_found) {
-        alert("A course with this identifier was not found.");
-        document.getElementById("searchCourse").searchValue.value="";
+        alert("A course with this identifier was not found.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
+        document.getElementById("searchCourseForm").searchValue.value="";
       }
       
     }
@@ -244,103 +297,192 @@ $("#searchValue").change(function(){
   });
 });
 
+$("#dataSourceKeyOptions").change(function () {
+  // console.log("searchUserForm: searchBy changed");
+  // manage divs - clear and hide because we have a new search
+  $("#searchValueUsrtoSearch").val("")
+  $("#resultsTableBody").empty();
+  $("#updateResultsTableBody").empty();
+  $("#resultsTable").hide();
+  $("#searchUpdate").hide();
+  $("#updateResults").hide();
+  $("#processBlock").hide();
+  $("#selectAllInput").hide();
+  $("#checkAll").prop("checked", false);
+  // clear checkboxes
+  $("#isUpdateRequired1").prop("checked", false);
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  
+});
+
 // [DONE] Course search request
-$('#searchCourse').on('submit', function(e){
-  console.log("searchCourse called");
-  // form id="searchUserForm"
-  // submit id="submitSearchUserForm"
-  // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
-  // "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+$('#searchCourseForm').on('submit', function(e){
+  console.log("searchCourseForm called");
+  let t0 = performance.now();
+
+  // form id="searchCourseForm"
+  // submit id="submitsearchCourseForm"
+  // "selectBy": document.getElementById("searchCourseForm").searchBy.value, 
+  // "searchValue": document.getElementById("searchCourseForm").searchValueUsrtoSearch.value
   e.preventDefault();
   $("#resultsTableBody").empty();
   $("#updateResultsTableBody").empty();
   $("#resultsTable").hide();
   $("#updateTable").hide();
+  $("#updateResults").hide();
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
-  $("#isDataSourceKeyUpdateRequired1").checked=false;
+  $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#selectedDataSourceKey")[0].selectedIndex = 0;
 
-
-  if (document.getElementById("searchCourse").searchValue.value === "") {
-    alert("You must provide a User identifier.");
+  if (  (document.getElementById("searchCourseForm").searchValue.value === "") 
+        && 
+        (document.getElementById("searchCourseForm").searchBy.value != "DSK") 
+     ) {
+    alert("You must provide a Course identifier.");
     return;
   }
 
   var formData = {
-    "searchBy": document.getElementById("searchCourse").searchBy.value, 
-    "searchValue": document.getElementById("searchCourse").searchValue.value,
+    "searchBy": document.getElementById("searchCourseForm").searchBy.value, 
   }
 
-  console.log("FORMDATA: \n" + JSON.stringify(formData));
+  if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+    //use get user endpoint
+    ajaxURL = '/ajax/getCourses/'
+    formData["searchValue"] = document.getElementById("searchCourseForm").dataSourceKeyOptions.value
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
+  } else {
+    //use get user endpoint
+    ajaxURL = '/ajax/getCourse/'
+    formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
+  }
+
+  // console.log("FORMDATA: \n" + JSON.stringify(formData));
 
   $.ajax({
     type: 'GET',
-    url: '/ajax/getCourse/',
+    url: ajaxURL,
     data: formData, //$('#selectCourseForm').serialize(),
     //contentType: "application/x-www-form-urlencoded",
     dataType: 'json',
     success: function(responseData) {
       console.log("ajax/getCourse success...");
       console.log("Full responseData: \n" + JSON.stringify(responseData));
-            
-      newResults = responseData["course_json"];
+
+      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        newResults = responseData["result_json"]["results"]
+        console.log("NEWRESULTS(DSK): " + newResults);
+      } else {
+        newResults = responseData["result_json"];
+      }
+
       // console.log("Results Length: " + newResults.length);
       console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
+      console.log("Results Length: " + newResults.length);
 
+      if (newResults.length == 0) { 
+        alert("No courses found under this data source...");
+      return;
+}
       // console.log("Processing results");
 
       let tableContents = "";
-      tableContents = setCourseResultsTableBody(newResults);
-      // console.log("TABLE CONTENTS\n" + tableContents);
-      $("#resultsTableBody").append(tableContents);
-
-      // <option>Choose a DSK or use field to right.</option> -->
-      var dskOption = '';
-      dskList = responseData["dsks_json"]
-                
-      if (typeof dskList == 'undefined') {
+      if (typeof newResults === 'undefined') {
       } else {
-        for ( dsk in dskList) {
-          dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
-          $('#selectedDataSourceKey').append(dskOption);
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+          tableContents = setCoursesResultsTableBody(newResults);
+        } else {
+          tableContents = setCourseResultsTableBody(newResults);
         }
+
+        // console.log("TABLE CONTENTS\n" + tableContents);
+        $("#resultsTableBody").append(tableContents);
+
+        // <option>Choose a DSK or use field to right.</option> -->
+        var dskOption = '';
+        dskList = responseData["dsks_json"]
+                
+        if (typeof dskList == 'undefined') {
+        } else {
+          let x = 0;
+          x = document.getElementById("selectedDataSourceKey").options.length;
+          console.log("selectedDataSourceKey LENGTH: " + x);
+          if (x == 0) {
+            for ( dsk in dskList) {
+              if ('INTERNAL' != dskList[dsk]['externalId']) {
+                dskOption = '<option value ='+ dskList[dsk]['id'] + '>'+ dskList[dsk]['externalId'] + '</option>';
+                $('#selectedDataSourceKey').append(dskOption);
+              }
+            }
+          }
+        }
+        // $("#searchDetailsJSON").text(JSON.stringify(newResults));
+        $("#processBlock").show();
+        if (document.getElementById("searchCourseForm").searchBy.value == "DSK") {
+          $("#selectAllInput").show();
+          $("#checkAll").prop("checked", false); 
+        } else {
+          $("#selectAllInput").hide();
+          $("#checkAll").prop("checked", false);
+        }
+
+        $("#selectedDataSourceKey")[0].selectedIndex = 0;
+        $("#resultsTable").show();
+        $("#resultsTableHeader").show();
+        $("#resultsTableBody").show();
+        $("#searchUpdate").show();
+      
+       // end undefined conditional
       }
-
-      // $("#searchDetailsJSON").text(JSON.stringify(newResults));
-      $("#processBlock").show();
-      $("#resultsTable").show();
-      $("#resultsTableHeader").show();
-      $("#resultsTableBody").show();
-      $("#searchUpdate").show();
     }
-    }).done(function() {
-			$("#overlay").fadeOut(300);
-    });      
-  });
+  }).done(function() {
+    $("#overlay").fadeOut(300);
+    let t1 = performance.now()
+    console.log("SEARCH TOOK: " + ((t1 - t0)/1000).toFixed(2) + " SECONDS.")
+  });      
+});
 
-// [DONE] user update request
+// [DONE] course update request
 $('#processCourseForm').on('submit', function(e) {
   e.preventDefault();
   console.log("processCourseForm");
+  let t0 = performance.now();
   // console.log("FORM: \n" + $("#processCourseForm").serialize());
   // console.log("SET results div display to visible");
 
   $("#updateResults").hide();
   $("#updateResultsTableBody").empty();
 
-  selectionCount=$(this).find('input[name="pmcId[]"]:checked').length;
 
   // get form data based on active div
-  let searchBy = document.getElementById("searchCourse").searchBy.value;
-  let searchValue = document.getElementById("searchCourse").searchValue.value;
+  let searchBy = document.getElementById("searchCourseForm").searchBy.value;
+  let searchValue = document.getElementById("searchCourseForm").searchValue.value;
   
-
   let pmcIdList = [];
 
-  $('input[name="pmcId[]"]:checked').each(function() {
-    pmcIdList.push($(this).val());
+  // $('input[name="pmcId[]"]:checked').each(function() {
+  //   pmcIdList.push($(this).val());
+  // });
+
+  let pmcCourseList = "";
+  selectionCount=$(this).find('input[name="pmcCourseId[]"]:checked').length;
+
+  n = 1;
+  $('input[name="pmcCourseId[]"]:checked').each(function() {
+    //pmcUserList.push($(this).val());
+    pmcCourseList += $(this).val();
+    if ((searchBy == 'DSK') && (n < selectionCount)) {
+      pmcCourseList += ","
+      n += 1;
+    }
+    console.log("PMCCOURSELIST ADD: " + $(this).val() )
   });
 
+  console.log("PMCCOURSELIST: " + pmcCourseList )
 
   var updateData = {
       "isUpdateRequired1": document.getElementById("processCourseForm").isUpdateRequired1.checked,
@@ -348,25 +490,43 @@ $('#processCourseForm').on('submit', function(e) {
       "selectedAvailability": document.getElementById("processCourseForm").selectedAvailability.value,
       "isDataSourceKeyUpdateRequired1": document.getElementById("processCourseForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processCourseForm").selectedDataSourceKey.value,
-      "pmcId[]": pmcIdList,
       }
   
-  console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
 
-  var ajxUrl = '/ajax/updateCourse/';
-  
+  let ajaxURL = '';
+
   if (!selectionCount > 0 ) {
     alert("You must select at least one record.")
     return;
   }
 
+  if (searchBy == 'DSK') {
+    //use update users endpoint
+    ajaxURL = '/ajax/updateCourses/'
+    // we are already passing the list so set searchBy to DSK for python logic
+    updateData["pmcCourseId[]"] = pmcCourseList;
+
+  } else {
+    // console.log("NOT DSK")
+    //use update user endpoint
+    ajaxURL = '/ajax/updateCourse/'
+    //set searchBy and searchValueUsr
+    searchBy = document.getElementById("searchCourseForm").searchBy.value;
+    searchValue = document.getElementById("searchCourseForm").searchValue.value;
+    updateData["searchBy"] = searchBy;
+    updateData["searchValue"] = searchValue; 
+    updateData["pmcCourseId[]"] = pmcCourseList;
+  }
+
+  console.log("UPDATE DATA:\n" + JSON.stringify(updateData));
+
   $.ajax({
     type: 'GET',
-    url: ajxUrl,
+    url: ajaxURL,
     data: updateData,
     success: function (data) {
       if (!data.is_found) {
-        alert("There was an error processing this request. Reload page and try again.");
+        alert("There was an error processing this request. Reload page and try again.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
       } else {
         // process selected records
         //console.log(newResults[row]);
@@ -374,10 +534,17 @@ $('#processCourseForm').on('submit', function(e) {
             
         let tableContents = "HELP!!!";
         newResults = data["result_json"];
-        console.log("PROCESS USR: RESULTS_JSON: \n" + JSON.stringify(newResults));
-        tableContents = setUpdateResultsTableBody(newResults);
+
+
+        console.log("PROCESS COURSE: RESULTS_JSON: \n" + JSON.stringify(newResults));
+        //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+          tableContents = setUpdateCoursesResultsTableBody(newResults);
+        } else {
+          tableContents = setUpdateCourseResultsTableBody(newResults);
+        }
         
         // $("#updateDetailsJSON").text(JSON.stringify(newResults));
         $('#updateResultsTableBody').append(tableContents);
@@ -389,7 +556,10 @@ $('#processCourseForm').on('submit', function(e) {
       }
     }
   }).done(function() {
-		$("#overlay").fadeOut(300);
+    $("#overlay").fadeOut(300);
+    let t1 = performance.now()
+      console.log("UPDATE TOOK: " + ((t1 - t0)/1000).toFixed(2) + " SECONDS.")
+
   });      
 });
 
@@ -398,6 +568,17 @@ function setCourseResultsTableBody(newResults) {
   console.log("setCourseResultsTableBody Called...");
   console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
+  //let childCourseId = newResults["childCourseId"];
+  // let childCourseId = (typeof newResults["childCourseId"] == 'undefined') ? false : true; 
+  
+  // let tRow = "";
+  //   // console.log("CHILDCOURSEID: " + childCourseId);
+  //   if (childCourseId) {
+  //     tRow = '<div class="divTableRow">';
+  //   } else {
+  //     tRow = '<div class="divTableRow" style="background-color: whitesmoke;">';
+  //   }
+
   let id = newResults["id"];
     // console.log("id: " + id);
     let available = newResults["availability"]["available"];
@@ -414,13 +595,16 @@ function setCourseResultsTableBody(newResults) {
 
     let dsk = newResults["dataSourceId"];
     // console.log("dsk: " + dsk);
+
     let modified = (newResults["modified"]).substring(0, 10);
+
     // console.log("modified: " + modified);
     let pmcId="pmc"+id;
+
     // console.log("pmcId: " + pmcId);
 
     let tableRow = '<div class="divTableRow">' +
-          '<div class="divTableCell"><input type="checkbox" name="pmcId[]" class="pmcId" value="' + id + '"></div>' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcCourseId[]" class="pmcId" value="' + id + '"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + serviceLevel + '</div>'+
           '<div class="divTableCell">' + externalId + '</div>'+ 
@@ -433,7 +617,7 @@ function setCourseResultsTableBody(newResults) {
   return tableRow;
 }
 
-function setUpdateResultsTableBody(newResults) {
+function setUpdateCourseResultsTableBody(newResults) {
   console.log("setUsrResultsTableBody Called...");
   console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
   contents = "";
@@ -459,7 +643,7 @@ function setUpdateResultsTableBody(newResults) {
     // console.log("pmcId: " + pmcId);
 
     let tableRow = '<div class="divTableRow">' +
-          '<div class="divTableCell"></div>' +
+          // '<div class="divTableCell"></div>' +
           '<div class="divTableCell">' + available + '</div>' +
           '<div class="divTableCell">' + serviceLevel + '</div>'+
           '<div class="divTableCell">' + externalId + '</div>'+ 
@@ -471,7 +655,149 @@ function setUpdateResultsTableBody(newResults) {
     
   return tableRow;
 }
-  </script>
+
+// SET DSK SEARCH RESULTS
+function setCoursesResultsTableBody(newResults) {
+  console.log("setCoursesResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  contents = "";
+  tableBody = ""; 
+  
+  if (typeof newResults === undefined){
+  } else {
+    for ( dataset in newResults) {
+      let id = (typeof newResults[dataset]["id"] == 'undefined') ? '' : newResults[dataset]["id"];
+    
+      let available = (typeof newResults[dataset]["availability"] == 'undefined') ? '' : newResults[dataset]["availability"]["available"];
+
+      let courseId = (typeof newResults[dataset]["courseId"] == 'undefined') ? '' : newResults[dataset]["courseId"];
+
+      let externalId = (typeof newResults[dataset]["externalId"] == 'undefined') ? '' : newResults[dataset]["externalId"];
+
+      let serviceLevel = (newResults[dataset]["organization"] == "True") ? "Organization" : "Course";
+
+      let name = (typeof newResults[dataset]["name"] == 'undefined') ? '' : newResults[dataset]["name"];
+
+      let dsk = (typeof newResults[dataset]["dataSourceId"] == 'undefined') ? '' : newResults[dataset]["dataSourceId"];
+
+      let modified = (typeof newResults[dataset]["modified"] == 'undefined') ? '' : (newResults[dataset]["modified"]).substring(0, 10);
+
+      let pmcId="pmc"+id;
+
+      tableBody += '<div class="divTableRow">' +
+          '<div class="divTableCell"><input type="checkbox" name="pmcCourseId[]" class="pmcCourseId" value="' + id + '"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + serviceLevel + '</div>'+
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + courseId + '</div>'+
+          '<div class="divTableCell">' + name + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    }
+  }
+
+  return tableBody;
+}
+
+// SET DSK UPDATE RESULTS
+function setUpdateCoursesResultsTableBody(newResults) {
+  console.log("setUpdateCoursesResultsTableBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  let tableBody = "";
+  if (typeof newResults === undefined) { 
+  } else {
+    // for each element in newResults get add an option for the DSK
+    for ( dataset in newResults) {
+      let id = (typeof newResults[dataset]["id"] == 'undefined') ? '' : newResults[dataset]["id"];
+    
+      let available = (typeof newResults[dataset]["availability"] == 'undefined') ? '' : newResults[dataset]["availability"]["available"];
+
+      let courseId = (typeof newResults[dataset]["courseId"] == 'undefined') ? '' : newResults[dataset]["courseId"];
+
+      let externalId = (typeof newResults[dataset]["externalId"] == 'undefined') ? '' : newResults[dataset]["externalId"];
+
+      let serviceLevel = (newResults[dataset]["organization"] == "True") ? "Organization" : "Course";
+
+      let name = (typeof newResults[dataset]["name"] == 'undefined') ? '' : newResults[dataset]["name"];
+
+      let dsk = (typeof newResults[dataset]["dataSourceId"] == 'undefined') ? '' : newResults[dataset]["dataSourceId"];
+
+      let modified = (typeof newResults[dataset]["modified"] == 'undefined') ? '' : (newResults[dataset]["modified"]).substring(0, 10);
+
+      let pmcId="pmc"+id;
+
+      tableBody += '<div class="divTableRow">' +
+          // '<div class="divTableCell"></div>' +
+          '<div class="divTableCell">' + available + '</div>' +
+          '<div class="divTableCell">' + serviceLevel + '</div>'+
+          '<div class="divTableCell">' + externalId + '</div>'+ 
+          '<div class="divTableCell">' + courseId + '</div>'+
+          '<div class="divTableCell">' + name + '</div>'+
+          '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + modified + '</div>' +
+          '</div>';
+    }
+  }
+    
+  return tableBody;
+}
+
+// [DONE] getDataSourceKeys: ajax function for retrieving a list of data source keys from target system.
+function getDataSourceKeys() {
+  console.log("Entered getDataSourceKeys");
+  let dskList = undefined;
+  var ajxUrl = '/ajax/getDataSourceKeys/';
+
+  console.log("getDataSourceKeys: Getting list of Data Source Keys");
+
+  $.ajax({
+    type: 'GET',
+    url: ajxUrl,
+    //data: data,
+    success: function (data) {
+      if (!data.is_found) {
+        alert("Data Sources could not be loaded. Reload page and try again.\n\nNote if this persists, your 3LO session may have expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL.");
+      } else {            
+        let dskOptions = ""
+        newResults = data["result_json"];
+        console.log("GET DSK LIST: RESULTS_JSON: \n" + JSON.stringify(newResults));
+        dataSourceKeyOptions = setDSKOptionsBody(newResults);
+        $('#dataSourceKeyOptions').append(dataSourceKeyOptions);
+      }
+    }
+  }).done(function() {
+    // console.log("OVERLAY TIME")
+    $("#overlay").fadeOut(300);
+  });
+};
+
+// [DONE] setDSKOptionsBody: ajax function that builds the DSK Options body
+function setDSKOptionsBody(newResults) {
+  console.log("setDSKOptionsBody Called...");
+  console.log("PASSED RESULTS: \n" + JSON.stringify(newResults));
+  dskOptions = "";
+  dskOption = "";
+
+  if (typeof newResults === undefined) { 
+  } else {
+    // for each element in newResults get add an option for the DSK
+    for ( dsk in newResults) {
+      console.log("option value/label: "+ newResults[dsk]['id'] + "/" + newResults[dsk]['externalId'])
+      id = newResults[dsk]['id']
+      externalId = newResults[dsk]['externalId']
+      if (externalId != 'INTERNAL') {
+        dskOption = '<option value ='+ id + '>'+ externalId + '</option>\n';
+        dskOptions += dskOption;
+      }
+    }    
+  }
+  
+  console.log("dskOptions: \n" + dskOptions)
+  return dskOptions;
+}
+
+</script>
   
   {% endblock %}
 

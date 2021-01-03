@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.0.11 (10/04/2020)
+# OSCELOT DSKTOOL for HEROKU v1.1.0 (01/03/2021)
 
 See below [Release Notes](#Release-Notes).
 
@@ -62,11 +62,30 @@ This starts the deployment and on successful completion you will see a message a
 
 This URL is sticky so bookmark it for later use and you are done!
 
-**IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, does not work if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue.
+**IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, may not work correctly if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue. 
+
+Additionally, it appears that your 3LO session may expire hourly requiring you to log out of the DSKTOOL, sign into Learn, and return to the DSKTOOL.
 
 **Work Around:** login to your Learn instance before opening your dsktool page.
 
+<hr>
+
 ## Release Notes
+### 1.1.0 (01/03/2021)
+<ul>
+  <li>Fixed annoying 'undefined' error on User and Course searches</li>
+  <li>Fixed a few annoying UI/UX issues</li>
+  <li>Added Data Source Key searches to Courses and Users</li>
+  <li>Added optional DSK filtering on Course and User Enrollment searches</li>
+  <li>Released v1.1.0 docker image.</li>
+</ul>
+
+## ToDo
+<ul>
+  <li>Add Calendar selection for date limiting searches
+  <li>Clean up code redundancies
+</ul>
+
 ### v1.0.11 (10/04/2020)
 <ul>
   <li>AJAX'd the Course page</li>
@@ -103,15 +122,6 @@ This release focuses on improving the user experience for searching and updating
   <li>Enrollments: Substantial logging to Javascript console for debugging
   <li>Added Docker deployment support (docker-compose.yml) see docker/README.md for details.
 </ul>
-
-**ToDo:**
-  <ul>
-    <li>Change User and Course searches to AJAX with improved UI and error checking
-    <li>Continue support for single project for multiple deployment models (Heroku, Desktop, or Docker). Current code fully supports Heroku and local use. Use the above deploy button or follow the instructions in the local folder. Docker coming soon.
-    <li>add logging support</li>
-    <li>analyze ditching Django for Flask</li>
-    <li>add date timeboxing</li>
-  </ul>
 
 ### v1.0.5 (08/16/2020)
 <ul>
