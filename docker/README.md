@@ -100,7 +100,6 @@ If for some reason you get an error loading the site there are a few things to c
 1. Ensure you changed the DJANGO\_SECRET\_KEY and that it is enclosed by single quotes **this is important**.
 1. If you see an error indicating that you need to add localhost to allowed hosts - you need to setup https.
 
-
 ## Release Notes
 ### v1.1.0 (01/03/2021)
 <ul>
