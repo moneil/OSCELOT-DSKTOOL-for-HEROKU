@@ -77,6 +77,7 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
   <li>Fixed a few annoying UI/UX issues</li>
   <li>Added Data Source Key searches to Courses and Users</li>
   <li>Added optional DSK filtering on Course and User Enrollment searches</li>
+  <li>Added error alerts when re-login is required</li>
   <li>Released v1.1.0 docker image.</li>
 </ul>
 
