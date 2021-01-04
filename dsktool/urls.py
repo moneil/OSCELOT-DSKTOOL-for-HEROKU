@@ -34,7 +34,6 @@ urlpatterns = [
     path('whoami', views.whoami, name='whoami'),
     
     url(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
-
     url(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
     url(r'^ajax/validate_courseIdentifier/$', views.validate_courseIdentifier, name='validate_courseIdentifier'),
     url(r'^ajax/getCourseMembership/$', views.getCourseMembership, name='getCourseMembership'),

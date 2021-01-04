@@ -78,6 +78,7 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+# [DONE]
 def courses(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
@@ -209,6 +210,7 @@ def courses(request):
 
     return render(request, 'courses.html')
 
+# [DONE]
 def enrollments(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
@@ -406,6 +408,7 @@ def enrollments(request):
     else:
         return render(request, 'enrollments.html')
 
+# [DONE]
 def get_access_token(request):
     # Happens when the user hits index the first time and hasn't authenticated on Learn
     # Part II. Get an access token for the user that logged in. Put that on their session.
@@ -447,6 +450,7 @@ def get_access_token(request):
     request.session['bb_json'] = bb_json
     return HttpResponseRedirect(reverse(f'{target_view}'))
 
+# [DONE]
 def get_auth_code(request):
     # Happens when the user hits index the first time and hasn't authenticated on Learn
     # Part I. Request an authroization code oauth2/authorizationcode
@@ -473,9 +477,11 @@ def get_auth_code(request):
     print(f"AUTHCODEURL:{authcodeurl}")
     return HttpResponseRedirect(authcodeurl)
 
+# [DONE]
 def isup(request):
     return render(request, 'isup.html')
 
+# [DONE]
 def logoutUser(request):
     print(f"VIEWS: LogoutUser: Site domain: {request.META['HTTP_HOST']}")
     site_domain = request.META['HTTP_HOST']
@@ -493,16 +499,19 @@ def logoutUser(request):
     #response = HttpResponse("We are not tracking you.")
     return response
 
+# [DONE]
 def learnlogout(request):
     print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
     request.session.flush()
 
     return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
 
+# [DONE]
 def notauthorized(request):
     context = {}
     return render(request, 'notauthorized.html', context=context )
 
+# [DONE]
 def users(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
@@ -1001,6 +1010,7 @@ def whoami(request):
 def sortDsk(dsks, sortBy):
   return sorted(dsks, key=lambda x: x[sortBy])
 
+# [DONE]
 def isGuestUser(bb_json):
     guestStatus = False
 
@@ -1020,16 +1030,19 @@ def isGuestUser(bb_json):
 
     return guestStatus
 
+# [DONE]
 def guestusernotallowed(request):
     context = {
         'learn_server': LEARNFQDN,
     }   
     return render(request, 'guestusernotallowed.html', context=context )
 
+# [DONE]
 def error_500(request):
     data = {}
     return render(request,'error_500.html', data)
 
+# [DONE]
 def updateCourseMemberships(request):
     finalResponse = {}
     print("request method: ", request.method)
@@ -1128,6 +1141,7 @@ def updateCourseMemberships(request):
                    
     return JsonResponse(finalResponse)
 
+# [DONE]
 def validate_userIdentifier(request):
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy') #externalId || userName
@@ -1193,6 +1207,7 @@ def validate_userIdentifier(request):
 
     return JsonResponse(data)
 
+# [DONE]
 def validate_courseIdentifier(request):
     print("validate_courseIdentifier called....")
     task = request.GET.get('task')
@@ -1243,6 +1258,7 @@ def validate_courseIdentifier(request):
 
     return JsonResponse(data)
 
+# [DONE]
 def getCourseMemberships(request):
     print("getCourseMembers Called...")
     print("request method: ", request.method)
