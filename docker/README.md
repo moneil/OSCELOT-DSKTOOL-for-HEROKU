@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for Docker v1.0.9 09.27.2020
+# OSCELOT DSKTOOL for Docker v1.1.0 (01/04/2021)
 
 See below [Docker Release Notes](#Release-Notes).
 
@@ -102,7 +102,7 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
-### v1.1.0 (01/03/2021)
+### v1.1.0 (01/04/2021)
 <ul>
   <li>Fixed annoying 'undefined' error on user and course searches</li>
   <li>Added Data Source Key searches to Courses, Users, and Enrollments</li>

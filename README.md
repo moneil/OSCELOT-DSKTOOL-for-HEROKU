@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.1.0 (01/03/2021)
+# OSCELOT DSKTOOL for HEROKU v1.1.0 (01/04/2021)
 
 See below [Release Notes](#Release-Notes).
 
@@ -71,7 +71,7 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
 <hr>
 
 ## Release Notes
-### 1.1.0 (01/03/2021)
+### 1.1.0 (01/04/2021)
 <ul>
   <li>Fixed annoying 'undefined' error on User and Course searches</li>
   <li>Fixed a few annoying UI/UX issues</li>
