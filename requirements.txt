@@ -20,7 +20,7 @@ dateparser==0.7.6
 fake-useragent==0.1.11
 humanize==2.5.0
 idna==2.10
-lxml==4.5.2
+lxml>=4.6.2
 maya==0.6.1
 multidict==4.7.6
 parse==1.16.0
