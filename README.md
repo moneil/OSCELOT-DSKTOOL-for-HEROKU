@@ -1,10 +1,10 @@
 # OSCELOT DSKTOOL for HEROKU v1.1.0 (01/04/2021)
 
-See below [Release Notes](#Release-Notes).
+See [Release Notes](#Release-Notes) below.
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com/] (https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
+This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
 
 With this release I am deprecating [https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool) and will remove that repository by the end of the year.
 
@@ -20,16 +20,22 @@ You ***must*** have registered an application in your Developer Portal ([https:/
 NOTE: Make certain to store your Key and Secret as those will be required when you install the application.
 
 ## Blackboard Learn
-1. On your Learn instance create a user 'dsktooluser' and assign them a low, to no, privileged Institution role - I used "staff" - you may create a specific role if you choose. Do not assign a System Role. 
-2. Navigate to the System Admin page and select the REST API Integrations link.
-3. Enter your Application Id into the Application Id field
-4. Set the REST integration user to your 'dsktooluser'.
-5. Set Available to 'Yes'.
-6. Set End User Access to 'Yes'
-7. Set Authorized To Act As User to 'Service Default'.
-8. Click Submit.
+1.	On your Learn instance create a user ‘DSKTOOLUSER’ and assign them a low, to no, privileged System Role - I have used "guest" - you may alternatively create a specific role if you choose.
+**Do not** assign a System Administrator Role. You may assign the DSKTOOLUSER any Institution Role.
+    <ul><li>Create a SYSTEM ROLE: DSKTOOLUSER_SYSTEM_ROLE with no privileges
+    <li>Create a USER: DSKTOOLUSER and assign the system role of DSKTOOLUSER_SYSTEM_ROLE
+    <li>and use DSKTOOLUSER as the user in the REST API Integration configuration in the next steps
+    </ul>
+2.	Navigate to the System Admin page and select the REST API Integrations link.
+3.	Enter your Application Id into the Application Id field
+4.	Set the REST integration user to your ‘DSKTOOLUSER’
+5.	Set Available to 'Yes'
+6.	Set End User Access to 'Yes'
+7.	Set Authorized To Act As User to ‘Yes'
+8.	Click Submit
 
-Learn is now ready and you may proceed with the installation by clicking the below button and following the instuctions.
+
+Learn is now ready and you may proceed with the installation by clicking the below button and following the instructions.
 
 ## Heroku
 
@@ -66,11 +72,23 @@ This URL is sticky so bookmark it for later use and you are done!
 
 Additionally, it appears that your 3LO session may expire hourly requiring you to log out of the DSKTOOL, sign into Learn, and return to the DSKTOOL.
 
-**Work Around:** login to your Learn instance before opening your dsktool page.
-
 <hr>
 
 ## Release Notes
+### 1.1.1 (02/29/2021)
+<ul>
+  <li>Fixed a few annoying UI/UX issues</li>
+  <li>Added System Admin role check to page loads and API calls </li>
+  <li>Cleaned up the code a bit in the process</li>
+  <li>Released v1.1.1 docker image.</li>
+</ul>
+
+## ToDo
+<ul>
+  <li>Add Calendar selection for date limiting searches
+  <li>Clean up code redundancies
+</ul>
+
 ### 1.1.0 (01/04/2021)
 <ul>
   <li>Fixed annoying 'undefined' error on User and Course searches</li>
@@ -79,12 +97,6 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
   <li>Added optional DSK filtering on Course and User Enrollment searches</li>
   <li>Added error alerts when re-login is required</li>
   <li>Released v1.1.0 docker image.</li>
-</ul>
-
-## ToDo
-<ul>
-  <li>Add Calendar selection for date limiting searches
-  <li>Clean up code redundancies
 </ul>
 
 ### v1.0.11 (10/04/2020)
@@ -164,3 +176,10 @@ This release focuses on improving the user experience for searching and updating
   <li> Supports TLS (SSL) deployments (see below TLS section)
 </ul>
 <hr>
+
+<!-- 
+After you create and edit your config.py file in the next step you may then run: python manage.py runserver_plus --cert certname
+
+If Using ngrok run pip install -r requirements.txt . Next run python manage.py migrate to apply the migrations. And last, start the server with python manage.py runserver
+If Using your own cert run $ python manage.py runserver_plus --cert certname 
+-->
