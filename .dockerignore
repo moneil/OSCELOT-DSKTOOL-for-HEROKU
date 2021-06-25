@@ -9,3 +9,6 @@ README-secret.md
 
 # ignore config file
 config.py
+
+#ignore Dockerfile
+Dockerfile

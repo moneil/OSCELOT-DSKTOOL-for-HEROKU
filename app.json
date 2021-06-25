@@ -33,5 +33,10 @@
         "required": true,
         "value": "1"
       }
+      "DJANGO_ALLOWED_HOSTS": {
+        "description": "Leave this set as is or edit for your custom domain for successful deploy.",
+        "required": true,
+        "value": ".herokuapp.com"
+      }
     }
   }

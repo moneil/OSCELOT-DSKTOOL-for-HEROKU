@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-# import config
+from django.conf import settings
+#import config
 import dj_database_url
 
 
@@ -34,20 +35,40 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 try:
     from config import adict
     print("\nSETTINGS.py: using config.py...")
+    
     SECRET_KEY = adict['django_secret_key'].strip("'")
     print(f"\nSETTINGS.py: config: SECRET_KEY: [ {SECRET_KEY} ]")
+    
+    ALLOWED_HOSTS = adict['django_allowed_hosts'].split(" ")
+    print(f"\nSETTINGS.py: env vars: ALLOWED_HOSTS: [ {ALLOWED_HOSTS} ]")
+    
+    DEBUG = adict['django_debug']
+    print(f"\nSETTINGS.py: env vars: django_debug: [ {DEBUG} ]")
 
-except: #no config file...load from env
-    print("\nSETTINGS.py: using env vars ...")
-    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY").strip("'")
-    print(f"\nSETTINGS.py: env vars: SECRET_KEY: [ {SECRET_KEY} ]")
+except ImportError: #no config file...load from env
+    print("\nSETTINGS.py: config.py not available using env vars ...")
+    print("DJANGO_ALLOWED_HOSTS: ", os.environ["DJANGO_ALLOWED_HOSTS"].split(" "))
+    print("DJANGO_DEBUG: ", os.environ["DJANGO_DEBUG"])
+    print("DJANGO_SECRET_KEY: ", os.environ["DJANGO_SECRET_KEY"].strip("'"))
+    
+    print("\nSETTINGS.py: setting DJANGO_ALLOWED_HOSTS ...")
+    ALLOWED_HOSTS=os.environ["DJANGO_ALLOWED_HOSTS"].split(" ")
+    #print(f"\nSETTINGS.py: env vars: ALLOWED_HOSTS: [ {ALLOWED_HOSTS} ]")
+    
+    print("\nSETTINGS.py: setting DJANGO_DEBUG ...")
+    DEBUG = os.environ["DJANGO_DEBUG"]
+    #print(f"\nSETTINGS.py: env vars: DJANGO_DEBUG: [ {DEBUG} ]")
 
-ALLOWED_HOSTS = ['127.0.0.1', '.ngrok.io', '.herokuapp.com']
+    print("\nSETTINGS.py: setting SECRET_KEY ...")
+    SECRET_KEY = os.environ["DJANGO_SECRET_KEY"].strip("'")
+    #print(f"\nSETTINGS.py: env vars: SECRET_KEY: [ {SECRET_KEY} ]")
 
-if 'DYNO' in os.environ:
-    DEBUG = False
-else:
-    DEBUG = True
+settings.configure(
+    DEBUG=DEBUG,
+    SECRET_KEY=SECRET_KEY,
+    ALLOWED_HOSTS=ALLOWED_HOSTS,
+)
+
 
 # Application definition
 

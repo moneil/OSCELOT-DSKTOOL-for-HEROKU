@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.1.0 (01/04/2021)
+# OSCELOT DSKTOOL for HEROKU v1.1.5 (06/25/2021)
 
 See [Release Notes](#Release-Notes) below.
 
@@ -75,18 +75,24 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
 <hr>
 
 ## Release Notes
-### 1.1.1 (02/29/2021)
+### v1.1.5 (06/25/2021)
 <ul>
-  <li>Fixed a few annoying UI/UX issues</li>
-  <li>Added System Admin role check to page loads and API calls </li>
-  <li>Cleaned up the code a bit in the process</li>
-  <li>Released v1.1.1 docker image.</li>
+  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
+  <li>Released comparable v1.1.5 docker image.
 </ul>
 
 ## ToDo
 <ul>
   <li>Add Calendar selection for date limiting searches
   <li>Clean up code redundancies
+</ul>
+
+### 1.1.1 (02/29/2021)
+<ul>
+  <li>Fixed a few annoying UI/UX issues</li>
+  <li>Added System Admin role check to page loads and API calls </li>
+  <li>Cleaned up the code a bit in the process</li>
+  <li>Released v1.1.1 docker image.</li>
 </ul>
 
 ### 1.1.0 (01/04/2021)

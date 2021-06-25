@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for Docker v1.1.0 (01/04/2021)
+# OSCELOT DSKTOOL for Docker v1.1.5 (06/25/2021)
 
 See below [Docker Release Notes](#Release-Notes).
 
@@ -77,7 +77,8 @@ Open the docker-compose.yaml file and edit the following:
 > 
 > `APPLICATION\_KEY: "your application key"`
 > 
-> `APPLICATIONN\_SECRET: "your application secret"`
+> `APPLICATION\_SECRET: "your application secret"`
+>
 > Note if you want to always run the latest image you may also edit:
 > 
 > Confirm target image version: `image: oscelot/oscelot-dsktool:1.0.9` and replace 1.0.9 with the latest version indicated in this site's docker-compose.yaml file.
@@ -102,6 +103,12 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
+### v1.1.5 (06/25/2021)
+<ul>
+  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
+  <li>Released comparable v1.1.5 docker image.
+</ul>
+
 ### v1.1.0 (01/04/2021)
 <ul>
   <li>Fixed annoying 'undefined' error on user and course searches</li>
