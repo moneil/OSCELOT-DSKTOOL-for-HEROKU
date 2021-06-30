@@ -28,15 +28,20 @@
         "description": "Paste the DJANGO SECRET from this website: https://djskgen.herokuapp.com (remove the single quotes)",
         "required": true
       },
+      "DJANGO_ALLOWED_HOSTS": {
+        "description": "Leave this set as is or edit for your custom domain for successful deploy.",
+        "required": true,
+        "value": ".heroku.com .herokuapp.com"
+      },
+      "DJANGO_DEBUG": {
+        "description": "Leave this set as is for production deploy. May set to True in non-production environments.",
+        "required": true,
+        "value": "False"
+      },
       "DISABLE_COLLECTSTATIC": {
         "description": "Leave this set as is for successful deploy.",
         "required": true,
         "value": "1"
-      },
-      "DJANGO_ALLOWED_HOSTS": {
-        "description": "Leave this set as is or edit for your custom domain for successful deploy.",
-        "required": true,
-        "value": ".herokuapp.com"
       }
     }
   }
