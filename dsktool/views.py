@@ -140,7 +140,7 @@ def courses(request):
             course_json['dataSourceId'] = dsk_json['externalId']
             course_json['searchValue'] = searchValue
             course_json['searchBy'] = searchBy
-            dskresp = bb.GetDataSources(limit = 5000, limit = 5000, params={'fields':'id, externalId'}, sync=True)
+            dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
             dsks_json = dskresp.json()
             print ("DSKS:\n", dsks_json["results"])
             dsks = dsks_json["results"]
