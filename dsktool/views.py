@@ -140,7 +140,7 @@ def courses(request):
             course_json['dataSourceId'] = dsk_json['externalId']
             course_json['searchValue'] = searchValue
             course_json['searchBy'] = searchBy
-            dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+            dskresp = bb.GetDataSources(limit = 5000, limit = 5000, params={'fields':'id, externalId'}, sync=True)
             dsks_json = dskresp.json()
             print ("DSKS:\n", dsks_json["results"])
             dsks = dsks_json["results"]
@@ -267,7 +267,7 @@ def enrollments(request):
                 member_json['crsExternalId'] = searchValueCrs
                 member_json['usrExternalId'] = searchValueUsr
                 member_json['searchBy'] = searchBy
-                dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+                dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
                 dsks_json = dskresp.json()
                 print ("DSKS:\n", dsks_json["results"])
                 dsks = dsks_json["results"]
@@ -689,7 +689,7 @@ def getUser(request):
         user_json['dataSourceId'] = dsk_json['externalId']
         user_json['searchValueUsr'] = searchValueUsr
         user_json['searchBy'] = searchBy
-        dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+        dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
         dsks_json = dskresp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
@@ -827,7 +827,7 @@ def getUsers(request):
         users_json = resp.json()
         print (f"user count: ", len(users_json["results"]))
 
-        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
@@ -904,7 +904,7 @@ def updateUsers(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'bbrest expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     for x in range(len(updateUserList)): 
@@ -1078,7 +1078,7 @@ def updateCourseMemberships(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     resps = {'results':[]}
@@ -1304,7 +1304,7 @@ def getCourseMemberships(request):
     print(f"\nmemberships_result:\n", membershipsResultJSON)
 
     if (memberships_result.status_code == 200):
-        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         #print("DSKS_JSON: \n", dsks_json)
         dsks = dsks_json["results"]
@@ -1502,7 +1502,7 @@ def getCourseMembership(request):
         member_json['usrToSearchFor'] = usrToSearchFor
         member_json['usrSearchBy'] = usrSearchBy
         print("updated member_json: \n", member_json)
-        dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+        dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
         dsks_json = dskresp.json()
         print ("DSKS:\n", dsks_json["results"])
         dsks = dsks_json["results"]
@@ -1582,7 +1582,7 @@ def getCourseMemberships(request):
 
 
     if (memberships_result.status_code == 200):
-        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         #print("DSKS_JSON: \n", dsks_json)
         dsks = dsks_json["results"]
@@ -1665,7 +1665,7 @@ def updateCourseMembership(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     resps = {'results':[]}
@@ -1775,7 +1775,7 @@ def updateCourseMemberships(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     resps = {'results':[]}
@@ -1901,7 +1901,7 @@ def getUserMemberships(request):
     print(f"\nmemberships_result:\n", membershipsResultJSON)
 
     if (memberships_result.status_code == 200):
-        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         #print("DSKS_JSON: \n", dsks_json)
         dsks = dsks_json["results"]
@@ -1963,7 +1963,7 @@ def updateUserMemberships(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     resps = {'results':[]}
@@ -2100,7 +2100,7 @@ def getCourse(request):
         course_json['dataSourceId'] = dsk_json['externalId']
         course_json['searchValue'] = searchValue
         course_json['searchBy'] = searchBy
-        dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
+        dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
         dsks_json = dskresp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
@@ -2246,7 +2246,7 @@ def getCourses(request):
         courses_json = resp.json() 
         print (f"courses count: ", len(courses_json["results"]))
 
-        dsksResp = bb.GetDataSources(params = {'fields': 'id, externalId'})
+        dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
@@ -2320,7 +2320,7 @@ def updateCourses(request):
         bb.method_generator()    # unpickling the pickled object.
         print(f'bbrest expiration: {bb.expiration()}')
 
-    dsks_json = bb.GetDataSources(params = {'fields': 'id, externalId'}).json()
+    dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
     for x in range(len(updateCourseList)): 
@@ -2442,7 +2442,7 @@ def getDataSourceKeys(request):
         }   
         return render(request, 'guestusernotallowed.html', context=context )
 
-    resp = bb.GetDataSources( params = {'fields': 'id, externalId'}, sync=True )
+    resp = bb.GetDataSources(limit = 5000,  params = {'fields': 'id, externalId'}, sync=True )
 
     isFoundStatus = False
     if (resp.status_code == 200):

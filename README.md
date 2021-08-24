@@ -75,7 +75,7 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
 <hr>
 
 ## Release Notes
-### v1.1.5 (06/25/2021)
+### v1.1.6 (08/24/2021)
 <ul>
   <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
   <li>Released comparable v1.1.5 docker image.
