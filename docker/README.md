@@ -103,6 +103,12 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
+### v1.1.6 (08/24/2021)
+<ul>
+  <li>Fixed issue with DSK lists being truncated at 100</li>
+  <li>Released chisotromparable v1.1.6 docker image.
+</ul>
+
 ### v1.1.5 (06/25/2021)
 <ul>
   <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>

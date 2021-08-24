@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.1.5 (06/25/2021)
+# OSCELOT DSKTOOL for HEROKU v1.1.6 (08/24/2021)
 
 See [Release Notes](#Release-Notes) below.
 
@@ -77,8 +77,8 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
 ## Release Notes
 ### v1.1.6 (08/24/2021)
 <ul>
-  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
-  <li>Released comparable v1.1.5 docker image.
+  <li>Fixed issue with DSK lists being truncated at 100</li>
+  <li>Released comparable v1.1.6 docker image.
 </ul>
 
 ## ToDo
@@ -87,6 +87,11 @@ Additionally, it appears that your 3LO session may expire hourly requiring you t
   <li>Clean up code redundancies
 </ul>
 
+### v1.1.6 (08/24/2021)
+<ul>
+  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
+  <li>Released comparable v1.1.6 docker image.
+</ul>
 ### 1.1.1 (02/29/2021)
 <ul>
   <li>Fixed a few annoying UI/UX issues</li>
