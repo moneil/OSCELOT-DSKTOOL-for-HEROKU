@@ -71,8 +71,10 @@ Download the above docker-compose.yaml file to a directory of your choosing
 
 Open the docker-compose.yaml file and edit the following:
 
-> `DJANGO\_SECRET\_KEY: 'secret from above generator'`
-> 
+> `DJANGO\_SECRET\_KEY: 'secret from https://djskgen.herokuapp.com see readme'`
+
+NOTE: the above generator adds single quotes. Remove remove them after pasting. The field must be single quoted only. E.g.: use '=)...9w&' **NOT** ''=)...9w&''. Retaining the generated single quotes will cause the install to fail.
+
 > `BLACKBOARD\_LEARN\_INSTANCE: "your Learn FQDN"` -- No protocol e.g. my.learn.server.com
 > 
 > `APPLICATION\_KEY: "your application key"`
