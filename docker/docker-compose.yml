@@ -2,7 +2,7 @@ version: "3.3"
 services:
     DSKTOOL:
         container_name: DSKTOOL
-        image: oscelot/oscelot-dsktool:1.1.6
+        image: oscelot/oscelot-dsktool:version
         ports:
             - "8000:8000"
         networks:   
