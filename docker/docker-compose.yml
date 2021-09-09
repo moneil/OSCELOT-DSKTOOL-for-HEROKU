@@ -11,7 +11,7 @@ services:
         environment:
             DJANGO_DEBUG: "False" 
             DJANGO_ALLOWED_HOSTS: '127.0.0.1 localhost .ngrok.io .herokuapp.com [::1]'  
-            DJANGO_SECRET_KEY: 'secret from https://djskgen.herokuapp.com NOTE: remove the single quotes e.g.: =)**...9w& NOT '=)**...9w&' Retaining the single quotes will cause the install to fail.' 
+            DJANGO_SECRET_KEY: secret from https://djskgen.herokuapp.com NOTE: remove the single quotes e.g.: '=)**...9w&' NOT ''=)**...9w&'' Retaining the generated single quotes will cause the install to fail.' 
             BLACKBOARD_LEARN_INSTANCE: "your Learn FQDN"
             APPLICATION_KEY: "your application key"
             APPLICATION_SECRET: "your application secret"
