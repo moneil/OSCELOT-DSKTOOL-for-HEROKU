@@ -6,8 +6,6 @@ This project is a Django/Python and Learn REST replacement for the Original York
 
 This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
 
-With this release I am deprecating [https://github.com/moneil/DSKTool](https://github.com/moneil/DSKTool) and will remove that repository by the end of the year.
-
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
 **Note**: This is an open source community project and, even though I am an employee, *is not supported or sponsored by Blackboard Inc.*. If you find it of value please contribute! Pull requests welcome! Make a fork and share your work back to this project.
