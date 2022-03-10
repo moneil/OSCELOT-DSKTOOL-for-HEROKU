@@ -6,6 +6,7 @@ This directory contains the files for building and running the OSCELOT DSKTOOL a
 
 # Installation
 There are two methods for running the OSCELOT DSKTOOL in Docker.
+
 1. Deploy using a prebuilt image - requires only the docker-compose.yml file
 2. Build and deploy - requires a clone of this repository.
 
@@ -19,6 +20,7 @@ With each release starting with 1.0.9 I will be providing a Docker image availab
 > Note: The OSCELOT DSKTOOL uses three-legged OAuth (3LO) for authentication. 3LO requires `https`.
 
 The installation is performed in three easy steps:
+
 1. Provide TLS for https access
 2. Install Docker
 3. Deploy using `docker-compose.yml` file.
