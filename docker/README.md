@@ -105,56 +105,20 @@ If for some reason you get an error loading the site there are a few things to c
 
 
 ## Release Notes
-### v1.1.6 (08/24/2021)
-<ul>
-  <li>Fixed issue with DSK lists being truncated at 100</li>
-  <li>Released chisotromparable v1.1.6 docker image.
-</ul>
+This and future releases will update this section only with changes/additions to the Docker Image. 
+
+Application Release Notes are available at: <a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a> </li>
 
 ### v1.1.5 (06/25/2021)
 <ul>
   <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
   <li>Released comparable v1.1.5 docker image.
 </ul>
-
-### v1.1.0 (01/04/2021)
-<ul>
-  <li>Fixed annoying 'undefined' error on user and course searches</li>
-  <li>Added Data Source Key searches to Courses, Users, and Enrollments</li>
-  <li>Released comparable v1.1.0 docker image.
-</ul>
-
-### v1.0.11 (10/04/2020)
-<ul>
-  <li>No Docker changes see Release notes at: <a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a> </li>
-</ul>
-
-### v1.0.10 (09/27/2020)
-<ul>
-  <li>No Docker changes see Release notes at: <a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a> </li>
-</ul>
-
-
-### v1.0.9 (09/27/2020)
-This release improves readibility of tables:
-<ul>
-  <li>Added 'sticky' table header and inner grid to all tables.</li>
-  <li>Added Course User Role to enrollment results.</li>
-  <li>Also fixed a display bug on loading non-enrollment pages.</li>
-  <li>Removed release notes from application index page (you may find them here).</li>
-  <li>Added version info to bottom of application index page.</li>
-</ul>
-Next up - AJAX Course/Org and User pages.
  
 ### v1.0.8 (09/25/2020)
 This Docker release focuses delivering the files supporting Docker deployment:
 <ul>
 	<li>This README</li>
 	<li>docker-compose.yml to use provided or self-built images</li>
+	<li>dockerfile for self-built images</li>
 </ul>
-
-**ToDo:**
-  <ul>
-    <li>Dockerfile (if you want to roll your own images)</li>
-    <li>Track down the elusive 'r' env variable...
-  </ul>

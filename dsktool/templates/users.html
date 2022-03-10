@@ -22,9 +22,60 @@
       <!-- <option valxue="familyName">Family Name</option> -->
       <option value="DSK">Data Source Key</option>
     </select>
-    <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all users with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> </div>
+
+    <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all users with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions">
+    </select> <!-- <br>
+    <label for="manualDSK">or enter a specific DSK: </label> <input type="text" id="manualDSK" name="manualDSK"><br> -->
+    </div>
+
     <div name="nonDSKSearch" id="nonDSKSearch" style="display: inline;">
       <input type="text" id="searchValueUsrtoSearch" name="searchValueUsrtoSearch"></br>
+    </div>
+
+    <div><p>&nbsp;</p></div>
+    <!-- SEARCH OPTIONS -->
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-6" id="searchOptions" name="searchOptions" style="display: inline;">
+          <b>Search Options <i>(multiple selections increase search time)</i>:</b>
+          <p>
+            <input type="checkbox" id="searchAvailability" name="searchAvailability"> <label for="searchAvailability">Availability (do not check if you want all results)</label>
+            <div id="searchByAvailStatus" name="searchByAvailStatus" style="display: none;">
+              <input type="radio" name="searchAvailabilityOption" id="onlyAvailableStatus" value="yes" checked> <label for="onlyAvailableStatus">Only Available</label>&nbsp;&nbsp;<input type="radio" name="searchAvailabilityOption" id="unAvailableStatus" value="no"> <label for="unAvailStatus">Only Unavailable</label>&nbsp;&nbsp;<input type="radio" name="searchAvailabilityOption" id="disabledAvailableStatus" value="disabled"> <label for="disabledAvailableStatus">Only Disabled</label> <!-- <input type="radio" name="searchAvailabilityOption" id="allAvailableStatus" value="term" checked> <label for="allAvailStatus">by Term</label> -->
+            </div>
+          </p>
+          <!-- BY DATE -->
+          <p>
+            <div id="searchByDateChkBx" name="searchByDateChkBx" style="display: inline;">
+              <input type="checkbox" id="searchDate" name="searchDate" unchecked> Search by Date Created
+      
+              <div id="searchByDate" name="searchByDate" style="display: none;">
+              mm/dd/yy or select using calendar (blank date uses current date and time)
+                <div name="dtpicker" id="dtpicker" class="col-xs-6" style="display: inline;">
+                  <div class="form-group">
+                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                      <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+                      <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                        <div class="input-group-text">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div display: block>
+                  <p>
+                    Select Comparison: 
+                  </p>
+                  <p>
+                    <input type="radio" id="lessThan" name="dtCompare" value="lessThan"> <label for="lessThan">Less than</label> &nbsp;&nbsp; <input type="radio" id="greaterOrEqual" name="dtCompare" value="greaterOrEqual" checked> <label for="greaterOrEqual">Equal to or greater than</label>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </p>
+        </div>
+      </div>
     </div>
 
     <div style="text-align:right; width:100%; padding:0;">
@@ -158,9 +209,9 @@
 </div>
 </div>
 <!-- END RESULTS DIV -->
+</div>
 
 
-{% block javascript %}
 <script>
 function setIsProcessable() {
   if ((document.getElementById('isUpdateRequired1').checked == true) &&
@@ -171,7 +222,6 @@ function setIsProcessable() {
     document.getElementById('processSubmit').disabled=true;
   }
 }
-
 function showElement(showme) {
   document.getElementById(showme).style.display = "inline";
 }
@@ -189,25 +239,30 @@ $(document).ready(function(){
       {
         $("#dskOptions").show();
         $("#nonDSKSearch").hide();
+        $("#searchOptions").show();
+        $("#searchByDateChkBx").show();
       }
       else
       {
         $("#dskOptions").hide();
         $("#nonDSKSearch").show();
+        $("#searchOptions").hide();
+        $("#searchByDateChkBx").hide();
       }
 });
 
 $(document).ready(function(){
   // console.log("Option Change!!")
     $('#searchBy').on('change', function() {
-      if ( this.value == 'DSK')
-      {
+      if ( this.value == 'DSK') {
         let dsklist = "";
         let x = 0;
         x = document.getElementById("dataSourceKeyOptions").options.length;
         //console.log("before:\n" + x)
         $("#dskOptions").show();
         $("#nonDSKSearch").hide();
+        $("#searchOptions").show();
+        $("#searchByDateChkBx").show();
         alert("Please note: Searching for Users based on Data Source may result in a longer processing time due to the possible number of users associated with the Data Source. \n\nApproximately 30sec to process and display 10K records (500K max).");
         if (x == 0) {
           dsklist = getDataSourceKeys();
@@ -223,12 +278,53 @@ $(document).ready(function(){
           }
         }
       }
-      else
-      {
+      else {
         $("#dskOptions").hide();
         $("#nonDSKSearch").show();
+        $("#searchOptions").hide();
+        $("#searchByDateChkBx").hide();
       }
     });
+});
+
+$(document).ready(function(){
+  if (!$('#searchAvailability').checked) {
+      console.log("searchByAvailStatus hide!");
+      $('#searchByAvailStatus').hide();
+  }
+  $("#searchAvailability").change(function () {
+    console.log("searchAvailability checkbox toggled!")
+    //$('#searchByDate').toggle();
+    if (!this.checked) {
+      console.log("searchBAvailability hide!");
+      $('#searchByAvailStatus').hide();
+    } else {
+      console.log("searchByAvailStatus show!");
+      $('#searchByAvailStatus').show();
+      //$('#searchByDate').hide();
+      //$('#searchDate').prop('checked', false);
+    }
+  });
+});
+
+$(document).ready(function(){
+  if (!$('#searchDate').checked) {
+      console.log("searchDate hide!");
+      $('#searchByDate').hide();
+  }
+  $("#searchDate").change(function () {
+    console.log("searchDate checkbox toggled!")
+    //$('#searchByDate').toggle();
+    if (!this.checked) {
+      console.log("searchDate hide!");
+      $('#searchByDate').hide();
+    } else {
+      console.log("searchDate show!");
+      $('#searchByDate').show();
+      //$('#searchByAvailStatus').hide();
+      //$('#searchAvailability').prop('checked', false);
+    }
+  });
 });
 
 /* AJAX!! */
@@ -241,6 +337,7 @@ $(document).ajaxSend(function() {
 // [DONE] Validate User Value: search:searchValueUsrtoSearch
 $("#searchValueUsrtoSearch").change(function(){
   console.log("searchValueUsrtoSearch: Validate change");
+  if (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") return;
   // console.log("User: " + document.getElementById("searchUserForm").searchValueUsrtoSearch.value);
   // console.log("By: " + document.getElementById("searchUserForm").searchBy.value);
 
@@ -265,6 +362,32 @@ $("#searchValueUsrtoSearch").change(function(){
     "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
   }
 
+  //searchAvailabilityOption
+  console.log("CHECK COURSE FOR SEARCH OPTIONS");
+  console.log("searchAvailability = " + $('#searchAvailability').prop('checked') );
+  if ( $('#searchAvailability').prop('checked') ) {
+    console.log("COLLECT SEARCH BY AVAILABILITY OPTIONS.")
+
+    // add searchAvailabilityOption to data
+    console.log("AVAILABILITY OPTION: " + $("input[name=searchAvailabilityOption]:checked").val() );
+    data["searchAvailabilityOption"] = $('#searchAvailabilityOption').value;
+  }
+  //searchDateOption
+  if ($('#searchDate').checked) {
+    // add searchDateOption to data
+    console.log("COLLECT SEARCH BY DATE OPTIONS.")
+
+    var date = $('#datetimepicker1').datetimepicker('viewDate');
+        console.log("selectedDate: " + date);
+        // var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        // var localTime = (selectedDate - tzoffset);
+        // console.log("localTime: " + localTime);
+
+        console.log("ISODATE [button]: " + localISOTime(date) );
+    data.push("searchDate", localISOTime(date));
+    data.push("searchDateOption", $('#dtCompare').value);
+  }
+
   console.log("VALIDATE ENTERED USER IDENTIFIER:searchUserForm:\n" + JSON.stringify(data));
 
   $.ajax({
@@ -282,8 +405,15 @@ $("#searchValueUsrtoSearch").change(function(){
   }).done(function() {
     // console.log("OVERLAY TIME")
     $("#overlay").fadeOut(300);
+    console.log("HASFOCUS: " + document.activeElement.id);
+    if ((!document.activeElement.id) ||(document.activeElement.id !== "submitSearchUserForm")) {
+      alert("I DON'T KNOW WHAT YOU CLICKED");
+      document.getElementById("submitSearchUserForm").focus();
+    }
   });
 });
+
+
 
 // usr searchBy change cleanup: 
 // [DONE] clears forms when changing from externalId to userName
@@ -304,12 +434,21 @@ $("#searchBy").change(function () {
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  if ( this.value == 'DSK') {
+    $("#dskOptions").show();
+    $("#nonDSKSearch").hide();
+    $("#searchOptions").show();
+    $("#searchByDateChkBx").show();
+  } else {
+    $("#dskOptions").hide();
+    $("#nonDSKSearch").show();
+    $("#searchOptions").hide();
+    $("#searchByDateChkBx").hide();
+  }
   
 });
 
 $("#dataSourceKeyOptions").change(function () {
-  // console.log("searchUserForm: searchBy changed");
-  // manage divs - clear and hide because we have a new search
   $("#searchValueUsrtoSearch").val("")
   $("#resultsTableBody").empty();
   $("#updateResultsTableBody").empty();
@@ -332,10 +471,7 @@ $('#searchUserForm').on('submit', function(e){
   console.log("searchUserForm called");
   let t0 = performance.now();
 
-  // form id="searchUserForm"
-  // submit id="submitSearchUserForm"
-  // "selectBy": document.getElementById("searchUserForm").searchBy.value, 
-  // "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+  $( "#searchValueUsrtoSearch" ).trigger( "blur" );
   e.preventDefault();
   $("#resultsTableBody").empty();
   $("#updateResultsTableBody").empty();
@@ -347,9 +483,6 @@ $('#searchUserForm').on('submit', function(e){
   $("#isDataSourceKeyUpdateRequired1").checked=false;
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
 
-  // console.log("searchBy: " + document.getElementById("searchUserForm").searchBy.value)
-  // console.log("searchFor: " + document.getElementById("searchUserForm").dataSourceKeyOptions.value)
-
   if ( (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") 
     && 
     (document.getElementById("searchUserForm").searchBy.value != "DSK") ) {
@@ -357,14 +490,47 @@ $('#searchUserForm').on('submit', function(e){
     return;
   }
 
+  //validate form criteria - in this case searchValueUsrtoSearch
+  // if (validateSearchValueUsrtoSearch() === false) return;
+
+
   var formData = {
     "searchBy": document.getElementById("searchUserForm").searchBy.value, 
   }
 
   if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
-    //use get user endpoint
+    //use get users endpoint and add options to formData...
     ajaxURL = '/ajax/getUsers/'
-    formData["searchValueUsr"] = document.getElementById("searchUserForm").dataSourceKeyOptions.value
+    formData["searchBy"] = document.getElementById("searchUserForm").searchBy.value
+    formData['searchValueUsr']=document.getElementById("searchUserForm").dataSourceKeyOptions.value;
+    if ( $('#searchAvailability').prop('checked') ) {
+      console.log("COLLECT SEARCH BY AVAILABILITY OPTIONS.")
+      // add searchAvailabilityOption to data
+      console.log("AVAILABILITY OPTION: " + $("input[name=searchAvailabilityOption]:checked").val() );
+      formData["searchOptions"] = "availability";
+      formData["searchAvailabilityOption"] = $("input[name=searchAvailabilityOption]:checked").val();
+
+    }
+    //searchDateOption
+    if ( $('#searchDate').prop('checked') ) {
+      // add searchDateOption to data
+      console.log("COLLECT SEARCH BY DATE OPTIONS.")
+            var date = $('#datetimepicker1').datetimepicker('viewDate');
+            console.log("selectedDate: " + date);
+            console.log("ISODATE [button]: " + localISOTime(date) );
+            if ( $('#searchAvailability').prop('checked') ) {
+              formData["searchOptions"]= formData["searchOptions"]+";date";
+            } else {
+              formData["searchOptions"] = "date";
+            }
+            formData["searchDate"] = localISOTime(date);
+            formData["searchDateOption"] = $("input[name=dtCompare]:checked").val();
+          }
+          console.table(formData);
+        // } else {
+          // formData['searchValueUser']=document.getElementById("manualDSK").value;
+          // console.log("manualDSK: " + document.getElementById("manualDSK").value)
+        // }
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
     // console.log("DSK INSTRUCTIONS: " + $("#instructions").text());
   } else {
@@ -376,16 +542,15 @@ $('#searchUserForm').on('submit', function(e){
   }
 
   // console.log("FORMDATA: \n" + JSON.stringify(formData));
-  // console.log("AJAXURL: \n" + ajaxURL);
+  console.log("AJAXURL: \n" + ajaxURL);
 
   $.ajax({
     type: 'GET',
     url: ajaxURL,
-    data: formData, //$('#selectCourseForm').serialize(),
-    //contentType: "application/x-www-form-urlencoded",
+    data: formData, 
     dataType: 'json',
     success: function(responseData) {
-      console.log("ajax/getUser success...");
+      console.log("ajax/getUsers success...");
       // console.log("Full responseData: \n" + JSON.stringify(responseData));
       if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
         newResults = responseData["users_json"]["results"]
@@ -604,7 +769,7 @@ function setUsrResultsTableBody(newResults) {
 
       let dsk = (typeof newResults["dataSourceId"] == 'undefined') ? '' : newResults["dataSourceId"];
 
-      let modified = (typeof newResults["dataSomodifiedurceId"] == 'undefined') ? '' : (newResults["modified"]).substring(0, 10);
+      let modified = (typeof newResults["modified"] == 'undefined') ? '' : (newResults["modified"]).substring(0, 10);
 
       let pmcId="pmc"+id;
 
@@ -844,7 +1009,44 @@ function setDSKOptionsBody(newResults) {
   return dskOptions;
 }
 
+var selectedDate
+$(document).ready(function() {
+  $(function() {
+    // $('#datetimepicker1').datetimepicker({
+    //   format: 'MM-DD-YYYY HH:mm',
+    // });
+    var date = $('#datetimepicker1').datetimepicker('viewDate');
+    $('#getDate').text(date.toString('mm-dd-yyyy HH:mm'));
+    $('#datetimepicker1').on("change.datetimepicker", function (e) {
+      console.log(e.date.toString());
+      // console.log(e.localDate.toString());
+      date = $('#datetimepicker1').datetimepicker('viewDate');
+      // $('#getDate').text(date);
+      selectedDate = date;
+      console.log("SELECTED_DATE [event]: " + date );
+      console.log("ISODATE [event]: " + localISOTime(selectedDate) );
+    });
+  });
+});
+
+function logDate () {
+  console.log("Log Date Button Clicked");
+  var date = $('#datetimepicker1').datetimepicker('viewDate');
+  date = $('#datetimepicker1').datetimepicker('viewDate');
+  selectedDate = date;
+  console.log("selectedDate [button]: " + date);
+  console.log("ISODATE [button]: " + localISOTime(date) );
+};
+
+function localISOTime(d) { 
+  if (!d) d = new Date();
+  var newDate = new Date(d);
+  var tzoffset = newDate.getTimezoneOffset() * 60000; //offset in milliseconds 
+  var correctDateTime = new Date(d - tzoffset);
+  correctDateTime.setSeconds(0,0);
+  return correctDateTime.toISOString(); 
+}
+
 </script>
 
-{% endblock %}
 {% endblock %}

@@ -266,6 +266,53 @@ $(document).ajaxSend(function() {
 		  $("#overlay").fadeIn(300);　
     });
 
+$(document).ready(function(){
+  if ( activeDiv == 'byCrsUsr' ) {
+    console.log("SEARCHINGBY byCrsUsr")
+    let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
+          '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">External Id</div>' +
+          '<div class="divTableHead">Username</div>' +
+          '<div class="divTableHead">User First Name</div>' +
+          '<div class="divTableHead">User Middle Name</div>' +
+          '<div class="divTableHead">User Last Name</div>' +
+          '<div class="divTableHead">User Email</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#resp-table-header").append(respTableHdr);
+        
+        let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">External Id</div>' +
+          '<div class="divTableHead">Username</div>' +
+          '<div class="divTableHead">User First Name</div>' +
+          '<div class="divTableHead">User Middle Name</div>' +
+          '<div class="divTableHead">User Last Name</div>' +
+          '<div class="divTableHead">User Email</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#update-table-header").append(updateTableHdr);
+  } else {
+    console.log("SEARCHINGBY COURSE or EXTERNAL ID")
+    let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
+          '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#resp-table-header").append(respTableHdr);
+
+        let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#update-table-header").append(updateTableHdr);
+  }
+});
 // ===== COURSE AND USER ===== //
 // [DONE] Manage divs: searchEnrollmentByCrsandUsrForm:searchEnrollmentByCrsandUsrIdByCRSID
 $("#searchEnrollmentByCrsandUsrIdByCRSID").change(function () {
@@ -301,7 +348,7 @@ $("#searchEnrollmentByCrsandUserIdByUSRID").change(function () {
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
 });
 
-// [IN PROGRESS] Manage divs: searchEnrollmentByDSKForm:searchEnrollmentByDSK
+// [DONE] Manage divs: searchEnrollmentByDSKForm:searchEnrollmentByDSK
 $("#searchEnrollmentByDSK").change(function () {
   console.log("searchEnrollmentByDSK: searchBy changed");
   console.log("searchEnrollmentByDSK: DSK: " + document.getElementById("dataSourceKeyOptions").value);
@@ -1057,7 +1104,7 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
     crsToSearchFor = "not_required";
     usrToSearchFor = document.getElementById(crsorusrForm).searchValueUsr.value;
     usrSearchBy = document.getElementById(crsorusrForm).searchByUsrUSRID.value;
-  } else { //active div is byCrsUsr
+  } else { //activeDiv is byCrsUsr
     crsorusrForm = "searchEnrollmentByCrsandUsrForm";
     crsSearchBy = document.getElementById(crsorusrForm).searchEnrollmentByCrsandUsrIdByCRSID.value;
     crsToSearchFor = document.getElementById(crsorusrForm).searchValueCrstoSearch.value;
@@ -1280,7 +1327,32 @@ function toggleDivs(anyDiv) {
       // if byCrsUsr or byCrs set result-table-header and update-table-header to what they are now - user info centric
       // if byUsr set result-table-header and update-table-header to reflect course info \not\ user-centric info
 
-      if ( (activeDiv == "byCrsUsr") || (activeDiv == "byCrs")) {
+      if (activeDiv == "byUsr") {
+        // console.log("SETTING result-table and update-table headers for User Memberships");
+        $("#resp-table-header").empty();
+        $("#update-table-header").empty();
+        if (activeDiv == "byUsr") {
+          $("#filterUsrByDSK").hide();
+          $("#filterUsrByDSK").prop("checked", false);
+        }
+        let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
+          '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#resp-table-header").append(respTableHdr);
+
+        let updateTableHdr = '<div class="divTableHead">Available</div>' +
+          '<div class="divTableHead">User Course Role</div>' +
+          '<div class="divTableHead">Course External Id</div>' +
+          '<div class="divTableHead">Course Name</div>' +
+          '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date Membership Modified</div>';
+        $("#update-table-header").append(updateTableHdr);
+      } else {
+        //if ( (activeDiv == "byCrsUsr") || (activeDiv == "byCrs") ) {
         // console.log("SETTING result-table and update-table headers for Course Memberships");
         $("#resp-table-header").empty();
         $("#update-table-header").empty();
@@ -1315,31 +1387,6 @@ function toggleDivs(anyDiv) {
           $("#filterCourseByDSK").prop("checked", false);
 
         }
-
-      } else if (activeDiv == "byUsr") {
-        // console.log("SETTING result-table and update-table headers for User Memberships");
-        $("#resp-table-header").empty();
-        $("#update-table-header").empty();
-        if (activeDiv == "byUsr") {
-          $("#filterUsrByDSK").hide();
-          $("#filterUsrByDSK").prop("checked", false);
-        }
-        let respTableHdr = '<div class="divTableHead">Select to Process</div>' +
-          '<div class="divTableHead">Available</div>' +
-          '<div class="divTableHead">User Course Role</div>' +
-          '<div class="divTableHead">Course External Id</div>' +
-          '<div class="divTableHead">Course Name</div>' +
-          '<div class="divTableHead">Membership Data Source</div>' +
-          '<div class="divTableHead">Date Membership Modified</div>';
-        $("#resp-table-header").append(respTableHdr);
-
-        let updateTableHdr = '<div class="divTableHead">Available</div>' +
-          '<div class="divTableHead">User Course Role</div>' +
-          '<div class="divTableHead">Course External Id</div>' +
-          '<div class="divTableHead">Course Name</div>' +
-          '<div class="divTableHead">Membership Data Source</div>' +
-          '<div class="divTableHead">Date Membership Modified</div>';
-        $("#update-table-header").append(updateTableHdr);
       }
     } else {
       // console.log("TOGGLE INDEX: " + index)

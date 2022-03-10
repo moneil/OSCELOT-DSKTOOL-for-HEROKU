@@ -2,12 +2,15 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.views.decorators.cache import never_cache
 import bbrest
 from bbrest import BbRest
 import jsonpickle
 import json
 import os
 import uuid
+import time
+import logging
 
 from django.http import JsonResponse
 #from django.views.generic import View
@@ -16,6 +19,142 @@ from django.http import JsonResponse
 #from django.forms.models import model_to_dict
 #from django.shortcuts import render
 
+# # THIS VERSIONS SORT OF WORKS (02/28/2021)
+# # does on load checks but when user token expires does not reset token.
+
+# Globals
+# bb: BbRest object - required for all BbRest requests
+# bb_json: BbRest session details
+# ISGUESTUSER: 3LO'd as a guest user
+
+global bb
+global bb_json
+global ISGUESTUSER
+global ISVALIDROLE
+
+bb = None
+bb_json = None
+ISVALIDROLE = False
+ISGUESTUSER = True
+bb_refreshToken = None
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.DEBUG,
+    datefmt='%Y-%m-%d %H:%M:%S')
+
+# HTTP Error handling:
+class makeRequestHTTPError(Exception):
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+    def __str__(self):
+        return repr(self.code + ": " + self.message)
+
+# bbrestSetup()
+# identifies whether bbrest and tokens are setup for processing the request.
+def BbRestSetup(request, targetView=None, redirectRequired=False):
+    global bb
+    global bb_json
+    global ISGUESTUSER
+    
+    ISGUESTUSER = False
+
+    logging.debug('BBRESTSETUP: ENTER')
+    logging.debug(f'BBRESTSETUP INPUTS: targetView: {targetView}')
+    logging.debug(f'BBRESTSETUP INPUTS: redirectRequired: {redirectRequired}')
+    
+    bb_json = request.session.get('bb_json')
+    if (bb_json is None):
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        bb_json = jsonpickle.encode(bb)
+        logging.debug('BBRESTSETUP: Pickled BbRest putting it on session')
+        request.session['bb_json'] = bb_json
+        request.session['target_view'] = targetView 
+        logging.debug(f"BBRESTSETUP request.session['target_view']: {request.session['target_view']}")
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        logging.debug('BBRESTSETUP: got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+        if bb.is_expired():
+            logging.debug('BBRESTSETUP:expired token')
+            
+            request.session['bb_json'] = None
+            # if targetView == 'whoami':
+            #     logging.debug('BBRESTSETUP: Expired call whoami')
+            #     whoami(request)
+            # elif targetView == 'index':
+            #     logging.debug('BBRESTSETUP: Expired call index')
+            #     index(request)
+            # else:
+            #     logging.debug('BBRESTSETUP: Expired call but NOT index or whoami - just validate?')
+            BbRestSetup(request, targetView)
+
+        bb.supported_functions() # This and the following are required after
+        bb.method_generator()    # unpickling the pickled object.
+        logging.info(f'BBRESTSETUP: Token expiration: {bb.expiration()}')
+
+
+    # if ISGUESTUSER:
+    #     context = {
+    #         'learn_server': LEARNFQDN,
+    #     }   
+    #     return render(request, 'guestusernotallowed.html', context=context)
+    
+    logging.info('BBRESTSETUP: EXIT')
+# end BbRestSetup
+
+def isValidRole(bb_json):
+    global ISVALIDROLE
+
+    ISVALIDROLE=False
+
+    validRoles=['SystemAdmin']
+    validRole=False
+
+    bb = jsonpickle.decode(bb_json)
+    resp = bb.call('GetUser', userId = "me", params = {'fields':'userName, systemRoleIds'}, sync=True ) 
+    
+    user_json = resp.json()
+
+    userSystemRoles = user_json['systemRoleIds']
+    logging.debug("userSystemRoles: " + json.dumps(userSystemRoles))
+    for role in userSystemRoles:
+        if role in validRoles:
+            logging.debug("ValidRole: " + role)
+            validRole=True
+
+    ISVALIDROLE=validRole
+    logging.debug("ISVALIDROLE: " + str(ISVALIDROLE))
+
+    return validRole
+
+
+# [DONE]
+def isGuestUser(bb_json):
+    global ISGUESTUSER
+
+    guestStatus = False
+
+    bb = jsonpickle.decode(bb_json)
+    resp = bb.call('GetUser', userId = "me", params = {'fields':'userName'}, sync=True ) 
+    
+    user_json = resp.json()
+
+    logging.debug(f"ISGUESTUSER::userName: {user_json['userName']}")
+
+    if user_json['userName'] == 'guest':
+        guestStatus = True
+        ISGUESTUSER = True
+    else:
+        guestStatus = False
+        ISGUESTUSER = False
+
+    logging.debug("ISGUESTUSER: " + str(ISGUESTUSER))
+    return guestStatus
+
+
+# Pull configuration... use env settings if no local config file
 try:
     from config import adict
     
@@ -32,44 +171,68 @@ except:
     SECRET = os.environ['APPLICATION_SECRET']
     LEARNFQDN = os.environ['BLACKBOARD_LEARN_INSTANCE']
 
-ISGUESTUSER = False
-
 # print("VIEWS: KEY: ", KEY)
 # print("VIEWS: SECRET: ", SECRET)
 # print("VIEWS: LEARNFQDN: ", LEARNFQDN)
 
 # [DONE] Authorizes user after AuthN if necessary
+@never_cache
+@never_cache
 def index(request):
-    bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    # global bb
+    # global bb_json
+
+    # bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    # logging.info("INDEX: bb expiration: " + bb.expiration())
+    # resp = bb.GetVersion()
+    # access_token = bb.token_info['access_token']
+    # version_json = resp.json()
+
+    # BbRestSetup(request, targetView='index')
+    bb_json = request.session.get('bb_json')
+
+    if (bb_json is None):
+        logging.info('INDEX: BbRest not found in session')
+        # request.session.flush()
+        try:
+            bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+            bb_json = jsonpickle.encode(bb)
+        except:
+            logging.critical('INDEX: Could not set BbREST in Session, Check Configuration KEY and SECRET.')
+        request.session['bb_json'] = bb_json
+        logging.info('INDEX: Pickled BbRest added to session')
+        request.session['target_view'] = 'index' 
+        return HttpResponseRedirect(reverse('get_auth_code'))
+    else:
+        logging.info('INDEX: Found BbRest in session')
+        bb = jsonpickle.decode(bb_json)
+        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+        logging.info("INDEX: bb token expired?: " + str(bb.is_expired()))
+        logging.debug("BB_JSON: Token Info: refresh_token " + str(bb.token_info.get('refresh_token')))
+        logging.debug("BB_JSON: Token Info: " + str(bb.token_info))
+
+
+    
     resp = bb.GetVersion()
     access_token = bb.token_info['access_token']
     version_json = resp.json()
+        
+        
+        # if bb.is_expired():
+        # # is_expired = True
+        # # if is_expired:
+        #     logging.info('INDEX: Expired Token - clear cookie and bb_json, then request new token.')
+        #     request.session.flush()
+        #     request.session['bb_json'] = None
+        #     index(request)
+        # bb.supported_functions() # This and the following are required after
+        # bb.method_generator()    # unpickling the pickled object.
+    
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print("VIEWS: index request: pickled BbRest and putting it on session")
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'index'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('VIEWS: index request: got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('VIEWS.py: index request: expired token')
-            request.session['bb_json'] = None
-            index(request)
-        bb.supported_functions() 
-        bb.method_generator()
-        print(f'VIEWS: index request: expiration: {bb.expiration()}')
+    # resp = bb.GetVersion()
+    # access_token = bb.token_info['access_token']
+    # version_json = resp.json()
 
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
- 
     context = {
         'learn_server': LEARNFQDN,
         'version_json' : version_json,
@@ -78,41 +241,91 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
-# [DONE]
-def courses(request):
-    task = request.GET.get('task')
-    searchBy = request.GET.get('searchBy')
-    searchValue = request.GET.get('searchValue')
-    if (searchValue is not None):
-        searchValue = searchValue.strip()
-    print ("SEARCHBY: ", searchBy)
-    print ("SEARCHVALUE: ", searchValue)
-    print ("TASK: ", task)
+# [DONE] WHOAMI returns the current user info/status
+@never_cache
+def whoami(request):
+    global bb
+    global bb_json
+
+    # View function for whoami page of site.
+
+    # BbRestSetup(request, 'whoami')
 
     bb_json = request.session.get('bb_json')
     if (bb_json is None):
         bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
         bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
+        logging.info('WHOAMI: Pickled BbRest putting it on session')
         request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'courses'
+        request.session['target_view'] = 'whoami' 
         return HttpResponseRedirect(reverse('get_auth_code'))
+        # for some reason i do not get a new auth toke/code here
     else:
-        print('got BbRest from session')
+        logging.info('WHOAMI: Found BbRest in session')
         bb = jsonpickle.decode(bb_json)
         if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
+            logging.info('WHOAMI: Expired Token - clear cookie and bb_json, then request new token.')
+            # request.session['bb_json'] = None
             whoami(request)
         bb.supported_functions() # This and the following are required after
         bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    
+    resp = bb.call('GetUser', userId = "me", params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, dataSourceId, created'}, sync=True )
 
-    if ISGUESTUSER:
+    user_json = resp.json()
+
+    logging.info("WHOAMI: user_json: " + json.dumps(user_json))
+
+    try:
+        logging.info("WHOAMI: try to get user information.")
+        logging.debug("WHOAMI: user_json['dataSourceId']: " + user_json['dataSourceId'])
+        logging.info("WHOAMI: GetDataSource")
+        # dskresp = bb.call('GetDataSource', dataSourceId = user_json['dataSourceId'], sync=True)
+        dskresp = bb.GetDataSource(dataSourceId=user_json['dataSourceId'], sync=True)
+        logging.debug("WHOAMI: POST WHOAMI DATASOURCE REQUEST.")
+        dsk_json = dskresp.json()
+        logging.debug("WHOAMI: dsk_json: " + json.dumps(dsk_json))
+        user_json['dataSourceId'] = dsk_json['externalId']
+
+        logging.info("WHOAMI: user_json: dataSourceId: " + user_json['dataSourceId'])
+    except:
         context = {
             'learn_server': LEARNFQDN,
         }   
-        return render(request, 'guestusernotallowed.html', context=context )    
+        return render(request, 'guestusernotallowed.html', context=context )
+
+    context = {
+        'user_json': user_json,
+        'access_token': bb.token_info['access_token']
+    }
+
+    logging.info(f'WHOAMI: Token expiration: {bb.expiration()}')
+
+    # Render the HTML template index.html with the data in the context variable
+    return render(request, 'whoami.html', context=context)
+
+# [DONE] (TASK BASED)
+def courses(request):
+    global ISVALIDROLE
+
+    task = request.GET.get('task')
+    searchBy = request.GET.get('searchBy')
+    searchValue = request.GET.get('searchValue')
+    if (searchValue is not None):
+        searchValue = searchValue.strip()
+    # logging.debug("COURSES: SEARCHBY: ", searchBy)
+
+    # logging.debug("COURSES: SEARCHVALUE: ", searchValue)
+    # logging.debug("COURSES: TASK: ", task)
+
+    if ISVALIDROLE:
+        logging.debug("User has valid role")
+        BbRestSetup(request, targetView='courses', redirectRequired=True)
+    else:
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'notauthorized.html', context=context )
 
     if (task == 'search'):
         #Process request...
@@ -121,17 +334,17 @@ def courses(request):
         if (searchValue is not None):
             searchValue = searchValue.strip()
         
-        print (f"COURSE REQUEST: CRS: {searchValue}")
-        print (f"Process by {searchBy}")
+        logging.debug(f"COURSE REQUEST: CRS: {searchValue}")
+        logging.debug(f"Process by {searchBy}")
         if (searchBy == 'externalId'):
             crs="externalId:" + searchValue
-            print(f"course pattern: {crs}")
+            logging.debug(f"course pattern: {crs}")
         elif (searchBy == 'primaryId'):
             crs=searchValue
-            print(f"course pattern: {crs}")
+            logging.debug(f"course pattern: {crs}")
         elif (searchBy == 'courseId'):
             crs="courseId:" + searchValue
-            print(f"course pattern: {crs}")
+            logging.debug(f"course pattern: {crs}")
         resp = bb.GetCourse(courseId = crs, params = {'fields':'id, courseId, externalId, name, availability.available, dataSourceId, created'}, sync=True )
         if (resp.status_code == 200):
             course_json = resp.json() 
@@ -142,10 +355,10 @@ def courses(request):
             course_json['searchBy'] = searchBy
             dskresp = bb.GetDataSources(limit = 5000, params={'fields':'id, externalId'}, sync=True)
             dsks_json = dskresp.json()
-            print ("DSKS:\n", dsks_json["results"])
+            logging.debug("DSKS:\n", dsks_json["results"])
             dsks = dsks_json["results"]
             dsks = sortDsk(dsks, 'externalId')
-            print ("SIZE OF DSK LIST:", len(dsks))
+            logging.debug("SIZE OF DSK LIST:", len(dsks))
                 
             context = {
               'course_json': course_json,
@@ -153,7 +366,7 @@ def courses(request):
             }
         else:
             error_json = resp.json()
-            print (f"RESPONSE:\n", error_json)
+            logging.debug(f"RESPONSE:\n", error_json)
             context = {
                 'error_json': error_json,
             }
@@ -161,10 +374,10 @@ def courses(request):
         return render(request, 'courses.html', context=context)
 
     if (task == 'process'):
-        print (f"COURSE REQUEST: ACTION {task}")
-        print (f"Process by {searchBy}")
-        print ('Request:\n ')
-        print (request)
+        logging.debug(f"COURSE REQUEST: ACTION {task}")
+        logging.debug(f"Process by {searchBy}")
+        logging.debug('Request:\n ')
+        logging.debug(request)
         payload={}
         if (request.GET.get('isAvailabilityUpdateRequired1')):
             if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
@@ -173,21 +386,21 @@ def courses(request):
             if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
                 payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
             
-        print ("PAYLOAD\n")
+        logging.debug("PAYLOAD\n")
         for x, y in payload.items():
-            print(x, y)
+            logging.debug(x, y)
 
         # Build and make bb request...
         if (searchBy == 'externalId'):
             crs="externalId:" + searchValue
         elif (searchBy == 'primaryId'):
             crs=searchValue
-            print(f"course pattern: {crs}")
+            logging.debug(f"course pattern: {crs}")
         elif (searchBy == 'courseId'):
             crs="courseId:" + searchValue
-            print(f"course pattern: {crs}")
+            logging.debug(f"course pattern: {crs}")
 
-        print(f"course pattern: {crs}")
+        logging.debug(f"course pattern: {crs}")
 
         resp = bb.UpdateCourse(courseId = crs, payload=payload, params = {'fields':'id, courseId, externalId, name, availability.available, dataSourceId, created'}, sync=True )
         if (resp.status_code == 200):
@@ -201,7 +414,7 @@ def courses(request):
             }
         else:
             error_json = resp.json()
-            print (f"RESPONSE:\n", error_json)
+            logging.debug(f"RESPONSE:\n", error_json)
             context = {
                 'error_json': error_json,
             }
@@ -210,36 +423,24 @@ def courses(request):
 
     return render(request, 'courses.html')
 
-# [DONE]
+# [DONE] (TASK BASED)
 def enrollments(request):
+    global ISVALIDROLE
+
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'whoami' 
-        return HttpResponseRedirect(reverse('get_auth_code'))
+    # BbRestSetup(request, targetView='enrollments', redirectRequired=True)
+    
+    if ISVALIDROLE:
+        logging.debug("User has valid role")
+        BbRestSetup(request, targetView='enrollments', redirectRequired=True)
     else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
-
-    if ISGUESTUSER:
         context = {
             'learn_server': LEARNFQDN,
         }   
-        return render(request, 'guestusernotallowed.html', context=context )
-     
+        return render(request, 'notauthorized.html', context=context )
+
     if (task == 'search'):
         #Process request...
         print (f"ENROLLMENTS REQUEST: ACTION {task}")
@@ -396,123 +597,19 @@ def enrollments(request):
             #return render(request, 'enrollments.html', context=context)
 
         result_json = {"brand": "Ford", "model": "Mustang", "year": 1964 }
-
         print (f"RESPONSE:\n", result_json)
-
         context = {     
             'result_json': result_json,
         }
-
         return render(request, 'enrollments.html', context=context)
-
     else:
         return render(request, 'enrollments.html')
 
-# [DONE]
-def get_access_token(request):
-    # Happens when the user hits index the first time and hasn't authenticated on Learn
-    # Part II. Get an access token for the user that logged in. Put that on their session.
-    bb_json = request.session.get('bb_json')
-    target_view = request.session.get('target_view')
-    print('VIEWS: get_access_token: got BbRest from session')
-    bb = jsonpickle.decode(bb_json)
-    bb.supported_functions() # This and the following are required after
-    bb.method_generator()    # unpickling the pickled object.
-    # Next, get the code parameter value from the request
-    redirect_uri = reverse(get_access_token)
-    absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
-
-    state = request.GET.get('state', default= "NOSTATE")
-    print(f'VIEWS: get_access_token: GOT BACK state: {state}')
-    stored_state = request.session.get('state')
-    print(f'VIEWS: get_access_token: STORED STATE: {stored_state}')
-    if (stored_state != state):
-        return HttpResponseRedirect(reverse('notauthorized'))
-
-    code =  request.GET.get('code', default = None)
-    if (code == None):
-        exit()
-
-    #Rebuild a new BbRest object to get an access token with the user's authcode.
-    # if (CUSTOM_LOGIN_URL):
-    #     print("CUSTOM_LOGIN_URL")
-    #     user_bb = BbRest(KEY, SECRET, f"https://{CUSTOM_LOGIN_URL}", code=code, redirect_uri=absolute_redirect_uri )
-    # else:
-    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )    
-    bb_json = jsonpickle.encode(user_bb)
-    if (isGuestUser(bb_json)):
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
-
-    print('VIEWS: get_access_token: pickled BbRest and putting it on session')
-    request.session['bb_json'] = bb_json
-    return HttpResponseRedirect(reverse(f'{target_view}'))
-
-# [DONE]
-def get_auth_code(request):
-    # Happens when the user hits index the first time and hasn't authenticated on Learn
-    # Part I. Request an authroization code oauth2/authorizationcode
-    print(f"In get_auth_code: REQUEST URI:{request.build_absolute_uri()}")
-    try: 
-        bb_json = request.session.get('bb_json')
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-    except:
-        #sideways sesssion go to index page and force get_access_token
-        return HttpResponseRedirect(reverse('index'))
-
-
-    bb.supported_functions() # This and the following are required after
-    bb.method_generator()    # unpickling the pickled object. 
-    # The following gives the path to the resource on the server where we are running, 
-    # but not the protocol or host FQDN. We need to prepend those to get an absolute redirect uri.
-    redirect_uri = reverse(get_access_token)
-    absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
-    state = str(uuid.uuid4())
-    request.session['state'] = state
-    authcodeurl = bb.get_auth_url(scope='read write', redirect_uri=absolute_redirect_uri, state=state)
-
-    print(f"AUTHCODEURL:{authcodeurl}")
-    return HttpResponseRedirect(authcodeurl)
-
-# [DONE]
-def isup(request):
-    return render(request, 'isup.html')
-
-# [DONE]
-def logoutUser(request):
-    print(f"VIEWS: LogoutUser: Site domain: {request.META['HTTP_HOST']}")
-    site_domain = request.META['HTTP_HOST']
-    response = HttpResponse("Cookies Cleared")
-    if (request.COOKIES.get(site_domain) is not None):
-    #if site_domain in request.COOKIES.keys():
-        #response = HttpResponse("Cookies Cleared")
-        print("VIEWS: LogoutUser: clearing cookies")
-        response = redirect('/threeleg/learnlogout')
-        response.delete_cookie(site_domain)
-    else:
-        print("VIEWS: LogoutUser: no cookies to clear")
-        response = redirect('/threeleg/learnlogout')
-
-    #response = HttpResponse("We are not tracking you.")
-    return response
-
-# [DONE]
-def learnlogout(request):
-    print("VIEWS.py: index request: Flushing session and redirecting to Learn for logout")
-    request.session.flush()
-
-    return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
-
-# [DONE]
-def notauthorized(request):
-    context = {}
-    return render(request, 'notauthorized.html', context=context )
-
-# [DONE]
+# [DONE] (TASK BASED)
 def users(request):
+    global bb_json
+    global ISVALIDROLE
+
     task = request.GET.get('task')
     searchBy = request.GET.get('searchBy')
     searchValueUsr = request.GET.get('searchValueUsr')
@@ -522,120 +619,111 @@ def users(request):
     print ("users: SEARCHVALUEUSR: ", searchValueUsr)
     print ("users: TASK: ", task)
 
-    """View function for users page of site."""
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
+    # View function for users page of site.
+    if ISVALIDROLE:
+        logging.debug("User has valid role")
+        BbRestSetup(request, targetView='users', redirectRequired=True)
+        return render(request, 'users.html')
     else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+        context = {
+            'learn_server': LEARNFQDN,
+        }   
+        return render(request, 'notauthorized.html', context=context )
 
-    if ISGUESTUSER:
+
+# [DONE]
+def get_access_token(request):
+    global bb_json
+    global bb
+    
+    # Happens when the user hits index the first time and hasn't authenticated on Learn
+    # Part II. Get an access token for the user that logged in. Put that on their session.
+    bb_json = request.session.get('bb_json')
+    target_view = request.session.get('target_view')
+    logging.info('GET_ACCESS_TOKEN: got BbRest from session')
+    bb = jsonpickle.decode(bb_json)
+    bb.supported_functions() # This and the following are required after
+    bb.method_generator()    # unpickling the pickled object.
+    # Next, get the code parameter value from the request
+    redirect_uri = reverse(get_access_token)
+    absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
+
+    state = request.GET.get('state', default= "NOSTATE")
+    logging.info(f'GET_ACCESS_TOKEN: GOT BACK state: {state}')
+    stored_state = request.session.get('state')
+    logging.info(f'GET_ACCESS_TOKEN: STORED STATE: {stored_state}')
+    if (stored_state != state):
+        return HttpResponseRedirect(reverse('notauthorized'))
+
+    code =  request.GET.get('code', default = None)
+    if (code == None):
+        exit()
+
+    user_bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}", code=code, redirect_uri=absolute_redirect_uri )    
+    bb_json = jsonpickle.encode(user_bb)
+
+    if (isGuestUser(bb_json)):
         context = {
             'learn_server': LEARNFQDN,
         }   
         return render(request, 'guestusernotallowed.html', context=context )
-     
-    # if (task == 'search'):
-    #     #Process request...
-    #     print (f"USERS REQUEST: ACTION {task}")
-    #     searchBy = request.GET.get('searchBy')
-    #     searchValueUsr = request.GET.get('searchValue')
-    #     if (searchValueUsr is not None):
-    #         searchValueUsr = searchValueUsr.strip()
-    #     print (f"USERS REQUEST: USR: {searchValueUsr}")
-    #     print (f"Process by {searchBy}")
-    #     if (searchBy == 'externalId'):
-    #         usr="externalId:" + searchValueUsr
-    #         print(f"user pattern: {usr}")
-    #     elif (searchBy == 'userName'):
-    #         usr="userName:" + searchValueUsr
-    #         print(f"user pattern: {usr}")
-    #     resp = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
-    #     if (resp.status_code == 200):
-    #         user_json = resp.json() 
-    #         dskresp = bb.GetDataSource(dataSourceId = user_json['dataSourceId'], sync=True)
-    #         dsk_json = dskresp.json()
-    #         user_json['dataSourceId'] = dsk_json['externalId']
-    #         user_json['searchValueUsr'] = searchValueUsr
-    #         user_json['searchBy'] = searchBy
-    #         dskresp = bb.GetDataSources(params={'fields':'id, externalId'}, sync=True)
-    #         dsks_json = dskresp.json()
-    #         print ("DSKS:\n", dsks_json["results"])
-    #         dsks = dsks_json["results"]
-    #         dsks = sortDsk(dsks, 'externalId')
-    #         print ("SIZE OF DSK LIST:", len(dsks))
-                
-    #         context = {
-    #           'user_json': user_json,
-    #           'dsks_json': dsks,
-    #         }
-    #     else:
-    #         error_json = resp.json()
-    #         print (f"RESPONSE:\n", error_json)
-    #         context = {
-    #             'error_json': error_json,
-    #         }
 
-    #     return render(request, 'users.html', context=context)
+    if (not isValidRole(bb_json)):
+        # return notauthorized page
+        return render(request, 'notauthorized.html', context=context )
 
-    # if (task == 'process'):
-    #     print (f"USERS REQUEST: ACTION {task}")
-    #     print (f"Process by {searchBy}")
-    #     print ('Request:\n ')
-    #     print (request)
-    #     payload={}
-    #     if (request.GET.get('isAvailabilityUpdateRequired1')):
-    #         if (request.GET.get('isAvailabilityUpdateRequired1') == 'true'):
-    #             payload={'availability':{"available":request.GET.get('selectedAvailability')}}
-    #     if (request.GET.get('isDataSourceKeyUpdateRequired1')):
-    #         if (request.GET.get('isDataSourceKeyUpdateRequired1') == 'true'):
-    #             payload["dataSourceId"] = request.GET.get('selectedDataSourceKey')
-            
-    #     print ("PAYLOAD\n")
-    #     for x, y in payload.items():
-    #         print(x, y)
+    logging.info('GET_ACCESS_TOKEN: pickled BbRest and putting it on session')
+    request.session['bb_json'] = bb_json
+    return HttpResponseRedirect(reverse(f'{target_view}'))
 
-    #     # Build and make bb request...
-    #     if (searchBy == 'externalId'):
-    #         usr="externalId:" + searchValueUsr
-    #     elif (searchBy == 'userName'):
-    #         usr="userName:" + searchValueUsr
+# [DONE]
+def get_auth_code(request):
+    global bb_json
+    global bb
+    
+    # Happens when the user hits index the first time and hasn't authenticated on Learn
+    # Part I. Request an authorization code oauth2/authorizationcode
+    logging.info(f"GET_AUTH_CODE: REQUEST URI:{request.build_absolute_uri()}")
+    try: 
+        bb_json = request.session.get('bb_json')
+        logging.info('GET_AUTH_CODE: got BbRest from session')
+        bb = jsonpickle.decode(bb_json)
+    except:
+        #sideways session go to index page and force get_access_token
+        logging.info(f"GET_AUTH_CODE: Something went sideways with bb session, reverse to target e.g. 'index', maybe you should have thrown an error here.")
+        return HttpResponseRedirect(reverse('index'))
 
-    #     print(f"user pattern: {usr}")
+    bb.supported_functions() # This and the following are required after
+    bb.method_generator()    # unpickling the pickled object. 
+    # The following gives the path to the resource on the server where we are running, 
+    # but not the protocol or host FQDN. We need to prepend those to get an absolute redirect uri.
+    redirect_uri = reverse(get_access_token)
+    absolute_redirect_uri = f"https://{request.get_host()}{redirect_uri}"
+    state = str(uuid.uuid4())
+    request.session['state'] = state
+    authcodeurl = bb.get_auth_url(scope='read write delete offline', redirect_uri=absolute_redirect_uri, state=state)
+    logging.info(f"GET_AUTH_CODE: AUTHCODEURL:{authcodeurl}")
+    logging.info(f"GET_AUTH_CODE: And now the app is setup to act on behalf of the user.")
 
-    #     resp = bb.UpdateUser(userId = usr, payload=payload, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
-    #     if (resp.status_code == 200):
-    #         result_json = resp.json() #return actual error
-    #         dskresp = bb.GetDataSource(dataSourceId = result_json['dataSourceId'], sync=True)
-    #         dsk_json = dskresp.json()
-    #         result_json['dataSourceId'] = dsk_json['externalId']
+    return HttpResponseRedirect(authcodeurl)
 
-    #         context = {
-    #           'result_json': result_json,
-    #         }
-    #     else:
-    #         error_json = resp.json()
-    #         print (f"RESPONSE:\n", error_json)
-    #         context = {
-    #             'error_json': error_json,
-    #         }
+# [DONE]
+def isup(request):
+    return render(request, 'isup.html')
 
-    #     return render(request, 'users.html', context=context)
+# [DONE]
+def learnlogout(request):
+    logging.info("LEARNLOGOUT: Flushing session and redirecting to Learn for logout")
+    site_domain = request.META['HTTP_HOST']
+    response = HttpResponse("Cookies Cleared")
+    response.delete_cookie(site_domain)
+    request.session.flush()
+    return HttpResponseRedirect(f"https://{LEARNFQDN}/webapps/login?action=logout")
 
-    return render(request, 'users.html')
+# [DONE]
+def notauthorized(request):
+    context = {}
+    return render(request, 'notauthorized.html', context=context )
 
 # [DONE] Retrieve User data
 def getUser(request):
@@ -647,30 +735,8 @@ def getUser(request):
     print ("getUser: SEARCHBY: ", searchBy)
     print ("getUser: SEARCHVALUEUSR: ", searchValueUsr)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, targetView='users', redirectRequired=True)
 
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
     usr = ""
 
     if (searchBy == 'externalId'):
@@ -680,7 +746,7 @@ def getUser(request):
     
     print(f"user pattern: {usr}")
     
-    #Process request... w
+    #Process request... 
     resp = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
     if (resp.status_code == 200):
         user_json = resp.json() 
@@ -739,24 +805,26 @@ def updateUser(request):
     # for x, y in passedPayload.items():
     #     print(x, y)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'bbrest expiration: {bb.expiration()}')
+    BbRestSetup(request, targetView='users', redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     request.session['target_view'] = 'users'
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #         whoami(request)
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'bbrest expiration: {bb.expiration()}')
 
     resp = bb.UpdateUser(userId = updateValue, payload=passedPayload, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
 
@@ -785,60 +853,132 @@ def updateUser(request):
 
 # [DONE] Retrieve user list (based on DSK)
 def getUsers(request):
-    print ("ENTER: getUsers")
-
+    print ("NEW QUERY: getUsers")
     context = ""
     searchBy = request.GET.get('searchBy')
     searchValueUsr = request.GET.get('searchValueUsr')
+    searchOptions = request.GET.get('searchOptions')
+    searchAvailabilityOption = request.GET.get('searchAvailabilityOption')
+    searchDate = request.GET.get('searchDate')
+    searchDateOption = request.GET.get('searchDateOption')
+    searchOptionList = None
+
     if (searchValueUsr is not None):
         searchValueUsr = searchValueUsr.strip()
-    print ("getUsers: SEARCHBY: ", searchBy)
-    print ("getUsers: SEARCHVALUEUSR: ", searchValueUsr)
-    print (f"getUsers request:\n", request)
-
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
+        print ("GETUSERS SEARCHBY: ", searchBy)
     else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+        print("GETUSERS SEARCHBY NOT SET")
+    if (searchValueUsr is not None):
+        print ("GETUSERS SEARCHVALUEUSR: ", searchValueUsr)
+    else:
+        print("GETUSERS SEARCHVALUEUSR NOT SET")
+    if (searchOptions is not None):
+        print(f"GETUSERS SEARCHOPTIONS: ", searchOptions)
+        searchOptionList = searchOptions.split(';')
+        print(f"GETUSERS SEARCHOPTIONLIST: ", searchOptionList)
+        print(f"IS BY AVAILABILITY A SELECTED OPTION? ", searchOptionList.count('searchAvailability'))
+        print(f"IS BY DATE A SELECTED OPTION? ", searchOptionList.count('date'))
+    else:
+        print("GETUSERS SEARCHOPTIONLIST NOT SET")
+    if (searchAvailabilityOption is not None):
+        print(f"GETUSERS searchAvailabilityOption: ", searchAvailabilityOption)
+    else:
+        print("GETUSERS searchAvailabilityOption NOT SET")
+    if (searchDate is not None):
+        print(f"GETUSERS searchDate: ", searchDate)
+    else:
+        print("GETUSERS searchDate NOT SET")
+    if (searchDateOption is not None):
+        print(f"GETUSERS searchDateOption: ", searchDateOption)
+    else:
+        print("GETUSERS searchDateOption NOT SET")
+    print (f"GETUSERS REQUEST:\n", request)
+    isFoundStatus = False
+    searchByDate = False
+    searchByAvailability = False
+    filterByAvailability = False
+    filterByDSK = False
 
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
+    if (searchOptions is not None):
+        if searchOptionList.count('date') == 1: searchByDate = True
+        if searchOptionList.count('availability') == 1: searchByAvailability = True
+    print("SEARCH OPTIONS: byAvailability: ",  searchByAvailability, "byDate: ", searchByDate)
 
-    resp = bb.GetUsers(limit = 500000, params = {'dataSourceId': searchValueUsr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
+    BbRestSetup(request, targetView='users', redirectRequired=True)
+
+    #currently not supporting any allUsers searches and we only use the date picker on DSK searches...
+
+    if searchBy == 'DSK':
+        if searchByDate:
+            # use searchDate parameter
+            #...
+            print("SEARCH FOR ALL USERS USING DATE...")
+
+            resp = bb.GetUsers(limit = 500000, params = {'created': searchDate,'createdCompare': searchDateOption,'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created, modified'}, sync=True )
+
+            filterByDSK = True
+            
+            if searchByAvailability: filterByAvailability = True
+            else: filterByAvailability = False
+        else:
+            # Not by date request, just do a standard request and return everything and filter on availability if requested
+            #...
+            resp = bb.GetUsers(limit = 500000, params = {'dataSourceId': searchValueUsr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created, modified'}, sync=True )
+
+            filterByDSK = False
+
+            if searchByAvailability: filterByAvailability = True
+            else: filterByAvailability = False
+    """ else: 
+        # eventually we will support an allUsers search as below
+        # do a normal search and return everything...
+        resp = bb.GetUsers(limit = 500000, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True ) """
+
+    # Otherwise search is by specifics in which case getUser was called and which should just return single user.
+
+    # in either case we process the results filtering out undesired DSKs and availability options if requested...
     
     if (resp.status_code == 200):
         users_json = resp.json()
-        print (f"user count: ", len(users_json["results"]))
+        print (f"USER COUNT(prepurge): ", len(users_json["results"]))
 
         dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
 
+        if filterByAvailability: 
+            # filter resp by selected availability...
+            print("GETUSERS EXECUTE AVAILABILITY PURGE")
+            print("AVAILABILITY OPTION: ", searchAvailabilityOption)
+            purgedResults = availabilityPurge(users_json,searchAvailabilityOption)
+            # print("FILTERBYAVAILABILITY PURGED AVAILABILITY RESULTS:\n", purgedResults)
+            print("FILTERBYAVAILABILITY PURGED RESULTS COUNT: ", len(purgedResults["results"]))
+            users_json = purgedResults
+
+        if filterByDSK:
+            # filter resp by selected date...
+            print("PURGING RESULTS based on DSK")
+            purgedResults = datasourcePurge(users_json, searchValueUsr)
+            # print("FILTERBYDSK PURGED DSK RESULTS:\n", purgedResults)
+            print("FILTERBYDSK PURGED RESULTS COUNT: ", len(purgedResults["results"]))
+            users_json = purgedResults
+
+        users_json["length"] = len(users_json)  
+        # print("DATASOURCE PURGE: users_json: /n", users_json)
+        print("users_json SIZE: ", len(users_json))
+
+        # we always want to replace dsk primary keys with the dsk externalId...  
         for idx, user in enumerate(users_json["results"]):
             for dsk in dsks:
                 #print("DSK:\n", dsk)
                 #print("DSKID: ", dsk["id"])
                 if (dsk["id"] == user["dataSourceId"]):
                     users_json["results"][idx]["dataSourceId"] = dsk["externalId"]
-        
+
+    print("USERS_JSON TYPE: ", type(users_json))
+    print("DSKS TYPE: ", type(dsks))
+
     context = {
         'users_json': users_json,
         'dsks_json': dsks,
@@ -885,24 +1025,26 @@ def updateUsers(request):
             
     print ("updateUsers: PASSABLE PAYLOAD:\n", passedPayload)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'bbrest expiration: {bb.expiration()}')
+    BbRestSetup(request, targetView='users', redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     request.session['target_view'] = 'users'
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #         whoami(request)
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'bbrest expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -945,90 +1087,10 @@ def updateUsers(request):
     # STOPPED HERE
     return JsonResponse(finalResponse) 
 
-# [DONE] WHOAMI returns the current user info/status
-def whoami(request):
-    """View function for whoami page of site."""
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'whoami' 
-        # So after we have the access token we know to come back here.
-        # The following does maintain the https: scheme if that was used with the incomming request.
-        # BUT because I'm terminating the tls at the ngrok server, my incomming request is http.
-        # Hence the redirect to get_auth_code is http in development. But we want our redirect_uri to be
-        # have a scheme of https so that the Learn server can redirect back through ngrok with our 
-        # secure SSL cert. We'll have to build a redirect_uri with the https scheme in the 
-        # get_auth_code function.
-    
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
-
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
-        
-    resp = bb.call('GetUser', userId = "me", params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, dataSourceId, created'}, sync=True ) #Need BbRest to support "me"
-    
-    user_json = resp.json()
-
-    #note: this next call is what is failing with 3LO on non-gateway logins
-    #could probably just wrap the next three lines in a try/except statment 
-    # - handing off to 'guestusernotallowed' if datasource call fails
-    try:
-        dskresp = bb.call('GetDataSource', dataSourceId = user_json['dataSourceId'], sync=True)
-        dsk_json = dskresp.json()
-        user_json['dataSourceId'] = dsk_json['externalId']
-    except:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
-
-    context = {
-        'user_json': user_json,
-        'access_token': bb.token_info['access_token']
-    }
-
-    # Render the HTML template index.html with the data in the context variable
-    return render(request, 'whoami.html', context=context)
 
 # [DONE] Sorts the DSK list
 def sortDsk(dsks, sortBy):
   return sorted(dsks, key=lambda x: x[sortBy])
-
-# [DONE]
-def isGuestUser(bb_json):
-    guestStatus = False
-
-    bb = jsonpickle.decode(bb_json)
-    resp = bb.call('GetUser', userId = "me", params = {'fields':'userName'}, sync=True ) 
-    
-    user_json = resp.json()
-
-    print(f"ISGUESTUSER::userName: {user_json['userName']}")
-
-    if user_json['userName'] == 'guest':
-        guestStatus = True
-        ISGUESTUSER = True
-    else:
-        guestStatus = False
-        ISGUESTUSER = False
-
-    return guestStatus
 
 # [DONE]
 def guestusernotallowed(request):
@@ -1061,22 +1123,23 @@ def updateCourseMemberships(request):
         crs = "courseId:"+searchValue
         print ("COURSE TO UPDATE:", crs)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, redirectRequired=True)
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -1141,122 +1204,123 @@ def updateCourseMemberships(request):
                    
     return JsonResponse(finalResponse)
 
+# [DONE] Legacy - replaced...
+# def validate_userIdentifier(request):
+#     task = request.GET.get('task')
+#     searchBy = request.GET.get('searchBy') #externalId || userName
+#     searchValue = request.GET.get('searchValue')
+#     if (searchValue is not None):
+#         searchValue = searchValue.strip()
+#     print("validate_userIdentifier: LEARNFQDN", LEARNFQDN)
+#     print ("validate_userIdentifier: SEARCHBY: ", searchBy)
+#     print ("validate_userIdentifier: SEARCHVALUE: ", searchValue)
+#     print ("validate_userIdentifier: TASK: ", task)
+    
+#     if (searchBy == 'externalId'):
+#         usr = "externalId:" + searchValue
+#     else:
+#         usr = "userName:" + searchValue
+
+#     print(f"user pattern: {usr}")
+
+#     try:
+#         bb_json = request.session.get('bb_json')
+#         if (bb_json is None):
+#             bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+#             bb_json = jsonpickle.encode(bb)
+#             print('pickled BbRest putting it on session')
+#             request.session['bb_json'] = bb_json
+#         else:
+#             print('got BbRest from session')
+#             bb = jsonpickle.decode(bb_json)
+#             if bb.is_expired():
+#                 print('expired token')
+#                 request.session['bb_json'] = None
+#             bb.supported_functions() # This and the following are required after
+#             bb.method_generator()    # unpickling the pickled object.
+#             print(f'expiration: {bb.expiration()}')
+
+#     except:
+#         data = {
+#             'error_result': "Your 3LO session has expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL."
+#         }
+
+#     return JsonResponse(data)
+
+    
+#     validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
+
+#     print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+#     print(f"VALIDATIONRESULT:\n", validationresult.json())
+
+#     #Use asynchronous when processing requests
+#     # tasks = []
+#     # for user in users:
+#     #     tasks.append(bb.GetUser(user), sync=False)
+#     #     resps = await asynchio.gather(*tasks)
+
+#     if (validationresult.status_code == 200):
+#         foundStatus = True
+#     else:
+#         foundStatus = False
+    
+#     data = {
+#         'is_found': foundStatus
+#     }
+
+#     return JsonResponse(data)
+
 # [DONE]
-def validate_userIdentifier(request):
-    task = request.GET.get('task')
-    searchBy = request.GET.get('searchBy') #externalId || userName
-    searchValue = request.GET.get('searchValue')
-    if (searchValue is not None):
-        searchValue = searchValue.strip()
-    print("validate_userIdentifier: LEARNFQDN", LEARNFQDN)
-    print ("validate_userIdentifier: SEARCHBY: ", searchBy)
-    print ("validate_userIdentifier: SEARCHVALUE: ", searchValue)
-    print ("validate_userIdentifier: TASK: ", task)
+# def validate_courseIdentifier(request):
+#     print("validate_courseIdentifier called....")
+#     task = request.GET.get('task')
+#     searchBy = request.GET.get('searchBy') #externalId || userName
+#     searchValue = request.GET.get('searchValue')
+#     if (searchValue is not None):
+#         searchValue = searchValue.strip()
+#     print("LEARNFQDN", LEARNFQDN)
+#     print ("validate_courseIdentifier: SEARCHBY: ", searchBy)
+#     print ("validate_courseIdentifier: SEARCHVALUE: ", searchValue)
+#     print ("validate_courseIdentifier: TASK: ", task)
     
-    if (searchBy == 'externalId'):
-        usr = "externalId:" + searchValue
-    else:
-        usr = "userName:" + searchValue
+#     if (searchBy == 'externalId'):
+#         crs = "externalId:" + searchValue
+#     else:
+#         crs = "courseId:" + searchValue
 
-    print(f"user pattern: {usr}")
-
-    try:
-        bb_json = request.session.get('bb_json')
-        if (bb_json is None):
-            bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-            bb_json = jsonpickle.encode(bb)
-            print('pickled BbRest putting it on session')
-            request.session['bb_json'] = bb_json
-        else:
-            print('got BbRest from session')
-            bb = jsonpickle.decode(bb_json)
-            if bb.is_expired():
-                print('expired token')
-                request.session['bb_json'] = None
-            bb.supported_functions() # This and the following are required after
-            bb.method_generator()    # unpickling the pickled object.
-            print(f'expiration: {bb.expiration()}')
-
-    except:
-        data = {
-            'error_result': "Your 3LO session has expired. Please use the 'Learn Logout' link to the left, log back into Learn, and reload the DSKTOOL."
-        }
-
-    return JsonResponse(data)
+#     BbRestSetup(request)
+#     # bb_json = request.session.get('bb_json')
+#     # if (bb_json is None):
+#     #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+#     #     bb_json = jsonpickle.encode(bb)
+#     #     print('pickled BbRest putting it on session')
+#     #     request.session['bb_json'] = bb_json
+#     # else:
+#     #     print('got BbRest from session')
+#     #     bb = jsonpickle.decode(bb_json)
+#     #     if bb.is_expired():
+#     #         print('expired token')
+#     #         request.session['bb_json'] = None
+#     #     bb.supported_functions() # This and the following are required after
+#     #     bb.method_generator()    # unpickling the pickled object.
+#     #     print(f'expiratXion: {bb.expiration()}')
 
     
-    validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
+#     validationresult = bb.GetCourse(courseId = crs, sync=True )
 
-    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
-    print(f"VALIDATIONRESULT:\n", validationresult.json())
+#     print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
+#     print(f"VALIDATIONRESULT:\n", validationresult.json())
 
-    #Use asynchronous when processing requests
-    # tasks = []
-    # for user in users:
-    #     tasks.append(bb.GetUser(user), sync=False)
-    #     resps = await asynchio.gather(*tasks)
-
-    if (validationresult.status_code == 200):
-        foundStatus = True
-    else:
-        foundStatus = False
+#     if (validationresult.status_code == 200):
+#         foundStatus = True
+#     else:
+#         foundStatus = False
     
-    data = {
-        'is_found': foundStatus
-    }
+#     data = {
+#         'is_found': foundStatus
+#     }
 
-    return JsonResponse(data)
-
-# [DONE]
-def validate_courseIdentifier(request):
-    print("validate_courseIdentifier called....")
-    task = request.GET.get('task')
-    searchBy = request.GET.get('searchBy') #externalId || userName
-    searchValue = request.GET.get('searchValue')
-    if (searchValue is not None):
-        searchValue = searchValue.strip()
-    print("LEARNFQDN", LEARNFQDN)
-    print ("validate_courseIdentifier: SEARCHBY: ", searchBy)
-    print ("validate_courseIdentifier: SEARCHVALUE: ", searchValue)
-    print ("validate_courseIdentifier: TASK: ", task)
-    
-    if (searchBy == 'externalId'):
-        crs = "externalId:" + searchValue
-    else:
-        crs = "courseId:" + searchValue
-
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
-
-    
-    validationresult = bb.GetCourse(courseId = crs, sync=True )
-
-    print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
-    print(f"VALIDATIONRESULT:\n", validationresult.json())
-
-    if (validationresult.status_code == 200):
-        foundStatus = True
-    else:
-        foundStatus = False
-    
-    data = {
-        'is_found': foundStatus
-    }
-
-    return JsonResponse(data)
+#     return JsonResponse(data)
 
 # [DONE]
 def getCourseMemberships(request):
@@ -1280,22 +1344,22 @@ def getCourseMemberships(request):
     else:
         crs = "courseId:" + searchValue
 
-    bb_json = request.session.get('bb_json')
-
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request)
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     memberships_result = bb.GetCourseMemberships( courseId = crs, limit = 1500, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
 
@@ -1355,21 +1419,22 @@ def validate_userIdentifier(request):
 
     print(f"user pattern: {usr}")
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request)
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     
     validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
@@ -1412,21 +1477,22 @@ def validate_courseIdentifier(request):
     else:
         crs = "courseId:" + searchValue
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request)
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     
     validationresult = bb.GetCourse(courseId = crs, sync=True )
@@ -1470,21 +1536,22 @@ def getCourseMembership(request):
     else:
         usr = "userName:" + usrToSearchFor
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request)
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     membership_result = bb.GetMembership( courseId = crs, userId = usr, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, childCourseId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
 
@@ -1553,22 +1620,23 @@ def getCourseMemberships(request):
     else:
         crs = "courseId:" + searchValue
 
-    bb_json = request.session.get('bb_json')
+    BbRestSetup(request)
 
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     
     if (filterByDSK == "true"):
@@ -1648,22 +1716,24 @@ def updateCourseMembership(request):
     else:
         usr = "userName:" + usrToSearchFor
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -1758,22 +1828,24 @@ def updateCourseMemberships(request):
         crs = "courseId:"+searchValue
         print ("COURSE TO UPDATE:", crs)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -1874,22 +1946,23 @@ def getUserMemberships(request):
     else:
         usr = "userName:" + searchValue
 
-    bb_json = request.session.get('bb_json')
+    BbRestSetup(request)
 
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
    
     if (filterByDSK == "true"):
         memberships_result = bb.GetUserMemberships( userId = usr, limit = 1500, params = {'dataSourceId': filterByDSKValue, 'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, course.name, childCourseId, course.externalId'}, sync=True )
@@ -1946,22 +2019,24 @@ def updateUserMemberships(request):
     crsArray =  request.GET.getlist('pmcUserId[]')
     print("REQUEST pmcUsersList: \n", crsArray)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -2040,7 +2115,7 @@ def updateUserMemberships(request):
                    
     return JsonResponse(finalResponse)
 
-# [DONE] Retrieve a single course data
+# [INPROGRESS] Retrieve a single course data - called from users page
 def getCourse(request):
     # returns a list of one course - saves on javascript side.
 
@@ -2051,30 +2126,26 @@ def getCourse(request):
     print ("SEARCHBY: ", searchBy)
     print ("SEARCHVALUE: ", searchValue)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request, 'users', redirectRequired=True)
 
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     request.session['target_view'] = 'users'
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #         whoami(request)
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
      
     #Process request...
     if (searchBy == 'externalId'):
@@ -2087,7 +2158,7 @@ def getCourse(request):
     print(f"course pattern: {crs}")
 
     isFoundStatus = False
-
+    
     resp = bb.GetCourse(courseId = crs, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified'}, sync=True )
 
     print("GETCOURSE RESP: \n", resp.json())
@@ -2122,7 +2193,7 @@ def getCourse(request):
 
     return JsonResponse(context)
 
-# [DONE] Update a single course
+# [DONE] Update a single course - called from users page
 def updateCourse(request):
     print("UPDATE COURSE...")
     print ('Request:\n ')
@@ -2153,24 +2224,26 @@ def updateCourse(request):
     # for x, y in passedPayload.items():
     #     print(x, y)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'bbrest expiration: {bb.expiration()}')
+    BbRestSetup(request, 'users', redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     request.session['target_view'] = 'users'
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #         whoami(request)
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'bbrest expiration: {bb.expiration()}')
 
     resp = bb.UpdateCourse(courseId = updateValue, payload=passedPayload, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified'}, sync=True )
 
@@ -2197,66 +2270,140 @@ def updateCourse(request):
 
     return JsonResponse(context)
 
-# [DONE] Retrieve course list (based on DSK)
+# [INPROGRESS] Retrieve course list (All or based on DSK)
+# this method handles:
+# Query by:
+#   DSK
+#   ALLCOURSES
+# Additionally this method supports searching by:
+#   DATE
+#   AVAILABILITY
 def getCourses(request):
-    print ("ENTER: getCourses")
-
+    print ("NEW QUERY: getCourses")
     context = ""
     searchBy = request.GET.get('searchBy')
     searchValue = request.GET.get('searchValue')
+    searchOptions = request.GET.get('searchOptions')
+    searchAvailabilityOption = request.GET.get('searchAvailabilityOption')
+    searchDate = request.GET.get('searchDate')
+    searchDateOption = request.GET.get('searchDateOption')
+    searchOptionList = None
+
     if (searchValue is not None):
         searchValue = searchValue.strip()
-    print ("GETCOURSES SEARCHBY: ", searchBy)
-    print ("GETCOURSES SEARCHVALUE: ", searchValue)
+        print ("GETCOURSES SEARCHBY: ", searchBy)
+    if (searchValue is not None):
+        print ("GETCOURSES SEARCHVALUE: ", searchValue)
+    if (searchOptions is not None):
+        print(f"GETCOURSES SEARCHOPTIONS: ", searchOptions)
+        searchOptionList = searchOptions.split(';')
+        print(f"GETCOURSES SEARCHOPTIONLIST: ", searchOptionList)
+        print(f"IS BY AVAILABILITY A SELECTED OPTION? ", searchOptionList.count('searchAvailability'))
+        print(f"IS BY DATE A SELECTED OPTION? ", searchOptionList.count('date'))
+    if (searchAvailabilityOption is not None):
+        print(f"GETCOURSES searchAvailabilityOption: ", searchAvailabilityOption)
+    if (searchDate is not None):
+        print(f"GETCOURSES searchDate: ", searchDate)
+    if (searchDateOption is not None):
+        print(f"GETCOURSES searchDateOption: ", searchDateOption)
     print (f"GETCOURSES REQUEST:\n", request)
-
-
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'courses'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
-
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
-
     isFoundStatus = False
+    searchByDate = False
+    searchByAvailability = False
+    filterByAvailability = False
+    filterByDSK = False
 
-    resp = bb.GetCourses(limit = 500000, params = {'dataSourceId': searchValue,'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, created'}, sync=True )
+    if (searchOptions is not None):
+        if searchOptionList.count('date') == 1: searchByDate = True
+        if searchOptionList.count('availability') == 1: searchByAvailability = True
+    print("SEARCH OPTIONS: byAvailability: ",  searchByAvailability, "byDate: ", searchByDate)
 
-    # print("GETCOURSE RESP: \n", resp.json())
+    BbRestSetup(request, targetView='courses', redirectRequired=True)
 
+    #if search request is by allcourses...
+    if searchBy == 'allcourses':
+        if searchByDate:
+            # use searchDate parameter
+            print("SEARCH FOR ALL COURSES USING DATE...")
+            resp = bb.GetCourses(limit = 500000, params = {'created': searchDate,'createdCompare': searchDateOption, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified, hasChildren, parentId'}, sync=True )
+            filterByDSK = False
+            if searchByAvailability: filterByAvailability = True
+            else: filterByAvailability = False
+        # elif searchByAvailability:
+        #     # use searchAvailability parameter
+        #     print("SEARCH FOR ALL COURSES USING AVAILABILTY...")
+        #     resp = bb.GetCourses(limit = 500000, params = {'availability.available': searchAvailabilityOption, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified'}, sync=True )
+
+        else : # Not by date request, just do a standard request and return everything and filter on availability if requested
+            print("SEARCH FOR ALL COURSES and FILTER ON AVAILABILITY if requested...")
+            resp = bb.GetCourses(limit = 500000, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified, hasChildren, parentId'}, sync=True )
+            filterByDSK = False
+            if searchByAvailability: filterByAvailability = True
+            else: filterByAvailability = False
+
+    elif searchBy == "DSK" : # we want courses with a specific DSK
+        if searchByDate : 
+            # Search by Date then filter results by availability, then purge DSKs
+            print("GETCOURSES EXECUTE DATE SEARCH on DSK search; Then purge non-matching DSKs")
+            resp = bb.GetCourses(limit = 500000, params = {'created': searchDate,'createdCompare': searchDateOption, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified, hasChildren, parentId'}, sync=True )
+            filterByDSK = True
+            if searchByAvailability: filterByAvailability = True
+
+        else: 
+            print("GETCOURSES EXECUTE DSK ONLY SEARCH; Then filter on availability if selected...")
+
+            # DSK post request filter only, just do a standard request and return everything.
+            resp = bb.GetCourses(limit = 500000, params = {'dataSourceId': searchValue,'createdCompare': searchDateOption, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, modified, hasChildren, parentId'}, sync=True )   
+            filterByDSK = True # this is set to true to capture child courses that don't match the DSK...
+            if searchByAvailability: filterByAvailability = True
+            else: filterByAvailability = False
+
+    # else: search is by specifics in which case getCourse was called and which should just return single courses. 
+        
     if (resp.status_code == 200):
         courses_json = resp.json() 
-        print (f"courses count: ", len(courses_json["results"]))
-
+        print (f"COURSES COUNT(prepurge): ", len(courses_json["results"]))
+        
+        # are we purging DSKs based on incoming option?
+        # purge results based on options
+        # if this is a DSK search we have already pulled the courses based on DSK
         dsksResp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'})
         dsks_json = dsksResp.json()
         dsks = dsks_json["results"]
         dsks = sortDsk(dsks, 'externalId')
-        
+
+        if filterByAvailability: 
+            # filter resp by selected availability...
+            print("GETCOURSES EXECUTE AVAILABILITY PURGE")
+            print("AVAILABILITY OPTION: ", searchAvailabilityOption)
+            purgedResults = availabilityPurge(courses_json,searchAvailabilityOption)
+            print("FILTERBYAVAILABILITY PURGED AVAILABILITY RESULTS:\n", purgedResults)
+            print("FILTERBYAVAILABILITY PURGED RESULTS COUNT: ", len(purgedResults["results"]))
+            courses_json = purgedResults
+
+        if filterByDSK:
+            # filter resp by selected date...
+            print("PURGING RESULTS based on DSK")
+            purgedResults = datasourcePurge(courses_json, searchValue)
+            print("FILTERBYDSK PURGED DSK RESULTS:\n", purgedResults)
+            print("FILTERBYDSK PURGED RESULTS COUNT: ", len(purgedResults["results"]))
+            courses_json = purgedResults
+
+        courses_json["length"] = len(courses_json)  
+        print("DATASOURCE PURGE: courses_json: /n", courses_json)
+        print("courses_json SIZE: ", len(courses_json))
+
+
+        # we always want to replace dsk primary keys with the dsk externalId...
         for idx, course in enumerate(courses_json["results"]):
             for dsk in dsks:
                 #print("DSK:\n", dsk)
                 #print("DSKID: ", dsk["id"])
                 if (dsk["id"] == course["dataSourceId"]):
                     courses_json["results"][idx]["dataSourceId"] = dsk["externalId"]
+
+        print("COURSES_JSON TYPE: ", type(courses_json))
+        print("DSKS TYPE: ", type(dsks))
 
         context = {
             'result_json': courses_json,
@@ -2301,24 +2448,26 @@ def updateCourses(request):
             
     print ("updateCourses: PASSABLE PAYLOAD:\n", passedPayload)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'courses'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'bbrest expiration: {bb.expiration()}')
+    BbRestSetup(request, targetView='courses', redirectRequired=True)
+
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    #     request.session['target_view'] = 'courses'
+    #     return HttpResponseRedirect(reverse('get_auth_code'))
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #         whoami(request)
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'bbrest expiration: {bb.expiration()}')
 
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
@@ -2361,7 +2510,7 @@ def updateCourses(request):
     # STOPPED HERE
     return JsonResponse(finalResponse) 
 
-# [DONE] Retrieve membership list (based on DSK)
+# [IN PROGRESS] Retrieve membership list (based on DSK)
 def getMembershipsByDSK(request):
     print ("GET MEMBERSHIPS BY DSK CALLED")
     print("request method: ", request.method)
@@ -2379,36 +2528,37 @@ def getMembershipsByDSK(request):
 
     isFoundStatus = False
 
-    bb_json = request.session.get('bb_json')
+    BbRestSetup(request)
 
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    # bb_json = request.session.get('bb_json')
+    # if (bb_json is None):
+    #     bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+    #     bb_json = jsonpickle.encode(bb)
+    #     print('pickled BbRest putting it on session')
+    #     request.session['bb_json'] = bb_json
+    # else:
+    #     print('got BbRest from session')
+    #     bb = jsonpickle.decode(bb_json)
+    #     if bb.is_expired():
+    #         print('expired token')
+    #         request.session['bb_json'] = None
+    #     bb.supported_functions() # This and the following are required after
+    #     bb.method_generator()    # unpickling the pickled object.
+    #     print(f'expiration: {bb.expiration()}')
 
     # First get course list based on crsAvailFilter
     # Then get memberships for each course based on DSK filter
 
 
-    # memberships_result = bb.GetMemberships( courseId = limit = 500000, params = {'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, course.name, childCourseId, course.externalId'}, sync=True )
+    memberships_result = bb.GetMemberships(limit = 500000, params = {'datasource': 'searchValue', 'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, modified, courseRoleId, course.name, childCourseId, course.externalId'}, sync=True )
 
     # print("memberships_result status: ", memberships_result.status_code)
-    # membershipsResultJSON = memberships_result.json()
+    membershipsResultJSON = memberships_result.json()
     # print(f"\nmemberships_result:\n", membershipsResultJSON)
 
     context = {
         "is_found": isFoundStatus,
-        'result_json': "",
+        'result_json': membershipsResultJSON,
     }
 
     return JsonResponse(context)
@@ -2417,38 +2567,16 @@ def getMembershipsByDSK(request):
 def getDataSourceKeys(request):
     print (f"getDataSourceKeys request:\n", request)
 
-    bb_json = request.session.get('bb_json')
-    if (bb_json is None):
-        bb = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
-        bb_json = jsonpickle.encode(bb)
-        print('pickled BbRest putting it on session')
-        request.session['bb_json'] = bb_json
-        request.session['target_view'] = 'users'
-        return HttpResponseRedirect(reverse('get_auth_code'))
-    else:
-        print('got BbRest from session')
-        bb = jsonpickle.decode(bb_json)
-        if bb.is_expired():
-            print('expired token')
-            request.session['bb_json'] = None
-            whoami(request)
-        bb.supported_functions() # This and the following are required after
-        bb.method_generator()    # unpickling the pickled object.
-        print(f'expiration: {bb.expiration()}')
+    BbRestSetup(request)
 
-    if ISGUESTUSER:
-        context = {
-            'learn_server': LEARNFQDN,
-        }   
-        return render(request, 'guestusernotallowed.html', context=context )
-
-    resp = bb.GetDataSources(limit = 5000,  params = {'fields': 'id, externalId'}, sync=True )
+    resp = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}, sync=True )
 
     isFoundStatus = False
     if (resp.status_code == 200):
         result_json = resp.json() #return actual error
         
         print(f"GET DSKS RESP: \n", resp.json())
+        print(f"DSK COUNT: ", len(result_json["results"]))
 
         dsks = result_json["results"]
         dsks = sortDsk(dsks, 'externalId')
@@ -2468,3 +2596,63 @@ def getDataSourceKeys(request):
         }
 
     return JsonResponse(context)
+
+# [IN PROGRESS] Take a response and refactor, purging unwanted DSKs
+# called by any COLLECTION request requiring availability as a search option e.g. getCourses, getUsers
+#  purgedResults = datasourcePurge(resp, searchValue)
+
+def datasourcePurge(resp, dataSourceOption):
+    dataSourceToKeep = dataSourceOption
+    purgedResponse = { "results": [] }
+    #dataSourceExternalId = dskList[dataSourceToKeep]["externalId"]
+    print("CALLED DATASOURCEPURGE...")
+    print("DATASOURCE PURGE: datasourceOption: ", dataSourceToKeep)
+    print("RESP:\n", resp)
+    #print("DATASOURCE EXTERNALID: ", dataSourceExternalId)
+
+    #iterate over resp, and remove any records not matching the datasourceOption
+    # if result:dataSourceId == datasourceToKeep then update the dataSourseExternalId.
+    items=purgedResponse["results"]
+
+    for idx, item in enumerate(resp["results"]):
+        if (item["dataSourceId"] == dataSourceToKeep):
+            print("ITEM: ", item)
+            print(type(item))
+            items.append(item)
+            if "hasChildren" in item and item["hasChildren"] == True:
+                #get children and add to items
+                print("GET ITEM CHILDREN.")
+                children = bb.GetCourseChildren(courseId=item["id"], limit = 500000, params = { 'fields':'childCourse.id, childCourse.courseId, childCourse.externalId, childCourse.name, childCourse.organization, childCourse.availability.available, childCourse.dataSourceId, childCourse.created, childCourse.hasChildren, childCourse.parentId'}, sync=True )
+                if (children.status_code == 200):
+                    children_json = children.json()
+                    for idx2, child in enumerate(children_json["results"]):
+                        child["childCourse"]["modified"] = child["childCourse"]["created"]
+                        print("CHILD: ", child["childCourse"])
+                        items.append(child["childCourse"])
+
+    print("DATASOURCE PURGE PURGEDRESPONSE SIZE: ", len(purgedResponse))
+    
+    return purgedResponse
+
+def availabilityPurge(resp, searchAvailabilityOption):
+    availabilityToKeep = searchAvailabilityOption
+    purgedResponse = { "results": [] }
+
+    print("Called availabilityPurge")
+    print("AVAILABILITY PURGE: searchAvailabilityOption: ", availabilityToKeep)
+    #dataSourceExternalId = dskList[dataSourceToKeep]["externalId"]
+    #iterate over resp, and remove any records not matching the datasourceOption
+    # if result:dataSourceId == datasourceToKeep then update the dataSourseExternalId.
+    items=purgedResponse["results"]
+
+    for idx, item in enumerate(resp["results"]):
+        itemAvailability=item["availability"]["available"]
+        print("ITEM AVAILABILITY: ", itemAvailability.upper())
+        if (item["availability"]["available"].upper() == availabilityToKeep.upper()):
+            print("ITEM: ", item)
+            print(type(item))
+            items.append(item)
+    # print("AVAILABILITY PURGE: purgedResponse: ", purgedResponse)
+    print("AVAILABILITY PURGE PURGEDRESPONSE SIZE: ", len(purgedResponse))
+
+    return purgedResponse

@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.1.6 (08/24/2021)
+# OSCELOT DSKTOOL for HEROKU v1.2.0 (03/10/2022)
 
 See [Release Notes](#Release-Notes) below.
 
@@ -70,28 +70,39 @@ This URL is sticky so bookmark it for later use and you are done!
 
 **IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, may not work correctly if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue. 
 
-Additionally, it appears that your 3LO session may expire hourly requiring you to log out of the DSKTOOL, sign into Learn, and return to the DSKTOOL.
+Additionally, it appears that your 3LO session may expire hourly (check the "Who am I" link) requiring you to log out of the DSKTOOL via the "Learn Logout" link, return to the DSKTOOL homepage and when prompted relogin to Learn.
 
 <hr>
 
 ## Release Notes
-### v1.1.6 (08/24/2021)
+### v1.2.0 (03/14/2022)
 <ul>
-  <li>Fixed issue with DSK lists being truncated at 100</li>
-  <li>Released comparable v1.1.6 docker image.
+  <li>Added Date and Availability options to Users/Courses DSK search</li>
+  <li>Added Course External Id to User Enrollment results</li>
+  <li>Fixed a couple annoying UI issues that no one else probably noticed</li>
+  <li>Released comparable v1.2.0 docker image</li>
 </ul>
 
 ## ToDo
 <ul>
-  <li>Add Calendar selection for date limiting searches
-  <li>Clean up code redundancies
+  <li>Add Availability option to Enrollments Course/User searches</li>
+  <li>Add Date option to Enrollments Course/User searches</li>
+  <li>Add Role option to Course Membership updates</li>
+  <li>Clean up code redundancies</li>
 </ul>
 
 ### v1.1.6 (08/24/2021)
 <ul>
-  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
-  <li>Released comparable v1.1.6 docker image.
+  <li>Fixed issue with DSK lists being truncated at 100</li>
+  <li>Released comparable v1.2.0 docker image.</li>
 </ul>
+
+### v1.1.5
+<ul>
+  <li>Fixed issue with Django ALLOW_HOSTS which prevented docker images from correctly running</li>
+  <li>Released comparable v1.2.0 docker image.
+</ul>
+
 ### 1.1.1 (02/29/2021)
 <ul>
   <li>Fixed a few annoying UI/UX issues</li>

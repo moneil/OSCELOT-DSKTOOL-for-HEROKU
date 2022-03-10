@@ -1,10 +1,10 @@
-$(function () {
-    console.log("Hello!");
-});
+// $(function () {
+//     console.log("Hello!");
+// });
 
-$(function () {
-    toggleDivs("byCrsUsr");
-});
+// $(function () {
+//     toggleDivs("byCrsUsr");
+// });
 
 function toggleDivs(anyDiv) {
     divArray = ['byCrsUsr', 'byCrs', 'byUsr'];

@@ -7,7 +7,7 @@
   </div>
 </div>
 
-<h1>Search for Courses or Oganizations</h1>
+<h1>Search for Courses or Organizations</h1>
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
   <p>
@@ -15,18 +15,76 @@
   </p>
   <form id="searchCourseForm" action="/courses">
     {% csrf_token %}
-    <select name="searchBy" id="searchBy">
-      <option value="courseId">Course/Organization Id</option>
-      <option value="externalId">External Id</option>
-      <!-- <option value="primaryId">Primary Id</option> -->
-      <option value="DSK">Data Source Key</option>
-    </select>
-    <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all courses with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> </div>
+    <div class="container">
+      <div class = "row">
+        <div>
+          <select name="searchBy" id="searchBy">
+            <option value="courseId">Course/Organization Id</option>
+            <option value="externalId">External Id</option>
+            <option value="DSK">Data Source Key</option>
+            <!-- <option value="allcourses">All Courses</option> -->
+          </select>
+          &nbsp;
+        </div>
 
-    <div name="nonDSKSearch" id="nonDSKSearch" style="display: inline;"><input type="text" id="searchValue" name="searchValue"></br></div>
-      <div style="text-align:right; width:100%; padding:0;">
-        <input id="submitCourseSearch" type="submit" value="Search"/>
+        <div name="dskOptions" id="dskOptions" style="display: inline;">
+          Search for all courses with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> <!-- <br>
+          <label for="manualDSK">or enter a specific DSK: </label> <input type="text" id="manualDSK" name="manualDSK"><br>-->
+        </div>
+
+        <div name="nonDSKSearch" id="nonDSKSearch" style="display: inline;">
+          <input type="text" id="searchValue" name="searchValue"></br>
+        </div>
+
+        <div><p>&nbsp;</p></div>
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-6" id="searchOptions" name="searchOptions" style="display: inline;">
+              <b>Search Options <i>(multiple selections increase search time)</i>:</b>
+              <p>
+                <input type="checkbox" id="searchAvailability" name="searchAvailability"> <label for="searchAvailability">Availability (do not check if you want all results)</label>
+                <div id="searchByAvailStatus" name="searchByAvailStatus" style="display: none;">
+                  <input type="radio" name="searchAvailabilityOption" id="onlyAvailableStatus" value="yes" checked> <label for="onlyAvailableStatus">Only Available</label>&nbsp;&nbsp;<input type="radio" name="searchAvailabilityOption" id="unAvailableStatus" value="no"> <label for="unAvailStatus">Only Unavailable</label>&nbsp;&nbsp;<input type="radio" name="searchAvailabilityOption" id="disabledAvailableStatus" value="disabled"> <label for="disabledAvailableStatus">Only Disabled</label> <!-- <input type="radio" name="searchAvailabilityOption" id="allAvailableStatus" value="term" checked> <label for="allAvailStatus">by Term</label> -->
+                </div>
+              </p>
+              <p>
+                <div id="searchByDateChkBx" name="searchByDateChkBx">
+                <input type="checkbox" id="searchDate" name="searchDate" unchecked> Search by Date Created
+          
+                <div id="searchByDate" name="searchByDate" style="display: none;">
+                  mm/dd/yy or select using calendar (blank date uses current date and time)
+                 <div name="dtpicker" id="dtpicker" class="col-xs-6" style="display: inline;">
+                    <div class="form-group">
+                      <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                          <div class="input-group-text">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div display: block>
+                    <p>
+                    Select Comparison: 
+                    </p>
+                    <p>
+                      <input type="radio" id="lessThan" name="dtCompare" value="lessThan"> <label for="lessThan">Less than</label> &nbsp;&nbsp; <input type="radio" id="greaterOrEqual" name="dtCompare" value="greaterOrEqual" checked> <label for="greaterOrEqual">Equal to or greater than</label>
+                    </p>
+                  </div>
+                </div>
+                </div>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div style="text-align:right; width:100%; padding:0;">
+      <input id="submitCourseSearch" type="submit" value="Search"/>
+    </div>
   </form>
 </div>
 <!-- END SEARCH DIV -->
@@ -178,53 +236,114 @@ $("#checkAll").click(function(){
 });
 
   $(document).ready(function(){
-      if ( '#searchBy'.value == 'DSK')
-      {
+      if ( '#searchBy'.value == 'DSK' ) {
+        console.log("SEARCHBY DSK")
         $("#dskOptions").show();
         $("#nonDSKSearch").hide();
-      }
-      else
-      {
+        $("#searchOptions").show();
+        $("#searchByDateChkBx").show();
+      //} else if ('#searchBy'.value == 'allcourses') {
+      //  console.log("SEARCHBY ALLCOURSES")
+      //  $("#dskOptions").hide();
+      //   $("#nonDSKSearch").hide();
+      //   $("#searchOptions").show();
+      } else {
+        console.log("SEARCHBY COURSE or EXTERNAL ID")
         $("#dskOptions").hide();
         $("#nonDSKSearch").show();
+        $("#searchOptions").hide();
+        $("#searchByDateChkBx").hide();
       }
 });
 
-  $(document).ready(function(){
+$(document).ready(function(){
   // console.log("Option Change!!")
-    $('#searchBy').on('change', function() {
-      if ( this.value == 'DSK')
-      {
-        let dsklist = "";
-        let x = 0;
-        x = document.getElementById("dataSourceKeyOptions").options.length;
-        //console.log("before:\n" + x)
-        $("#dskOptions").show();
-        $("#nonDSKSearch").hide();
-        alert("Please note: Searching for Courses based on Data Source may result in a longer processing time due to the possible number of courses associated with the Data Source.\n\nApproximately 30sec to process and display 10K records (500K max).");
+  $('#searchBy').on('change', function() {
+    if ( this.value == 'DSK') {
+      console.log("SEARCHBY DSK")
+      let dsklist = "";
+      let x = 0;
+      x = document.getElementById("dataSourceKeyOptions").options.length;
+      //console.log("before:\n" + x)
+      $("#dskOptions").show();
+      $("#nonDSKSearch").hide();
+      $("#searchOptions").show();
+      $("#searchByDateChkBx").show();
+
+      alert("Please note: Searching for Courses based on Data Source may result in a longer processing time due to the possible number of courses associated with the Data Source.\n\nApproximately 30sec to process and display 10K records (500K max).");
       
-        if (x == 0) {
-          dsklist = getDataSourceKeys();
-          //console.log("dskList: " + dsklist);
-          if (typeof dsklist === undefined) {
-            //do nothing
-          } else {
-            //build dskoptions
-            for ( dsk in dsklist) {
-              if ('INTERNAL' != dskList[dsk]['externalId']) {
-                dskOption = '<option value ='+ dsklist[dsk]['id'] + '>'+ dsklist[dsk]['externalId'] + '</option>';
-                $('#dataSourceKeyList').append(dskOption);
-              }
+      if (x == 0) {
+        dsklist = getDataSourceKeys();
+        //console.log("dskList: " + dsklist);
+        if (typeof dsklist === undefined) {
+          //do nothing
+        } else {
+          //build dskoptions
+          for ( dsk in dsklist) {
+            if ('INTERNAL' != dskList[dsk]['externalId']) {
+              dskOption = '<option value ='+ dsklist[dsk]['id'] + '>'+ dsklist[dsk]['externalId'] + '</option>';
+              $('#dataSourceKeyList').append(dskOption);
             }
           }
         }
       }
-      else
-      {
-        $("#dskOptions").hide();
-        $("#nonDSKSearch").show();
-      }
-    });
+    } else if (this.value == 'allcourses') {
+      console.log("SEARCHBY ALLCOURSES")
+      $("#dskOptions").hide();
+      $("#nonDSKSearch").hide();
+      $("#searchOptions").show();
+      $("#searchByDateChkBx").show();
+
+      alert("Please note: Searching for all Courses will result in a longer processing time due to the possible number of courses. Note that additional search options will additionally increase processing time.\n\nApproximately 30sec to process and display 10K records (500K max).");
+    } else {
+      console.log("SEARCHBY COURSE or EXTERNAL ID")
+      $("#dskOptions").hide();
+      $("#nonDSKSearch").show();
+      $("#searchOptions").hide();
+      $("#searchByDateChkBx").hide();
+    }
+  });
+});
+
+
+$(document).ready(function(){
+  if (!$('#searchAvailability').checked) {
+      console.log("searchByAvailStatus hide!");
+      $('#searchByAvailStatus').hide();
+  }
+  $("#searchAvailability").change(function () {
+    console.log("searchAvailability checkbox toggled!")
+    //$('#searchByDate').toggle();
+    if (!this.checked) {
+      console.log("searchBAvailability hide!");
+      $('#searchByAvailStatus').hide();
+    } else {
+      console.log("searchByAvailStatus show!");
+      $('#searchByAvailStatus').show();
+      //$('#searchByDate').hide();
+      //$('#searchDate').prop('checked', false);
+    }
+  });
+});
+
+$(document).ready(function(){
+  if (!$('#searchByDate').checked) {
+      console.log("searchDate hide!");
+      $('#searchByDate').hide();
+  }
+  $("#searchDate").change(function () {
+    console.log("searchDate checkbox toggled!")
+    //$('#searchByDate').toggle();
+    if (!this.checked) {
+      console.log("searchDate hide!");
+      $('#searchByDate').hide();
+    } else {
+      console.log("searchDate show!");
+      $('#searchByDate').show();
+      //$('#searchByAvailStatus').hide();
+      //$('#searchAvailability').prop('checked', false);
+    }
+  });
 });
 
 /* AJAX!! */
@@ -277,7 +396,33 @@ $("#searchValue").change(function(){
     "searchValue": document.getElementById("searchCourseForm").searchValue.value
   }
 
-  console.log("VALIDATE ENTERED USER IDENTIFIER:searchCourseForm:\n" + JSON.stringify(data));
+  //searchAvailabilityOption
+  console.log("CHECK COURSE FOR SEARCH OPTIONS");
+  console.log("searchAvailability = " + $('#searchAvailability').prop('checked') );
+  if ( $('#searchAvailability').prop('checked') ) {
+    console.log("COLLECT SEARCH BY AVAILABILITY OPTIONS.")
+
+    // add searchAvailabilityOption to data
+    console.log("AVAILABILITY OPTION: " + $("input[name=searchAvailabilityOption]:checked").val() );
+    data["searchAvailabilityOption"] = $('#searchAvailabilityOption').value;
+  }
+  //searchDateOption
+  if ($('#searchDate').checked) {
+    // add searchDateOption to data
+    console.log("COLLECT SEARCH BY DATE OPTIONS.")
+
+    var date = $('#datetimepicker1').datetimepicker('viewDate');
+        console.log("selectedDate: " + date);
+        // var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        // var localTime = (selectedDate - tzoffset);
+        // console.log("localTime: " + localTime);
+
+        console.log("ISODATE [button]: " + localISOTime(date) );
+    data.push("searchDate", localISOTime(date));
+    data.push("searchDateOption", $('#dtCompare').value);
+  }
+
+  console.log("VALIDATE ENTERED COURSE IDENTIFIER:searchCourseForm:\n" + JSON.stringify(data));
 
   $.ajax({
     //type: 'POST',
@@ -317,6 +462,7 @@ $("#dataSourceKeyOptions").change(function () {
   
 });
 
+
 // [DONE] Course search request
 $('#searchCourseForm').on('submit', function(e){
   console.log("searchCourseForm called");
@@ -337,10 +483,8 @@ $('#searchCourseForm').on('submit', function(e){
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
 
-  if (  (document.getElementById("searchCourseForm").searchValue.value === "") 
-        && 
-        (document.getElementById("searchCourseForm").searchBy.value != "DSK") 
-     ) {
+  
+  if ( (document.getElementById("searchCourseForm").searchBy.value == "courseId" || document.getElementById("searchCourseForm").searchBy.value == "externalId") && document.getElementById("searchCourseForm").searchValue.value === "") {
     alert("You must provide a Course identifier.");
     return;
   }
@@ -349,19 +493,74 @@ $('#searchCourseForm').on('submit', function(e){
     "searchBy": document.getElementById("searchCourseForm").searchBy.value, 
   }
 
-  if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
-    //use get user endpoint
+  console.log("COURSES SEARCH DATA[0]:\n" + JSON.stringify(formData));
+  console.log("DSK SEARCH? " + document.getElementById("searchCourseForm").searchBy.value == 'DSK');
+
+  // {"searchBy":"allcourses","searchOption":"date","searchAvailabilityOption":"yes","searchDate":"2021-07-06T09:33:00.000Z","searchDateOption":"egThan","searchValue":""}
+
+  if ((document.getElementById("searchCourseForm").searchBy.value == 'DSK') ||
+      (document.getElementById("searchCourseForm").searchBy.value == 'allcourses')) { 
+        // ADD if manualDSK no empty then use options
+        //     else use manualDSK value
+        //if( !document.getElementById("manualDSK").value ) {
+          formData['searchValue']=document.getElementById("searchCourseForm").dataSourceKeyOptions.value;
+        //} else {
+        //  formData['searchValue']=document.getElementById("manualDSK").value;
+        //}
+    // gather options if selected
+    console.log("CHECK COURSE FOR SEARCH OPTIONS");
+    console.log("CHECK FOR AVAILABILITY OPTION");
+    console.log("searchAvailability = " + $('#searchAvailability').prop('checked') );
+    if ( $('#searchAvailability').prop('checked') ) {
+      console.log("COLLECT SEARCH BY AVAILABILITY OPTIONS.")
+      // add searchAvailabilityOption to data
+      console.log("AVAILABILITY OPTION: " + $("input[name=searchAvailabilityOption]:checked").val() );
+      formData["searchOptions"] = "availability";
+      formData["searchAvailabilityOption"] = $("input[name=searchAvailabilityOption]:checked").val();
+      console.log("COURSES SEARCH DATA[1]:\n" + JSON.stringify(formData));
+
+    }
+
+    //searchDateOption
+    if ( $('#searchDate').prop('checked') ) {
+      // add searchDateOption to data
+      console.log("COLLECT SEARCH BY DATE OPTIONS.")
+      var date = $('#datetimepicker1').datetimepicker('viewDate');
+      console.log("selectedDate: " + date);
+        // var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        // var localTime = (selectedDate - tzoffset);
+        // console.log("localTime: " + localTime);
+
+      console.log("ISODATE [button]: " + localISOTime(date) );
+      if ( $('#searchAvailability').prop('checked') ) {
+        formData["searchOptions"]= formData["searchOptions"]+";date";
+      } else {
+        formData["searchOptions"] = "date";
+      }
+      formData["searchDate"] = localISOTime(date);
+      formData["searchDateOption"] = $("input[name=dtCompare]:checked").val();
+      console.log("COURSES SEARCH DATA[2]:\n" + JSON.stringify(formData));
+
+    }
+  }
+
+  if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' ||
+    document.getElementById("searchCourseForm").searchBy.value == 'allcourses') {
+    //use get courses endpoint
     ajaxURL = '/ajax/getCourses/'
-    formData["searchValue"] = document.getElementById("searchCourseForm").dataSourceKeyOptions.value
+    //formData["searchValue"] = document.getElementById("searchCourseForm").dataSourceKeyOptions.value
+    console.log("COURSES SEARCH DATA[F]:\n" + JSON.stringify(formData));
+
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
   } else {
-    //use get user endpoint
+    //use get course endpoint
     ajaxURL = '/ajax/getCourse/'
     formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
+    console.log("COURSE SEARCH DATA:\n" + JSON.stringify(formData));
+
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   }
 
-  // console.log("FORMDATA: \n" + JSON.stringify(formData));
 
   $.ajax({
     type: 'GET',
@@ -792,13 +991,50 @@ function setDSKOptionsBody(newResults) {
       }
     }    
   }
-  
   console.log("dskOptions: \n" + dskOptions)
   return dskOptions;
 }
 
+var selectedDate
+$(document).ready(function() {
+  $(function() {
+    // $('#datetimepicker1').datetimepicker({
+    //   format: 'MM-DD-YYYY HH:mm',
+    // });
+    var date = $('#datetimepicker1').datetimepicker('viewDate');
+    $('#getDate').text(date.toString('mm-dd-yyyy HH:mm'));
+    $('#datetimepicker1').on("change.datetimepicker", function (e) {
+      console.log(e.date.toString());
+      // console.log(e.localDate.toString());
+      date = $('#datetimepicker1').datetimepicker('viewDate');
+      // $('#getDate').text(date);
+      selectedDate = date;
+      console.log("SELECTED_DATE [event]: " + date );
+      console.log("ISODATE [event]: " + localISOTime(selectedDate) );
+    });
+  });
+});
+
+function logDate () {
+  console.log("Log Date Button Clicked");
+  var date = $('#datetimepicker1').datetimepicker('viewDate');
+  date = $('#datetimepicker1').datetimepicker('viewDate');
+  selectedDate = date;
+  console.log("selectedDate [button]: " + date);
+  console.log("ISODATE [button]: " + localISOTime(date) );
+};
+
+function localISOTime(d) { 
+  if (!d) d = new Date();
+  var newDate = new Date(d);
+  var tzoffset = newDate.getTimezoneOffset() * 60000; //offset in milliseconds 
+  var correctDateTime = new Date(d - tzoffset);
+  correctDateTime.setSeconds(0,0);
+  return correctDateTime.toISOString(); 
+}
+
 </script>
   
-  {% endblock %}
+{% endblock %}
 
 
