@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for Docker v1.1.6 (08/24/2021)
+# OSCELOT DSKTOOL for Docker v1.2.0 (03/13/2022)
 
 See below [Docker Release Notes](#Release-Notes).
 
