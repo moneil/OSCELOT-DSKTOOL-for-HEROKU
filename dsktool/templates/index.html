@@ -3,7 +3,8 @@
 {% block content %}
   <h1>OSCELOT DSK Tool Home</h1>
   <p>Welcome to the OSCELOT DSK Tool, a REST-based version of the original York DSK Tool</p>
-  <Thead></Thead>The OSCELOT DSK Tool is a secure cloud-based data source and availability managment tool that utilizes 3-legged authentication.
+  <p>The OSCELOT DSK Tool is a secure cloud-based data source and availability managment tool that utilizes 3-legged authentication.</p>
+  <p>Click <a href=https://4510-67-172-47-55.ngrok.io/learnlogout>Learn Logout</a> to logout of this application. Note: Failing to logout will allow anyone with access to this browser window to use the application.</p>
   <p></p>
   <h2>Version Information</h2>
   Documentation is available via the project site located at:<p><a href='https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU'>https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU</a></p>
@@ -13,7 +14,10 @@
   <ul>
     <li><strong>Learn Server:</strong> {{ learn_server }}</li>
     <li><strong>Version JSON:</strong> {{ version_json }}</li>
-    <li><strong>Access Token:</strong> {{ access_token }}</li>
+    <li><strong>API Token Expiration </strong>in {{ token_expiry }} <!-- at {{ expire_from }} 
+    </br><a href = https://www.timeanddate.com/worldclock/converter.html target="_blank">World clock converter</a> Tip: select "Include UTC Time in Results"</li> -->
+    <!-- <li><strong>API Token:</strong> {{ access_token }}</li>
+    <li><strong>3LO Token:</strong> {{ refresh_token }}</li> -->
   </ul>
  
 {% endblock %}

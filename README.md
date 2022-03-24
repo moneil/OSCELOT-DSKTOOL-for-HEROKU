@@ -73,13 +73,14 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
 <hr>
 
 ## Release Notes
-### v1.2.0 (03/14/2022)
+### v1.2.1 (03/23/2022)
 <ul>
-  <li>Added Date and Availability options to Users/Courses DSK search</li>
-  <li>Added Course External Id to User Enrollment results</li>
-  <li>Fixed a couple annoying UI issues that no one else probably noticed</li>
-  <li>Released comparable v1.2.0 docker image</li>
+  <li>Removed token information from index page</li>
+  <li>Added token expiration time to index page.</li>
+  <li>Altered 3LO behavior with 'offline' scope: Admin is no longer required to log in hourly on API access_token refresh.</li>
+  <li>Released comparable v1.2.1 docker image</li>
 </ul>
+General note per token expiration UTC time: If you restart the service while you have an active token this time will not reflect the actual expiration time. It will auto-correct on next token refresh.
 
 ## ToDo
 <ul>
@@ -87,6 +88,14 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
   <li>Add Date option to Enrollments Course/User searches</li>
   <li>Add Role option to Course Membership updates</li>
   <li>Clean up code redundancies</li>
+</ul>
+
+### v1.2.0 (03/14/2022)
+<ul>
+  <li>Added Date and Availability options to Users/Courses DSK search</li>
+  <li>Added Course External Id to User Enrollment results</li>
+  <li>Fixed a couple annoying UI issues that no one else probably noticed</li>
+  <li>Released comparable v1.2.0 docker image</li>
 </ul>
 
 ### v1.1.6 (08/24/2021)
