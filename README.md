@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.2.0 (03/13/2022)
+# OSCELOT DSKTOOL for HEROKU v1.2.1 (03/23/2022)
 
 See [Release Notes](#Release-Notes) below.
 
@@ -80,7 +80,6 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
   <li>Altered 3LO behavior with 'offline' scope: Admin is no longer required to log in hourly on API access_token refresh.</li>
   <li>Released comparable v1.2.1 docker image</li>
 </ul>
-General note per token expiration UTC time: If you restart the service while you have an active token this time will not reflect the actual expiration time. It will auto-correct on next token refresh.
 
 ## ToDo
 <ul>
