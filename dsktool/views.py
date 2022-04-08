@@ -1497,20 +1497,13 @@ def validate_userIdentifier(request):
 # [DONE] Reduce error opportunity by validating form entered values
 def validate_courseIdentifier(request):
     print("validate_courseIdentifier called....")
-    searchBy = request.GET.get('searchBy') #externalId || userName
+    searchBy = request.GET.get('searchBy') #externalId || userName || course name
     searchValue = request.GET.get('searchValue')
     if (searchValue is not None):
         searchValue = searchValue.strip()
     print("LEARNFQDN", LEARNFQDN)
     print ("SEARCHBY: ", searchBy)
     print ("SEARCHVALUE: ", searchValue)
-    
-    if (searchBy == 'externalId'):
-        crs = "externalId:" + searchValue
-    elif (searchBy == 'primaryId'):
-        crs=searchValue
-    else:
-        crs = "courseId:" + searchValue
 
     #BbRestSetup(request)
 
@@ -1530,8 +1523,7 @@ def validate_courseIdentifier(request):
     #     bb.method_generator()    # unpickling the pickled object.
     #     print(f'expiration: {bb.expiration()}')
 
-    
-    validationresult = bb.GetCourse(courseId = crs, sync=True )
+    validationresult = bb.GetCourses(limit = 1, params = {searchBy: searchValue, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, created'}, sync=True )
 
     print("VALIDATIONRESULT_STATUS: ", validationresult.status_code)
     print(f"VALIDATIONRESULT:\n", validationresult.json())
@@ -2304,14 +2296,16 @@ def updateCourse(request):
 
     return JsonResponse(context)
 
-# [Done (DSK); INPROGRESS (ALLCOURSES)] Retrieve course list (All or based on DSK)
+# [Done (DSK); INPROGRESS (ALLCOURSES)] Retrieve course list (All or based on DSK or based on Course Name)
 # this method handles:
 # Query by:
 #   DSK
 #   ALLCOURSES
+#   NAME
 # Additionally this method supports searching by:
 #   DATE
 #   AVAILABILITY
+#   NAME
 def getCourses(request):
     print ("NEW QUERY: getCourses")
     context = ""
@@ -2391,6 +2385,11 @@ def getCourses(request):
             filterByDSK = True # this is set to true to capture child courses that don't match the DSK...
             if searchByAvailability: filterByAvailability = True
             else: filterByAvailability = False
+    else:
+        resp = bb.GetCourses(limit = 500000, params = {searchBy: searchValue,'createdCompare': searchDateOption, 'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, created, modified, hasChildren, parentId'}, sync=True )
+        filterByDSK = False
+        filterByAvailability = False
+
 
     # else: search is by specifics in which case getCourse was called and which should just return single courses. 
         
