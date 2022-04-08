@@ -1,4 +1,4 @@
-# OSCELOT DSKTOOL for HEROKU v1.2.1 (03/23/2022)
+# OSCELOT DSKTOOL for HEROKU v1.2.5 (04/08/2022)
 
 See [Release Notes](#Release-Notes) below.
 
@@ -80,20 +80,40 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
 <hr>
 
 ## Release Notes
+### v1.2.5 (04/08/2022)
+<ul>
+  <li>Since we are successfully refreshing access_tokens w/o re-authenticating, I have removed token time to expiration from index page</li>
+  <li>Added Availability option to Enrollments Course/User searches</li>
+  <li>Add Course search by name, all searches are 'contains'</li>
+  <li>Add search for Learn user by last name</li>
+  <li>Add option to search by user name contains, case insensitive</li>
+  <li>Add date enrolled to the display</li>
+  <li>Add instructions on how to install on c host (c panel)</li>
+  <li>Released comparable v1.2.1 docker image</li>
+</ul>
+
+Special thanks to ajuszczyk for the search updates, date additions, and C Panel how-to!
+
+## ToDo
+<ul>
+  <li>Clean up code redundancies</li>
+  <li>Added Role option to Course Membership updates</li>
+</ul>
+
+### v1.2.2 (03/23/2022)
+<ul>
+  <li>Since we are successfully refreshing access_tokens w/o re-authenticating, I have removed token time to expiration from index page</li>
+  <li>Added Availability option to Enrollments Course/User searches</li>
+  <li>Added Date option to Enrollments Course/User searches</li>
+  <li>Released comparable v1.2.1 docker image</li>
+</ul>
+
 ### v1.2.1 (03/23/2022)
 <ul>
   <li>Removed token information from index page</li>
   <li>Added token expiration time to index page.</li>
   <li>Altered 3LO behavior with 'offline' scope: Admin is no longer required to log in hourly on API access_token refresh.</li>
   <li>Released comparable v1.2.1 docker image</li>
-</ul>
-
-## ToDo
-<ul>
-  <li>Add Availability option to Enrollments Course/User searches</li>
-  <li>Add Date option to Enrollments Course/User searches</li>
-  <li>Add Role option to Course Membership updates</li>
-  <li>Clean up code redundancies</li>
 </ul>
 
 ### v1.2.0 (03/14/2022)
