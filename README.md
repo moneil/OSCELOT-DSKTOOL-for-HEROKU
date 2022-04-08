@@ -72,7 +72,7 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
 
 ## Installation on cHost (cPanel): ##
 
-1. Create dsktool directory in the home folder
+1. Create dsktool directory in the home folder in the cpanel
 
 2. Upload DskTool files to the dsktool directory
 
