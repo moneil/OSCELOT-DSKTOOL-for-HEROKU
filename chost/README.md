@@ -1,6 +1,6 @@
-## Installation on cHost (cPanel): ##
+## Installation on cPanel: ##
 
-1. Create dsktool directory in the home folder in the cpanel
+1. Create dsktool directory in the home folder in the cPanel
 
 2. Upload DskTool files to the dsktool directory
 

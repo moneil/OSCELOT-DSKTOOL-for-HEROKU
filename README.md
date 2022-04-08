@@ -8,7 +8,7 @@ This project is built to be deployed in a variety of ways:
   <ul>
     <li>Heroku: You may read about Heroku here: [https://heroku.com](https://heroku.com).</li>
     <li>Docker: You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.</li>
-    <li>Cpanel: See this project's  `./cpanel/README.md` for cpanel details.</li>
+    <li>cPanel: See this project's  `./cpanel/README.md` for cPanel details.</li>
     <li>Localhost: See `./local/README.md` for running on localhost.</li>
   </ul>
   
