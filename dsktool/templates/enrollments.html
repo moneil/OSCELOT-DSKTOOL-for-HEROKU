@@ -642,6 +642,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           email = newResults["user"]["contact"]["email"];
         }
         var dsk = newResults["dataSourceId"];
+        var enrolled = (newResults["created"]).substring(0, 10);
         var modified = (newResults["modified"]).substring(0, 10);
         var pmcId="pmc"+userId;
 
@@ -657,6 +658,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
@@ -1024,6 +1026,7 @@ $('#selectCourseForm').on('submit', function(e) {
                   email = newResults[row]["user"]["contact"]["email"];
                 }
                 var dsk = newResults[row]["dataSourceId"];
+                var enrolled = (newResults[row]["created"]).substring(0, 10);
                 var modified = (newResults[row]["modified"]).substring(0, 10);
                 var pmcId="pmc"+userId;
 
@@ -1037,6 +1040,7 @@ $('#selectCourseForm').on('submit', function(e) {
                   '<div class="divTableCell">' + lastName + '</div>'+
                   '<div class="divTableCell">' + email + '</div>'+
                   '<div class="divTableCell">' + dsk + '</div>' +
+                  '<div class="divTableCell">' + enrolled + '</div>' +
                   '<div class="divTableCell">' + modified + '</div>' +
                   '</div>';
 
@@ -1341,6 +1345,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">Course External Id</div>' +
           '<div class="divTableHead">Course Name</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
 
@@ -1367,6 +1372,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">User Last Name</div>' +
           '<div class="divTableHead">User Email</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
         
@@ -1379,6 +1385,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">User Last Name</div>' +
           '<div class="divTableHead">User Email</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
 
@@ -1441,6 +1448,7 @@ function setCrsMembershipResultsTableBody(newResults) {
     // console.log("email: " + email);
     let dsk = newResults[row]["dataSourceId"];
     // console.log("dsk: " + dsk);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
     let pmcId="pmc"+userId;
@@ -1457,6 +1465,7 @@ function setCrsMembershipResultsTableBody(newResults) {
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
     contents += tableRow;
@@ -1492,6 +1501,7 @@ function setCrsMembershipUpdatesTableBody(newResults) {
       email = newResults[row]["user"]["contact"]["email"];
     }
     let dsk = newResults[row]["dataSourceId"];
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     let pmcId="pmc"+userId;
 
@@ -1505,6 +1515,7 @@ function setCrsMembershipUpdatesTableBody(newResults) {
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
@@ -1537,6 +1548,7 @@ function setUsrMembershipResultsTableBody(newResults) {
     // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     // console.log("role: " + role);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
 
@@ -1549,6 +1561,7 @@ function setUsrMembershipResultsTableBody(newResults) {
           '<div class="divTableCell">'+ externalId +'</div>' +
           '<div class="divTableCell">'+ name +'</div>' +
           '<div class="divTableCell">'+ dsk +'</div>' +
+          '<div class="divTableCell">'+ enrolled +'</div>' +
           '<div class="divTableCell">'+ modified +'</div>' +
           '</div>';
 
@@ -1581,6 +1594,7 @@ function setUsrMembershipUpdatesTableBody(newResults) {
     // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     // console.log("role: " + role);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
 
@@ -1590,6 +1604,7 @@ function setUsrMembershipUpdatesTableBody(newResults) {
           '<div class="divTableHead">'+ externalId +'</div>' +
           '<div class="divTableHead">'+ name +'</div>' +
           '<div class="divTableHead">'+ dsk +'</div>' +
+          '<div class="divTableHead">'+ enrolled +'</div>' +
           '<div class="divTableHead">'+ modified +'</div>' +
           '</div>';
     contents = contents + tableRow;
