@@ -14,6 +14,10 @@ import logging
 from datetime import datetime, timedelta
 import time
 import pytz
+from dsktool.rfc import Rfc
+from dsktool.models import Messages
+from dsktool.models import Logs
+from django.core.paginator import Paginator
 
 from django.http import JsonResponse
 #from django.views.generic import View
@@ -984,11 +988,25 @@ def updateUser(request):
             print("DATASOURCE UPDATE REQUIRED")
             
     print ("PASSABLE PAYLOAD:\n", passedPayload)
+
+    # ----------------------------------------------
+    # get user data BEFORE the change
+    # and insert message and log to local DB
+    rfc = Rfc()
+    message = rfc.save_message(request, "user")
+    rfc.save_log(request=request, userSearch=updateValue, message=message, call_name='user', state='before')
+    # ----------------------------------------------
             
     resp = bb.UpdateUser(userId = updateValue, payload=passedPayload, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created, modified'}, sync=True )
 
     if (resp.status_code == 200):
-        result_json = resp.json() #return actual error
+        # ----------------------------------------------
+        # get data AFTER the change
+        # and insert log to local DB
+        rfc.save_log(request=request, userSearch=updateValue, message=message, call_name='user', state='after')
+        # ----------------------------------------------
+        
+        result_json = resp.json()
         dskresp = bb.GetDataSource(dataSourceId = result_json['dataSourceId'], sync=True)
         dsk_json = dskresp.json()
         print (f"RESPONSE:\n", result_json)
@@ -1001,7 +1019,7 @@ def updateUser(request):
           'result_json': result_json,
         }
     else:
-        error_json = resp.json()
+        error_json = resp.json() #return actual error
         print (f"RESPONSE:\n", error_json)
         context = {
             "is_found": isFoundStatus,
@@ -1208,15 +1226,34 @@ def updateUsers(request):
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
+    # ----------------------------------------------
+    # insert message to local DB
+    rfc = Rfc()
+    message = rfc.save_message(request, "user")
+    # ----------------------------------------------
+
     for x in range(len(updateUserList)): 
         print ("userPK: ", updateUserList[x])
         updateValue = updateUserList[x]
+
+        # ----------------------------------------------
+        # get data BEFORE the change
+        # and insert log to local DB
+        rfc.save_log(request=request, userSearch=updateValue, message=message, call_name='user', state='before')
+        # ----------------------------------------------
+        
         # updateUser
         resp = bb.UpdateUser(userId = updateValue, payload=passedPayload, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created, modified'}, sync=True )
 
         respJSON = resp.json()
 
         if (resp.status_code == 200):
+            # ----------------------------------------------
+            # get user data AFTER the change
+            # and insert log to local DB
+            rfc.save_log(request=request, userSearch=updateValue, message=message, call_name='user', state='after')
+            # ----------------------------------------------
+            
             print("RESP:\n", resp.json())
             #resps["results"].append(respJSON["results"])
             print("RESPJSON:\n", respJSON)
@@ -1289,6 +1326,12 @@ def updateCourseMemberships(request):
     if (request.GET.get('isUpdateRequired1') == 'true'):
         print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
 
+        # ----------------------------------------------
+        # insert message to local DB
+        rfc = Rfc()
+        message = rfc.save_message(request, "enrollments")
+        # ----------------------------------------------
+
         for user in userArray:            
             payload={}
             if (request.GET.get('isAvailabilityUpdateRequired1')):
@@ -1307,11 +1350,23 @@ def updateCourseMemberships(request):
             
             print("PAYLOAD: \n", payload)
 
+            # ----------------------------------------------
+            # get data BEFORE the change
+            # and log to local DB
+            rfc.save_log(request=request, crs=crs, usr=user, message=message, call_name='membership', state='before')
+            # ----------------------------------------------
+
             resp = bb.UpdateMembership(courseId=crs, userId = user, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, created, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
 
             respJSON = resp.json()
 
             if (resp.status_code == 200):
+                # ----------------------------------------------
+                # get data AFTER the change
+                # and log to local DB
+                rfc.save_log(request=request, crs=crs, usr=user, message=message, call_name='membership', state='after')
+                # ----------------------------------------------
+                
                 print("RESP:\n", resp.json())
                 #resps["results"].append(respJSON["results"])
                 print ("User:" + user + "UPDATED WITH PAYLOAD: \n", payload)
@@ -1785,6 +1840,14 @@ def updateCourseMembership(request):
             
             print("PAYLOAD: \n", payload)
 
+    # ----------------------------------------------
+    # get data BEFORE the change
+    # and insert message and log to local DB
+    rfc = Rfc()
+    message = rfc.save_message(request, "enrollments")
+    rfc.save_log(request=request, crs=crs, usr=usr, message=message, call_name='membership', state='before')
+    # ----------------------------------------------
+
     resp = bb.UpdateMembership(courseId=crs, userId = usr, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, created, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
 
     respJSON = resp.json()
@@ -1815,6 +1878,12 @@ def updateCourseMembership(request):
             "is_found": isFoundStatus,
             "updateList": resps["results"],
         }
+
+        # ----------------------------------------------
+        # get data AFTER the change
+        # and insert log to local DB
+        rfc.save_log(request=request, crs=crs, usr=usr, message=message, call_name='membership', state='after')
+        # ----------------------------------------------
 
         print("FINAL RESPONSE:\n", finalResponse)
                    
@@ -1882,6 +1951,12 @@ def updateCourseMemberships(request):
     if (request.GET.get('isUpdateRequired1') == 'true'):
         print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
 
+        # ----------------------------------------------
+        # insert message to local DB
+        rfc = Rfc()
+        message = rfc.save_message(request, "enrollments")
+        # ----------------------------------------------
+
         for user in userArray:            
             payload={}
             if (request.GET.get('isAvailabilityUpdateRequired1')):
@@ -1900,11 +1975,23 @@ def updateCourseMemberships(request):
             
             print("PAYLOAD: \n", payload)
 
+            # ----------------------------------------------
+            # get data BEFORE the change
+            # and insert log to local DB
+            rfc.save_log(request=request, crs=crs, usr=user, message=message, call_name='membership', state='before')
+            # ----------------------------------------------
+
             resp = bb.UpdateMembership(courseId=crs, userId = user, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, created, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
 
             respJSON = resp.json()
 
             if (resp.status_code == 200):
+                # ----------------------------------------------
+                # get user data AFTER the change
+                # and insert log to local DB
+                rfc.save_log(request=request, crs=crs, usr=user, message=message, call_name='membership', state='after')
+                # ----------------------------------------------
+                
                 print("RESP:\n", resp.json())
                 #resps["results"].append(respJSON["results"])
                 print ("User:" + user + "UPDATED WITH PAYLOAD: \n", payload)
@@ -1931,9 +2018,19 @@ def updateCourseMemberships(request):
                 print("CHILD QUEST:JSON", cqmembership_resultJSON)
                 print("CHILD QUEST:CHILDCOURSEID", cqmembership_resultJSON["childCourseId"])
 
-                
+                # ----------------------------------------------
+                # get data BEFORE the change
+                rfc.save_log(request=request, crs=cqmembership_resultJSON["childCourseId"], usr=user, message=message, call_name='membership', state='before')
+                # ----------------------------------------------
 
                 resp2 = bb.UpdateMembership(courseId=cqmembership_resultJSON["childCourseId"], userId = user, payload=payload, params = {'expand': 'user', 'fields': 'id, courseId, userId, availability.available, dataSourceId, created, modified, courseRoleId, user.userName, user.name.given, user.name.middle, user.name.family, user.externalId, user.contact.email'}, sync=True )
+
+                # ----------------------------------------------
+                # get data AFTER the change
+                # and insert log to local DB
+                rfc.save_log(request=request, crs=cqmembership_resultJSON["childCourseId"], usr=user, message=message, call_name='membership', state='after')
+                # ----------------------------------------------
+                
                 print("RESP2:\n", resp2.json())
 
             print("RESPS:\n", resps)
@@ -2073,6 +2170,12 @@ def updateUserMemberships(request):
     if (request.GET.get('isUpdateRequired1') == 'true'):
         print("isUpdateRequired1", request.GET.get('isUpdateRequired1'))
 
+        # ----------------------------------------------
+        # insert message to local DB
+        rfc = Rfc()
+        message = rfc.save_message(request, "enrollments")
+        # ----------------------------------------------
+
         for crs in crsArray:            
             payload={}
             #print("COURSE RECORD: ", crs)
@@ -2094,6 +2197,12 @@ def updateUserMemberships(request):
                     print("dataSourceId: ",request.GET.get('selectedDataSourceKey'))
             
             print("PAYLOAD: \n", payload)
+
+            # ----------------------------------------------
+            # get data BEFORE the change
+            # and log to local DB
+            rfc.save_log(request=request, crs=passedCrsId, usr=passedUsrId, message=message, call_name='membership', state='before')
+            # ----------------------------------------------
 
             resp = bb.UpdateMembership(courseId=passedCrsId, userId=passedUsrId, payload=payload, params = {'expand': 'course', 'fields': 'id, courseId, userId, availability.available, dataSourceId, created, modified, courseRoleId, course.name, course.externalId'}, sync=True )
 
@@ -2122,6 +2231,12 @@ def updateUserMemberships(request):
                         #print("CRSRESP:\n", crsResp.json())
                         respJSON["course"] = crsResp.json()
                         #print("RESPRESP:\n", respJSON)
+
+                # ----------------------------------------------
+                # get data AFTER the change
+                # and log to local DB
+                rfc.save_log(request=request, crs=passedCrsId, usr=passedUsrId, message=message, call_name='membership', state='after')
+                # ----------------------------------------------
             else:
                 error_json["results":] = resp.json()
                 print("resp.status_code:", resp.status_code)
@@ -2267,9 +2382,24 @@ def updateCourse(request):
     #     bb.method_generator()    # unpickling the pickled object.
     #     print(f'bbrest expiration: {bb.expiration()}')
 
+    # ----------------------------------------------
+    # get data BEFORE the change
+    # and insert message and log to local DB
+    rfc = Rfc()
+    message = rfc.save_message(request, "course")
+    rfc.save_log(request=request, updateValue=updateValue, message=message, call_name='course', state='before')
+    # ----------------------------------------------
+    
     resp = bb.UpdateCourse(courseId = updateValue, payload=passedPayload, params = {'fields':'id, courseId, externalId, name, organization, availability.available, dataSourceId, created, modified'}, sync=True )
 
     if (resp.status_code == 200):
+
+        # ----------------------------------------------
+        # get data AFTER the change
+        # and insert log to local DB
+        rfc.save_log(request=request, updateValue=updateValue, message=message, call_name='course', state='after')
+        # ----------------------------------------------
+
         result_json = resp.json() #return actual error
         dskresp = bb.GetDataSource(dataSourceId = result_json['dataSourceId'], sync=True)
         dsk_json = dskresp.json()
@@ -2494,15 +2624,35 @@ def updateCourses(request):
     dsks_json = bb.GetDataSources(limit = 5000, params = {'fields': 'id, externalId'}).json()
     dsks = dsks_json["results"]
 
+    # ----------------------------------------------
+    # insert message to local DB
+    rfc = Rfc()
+    message = rfc.save_message(request, "course")
+    # ----------------------------------------------
+
     for x in range(len(updateCourseList)): 
         print ("coursePK: ", updateCourseList[x])
         updateValue = updateCourseList[x]
+
+        # ----------------------------------------------
+        # get data BEFORE the change
+        # and insert log to local DB
+        rfc.save_log(request=request, updateValue=updateValue, message=message, call_name='course', state='before')
+        # ----------------------------------------------
+
         # updateCourse
         resp = bb.UpdateCourse(courseId = updateValue, payload=passedPayload, params = {'fields':'id, courseId, externalId, name, availability.available, dataSourceId, created'}, sync=True )
 
         respJSON = resp.json()
 
         if (resp.status_code == 200):
+            
+            # ----------------------------------------------
+            # get user data AFTER the change
+            # and insert log to local DB
+            rfc.save_log(request=request, updateValue=updateValue, message=message, call_name='course', state='after')
+            # ----------------------------------------------
+
             print("RESP:\n", resp.json())
             #resps["results"].append(respJSON["results"])
             print("RESPJSON:\n", respJSON)
@@ -2679,3 +2829,29 @@ def availabilityPurge(resp, searchAvailabilityOption):
     print("AVAILABILITY PURGE PURGEDRESPONSE SIZE: ", len(purgedResponse))
 
     return purgedResponse
+
+def rfcreport(request):
+    
+    if not isValidRole(request.session.get('bb_json')):
+        context = {
+            'learn_server': LEARNFQDN,
+        } 
+        return render(request, 'guestusernotallowed.html', context=context )
+
+    # get all messages
+    # messages = Messages.objects.all().prefetch_related('logs')
+    paginator = Paginator(Messages.objects.all().order_by('-id').prefetch_related('logs'), 10)
+    page = request.GET.get('page', 1)
+
+    try:
+        messages = paginator.page(page)
+    except PageNotAnInteger:
+        messages = paginator.page(1)
+    except EmptyPage:
+        messages = paginator.page(paginator.num_pages)
+
+    context = {
+        'messages': messages,
+    }
+
+    return render(request, 'rfcreport.html', context=context) 

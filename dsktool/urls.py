@@ -32,6 +32,7 @@ urlpatterns = [
     path('notauthorized', views.notauthorized, name='notauthorized'),
     path('users', views.users, name='users'),
     path('whoami', views.whoami, name='whoami'),
+    path('rfcreport', views.rfcreport, name='rfcreport'),
     
     url(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
     url(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),

@@ -142,7 +142,14 @@
           <thead>
             <tr style="padding:10px">
               <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-              <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+              <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>
+                <p>
+                  <strong>Reason for change</strong>
+                  <br>
+                  Please comment the change in plain text. Comments entered here will be stored in a local database table.
+                  <br>
+                  <textarea id="comment" name="comment" rows="6" cols="100"></textarea>
+                </p>
               </th>
               <th style="padding:10px">
                 <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
@@ -368,7 +375,7 @@ $(document).ready(function(){
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
-  
+  $("#comment").val('');
 });
 
 // course Id validation request
@@ -389,7 +396,7 @@ $("#searchValue").change(function(){
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
-  
+  $("#comment").val('');
 
   var data = {
     "searchBy": document.getElementById("searchCourseForm").searchBy.value, 
@@ -459,7 +466,7 @@ $("#dataSourceKeyOptions").change(function () {
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
-  
+  $("#comment").val('');
 });
 
 
@@ -482,7 +489,7 @@ $('#searchCourseForm').on('submit', function(e){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
-
+  $("#comment").val('');
   
   if ( (document.getElementById("searchCourseForm").searchBy.value == "courseId" || document.getElementById("searchCourseForm").searchBy.value == "externalId") && document.getElementById("searchCourseForm").searchValue.value === "") {
     alert("You must provide a Course identifier.");
@@ -669,6 +676,7 @@ $('#processCourseForm').on('submit', function(e) {
 
   let pmcCourseList = "";
   selectionCount=$(this).find('input[name="pmcCourseId[]"]:checked').length;
+  commentExists=document.getElementById("processCourseForm").comment.value;
 
   n = 1;
   $('input[name="pmcCourseId[]"]:checked').each(function() {
@@ -689,6 +697,7 @@ $('#processCourseForm').on('submit', function(e) {
       "selectedAvailability": document.getElementById("processCourseForm").selectedAvailability.value,
       "isDataSourceKeyUpdateRequired1": document.getElementById("processCourseForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processCourseForm").selectedDataSourceKey.value,
+      "comment": document.getElementById("processCourseForm").comment.value,
       }
   
 
@@ -696,6 +705,11 @@ $('#processCourseForm').on('submit', function(e) {
 
   if (!selectionCount > 0 ) {
     alert("You must select at least one record.")
+    return;
+  }
+
+  if (commentExists === '' ) {
+    alert("You must provide a reason for change.")
     return;
   }
 
