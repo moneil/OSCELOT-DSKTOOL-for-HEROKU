@@ -4,7 +4,7 @@ See [Release Notes](#Release-Notes) below.
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
+This project is built to be deployed on Heroku and as a Docker container (alternativly it can also be installed on cHost). You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
@@ -69,6 +69,44 @@ This URL is sticky so bookmark it for later use and you are done!
 **IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, may not work correctly if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue. 
 
 Additionally, it appears that your 3LO session may expire hourly (check the "Who am I" link) requiring you to log out of the DSKTOOL via the "Learn Logout" link, return to the DSKTOOL homepage and when prompted relogin to Learn.
+
+## Installation on cHost (cPanel): ##
+
+1. Create dsktool directory in the home folder
+
+2. Upload DskTool files to the dsktool directory
+
+3. Make backup of the dsktool/dsktool/wsgi.py file as it will be overwritten in the process
+
+4. Update/create config.py file with all the values
+    * Update allowed hosts with your site URI!
+
+5. Create Python app (cpanel option)
+    * Set version to 3.8.6
+    * App root: dsktool
+    * App URL no change
+    * App start up file: dsktool/wsgi.py
+    * App entry point: application
+    * Passenger log file is optional
+    * Click on CREATE button
+    * Stop the app - click on STOP APP button
+
+6. Update wsgi.py file as the cpanel overwrites it with its own data
+
+7. Go to virtual env: run the command dispalyed at the top in the terminal (exmpl: source /home/dsktooltest/virtualenv/dsktool/3.8/bin/activate && cd /home/dsktooltest/dsktool)
+
+8. Run: pip install --no-cache-dir -r requirements.txt
+
+9. Run: python manage.py migrate
+
+10. Run: python manage.py collectstatic
+
+11. Start the app: press START APP button
+
+12. Follow the instruction to set up Blackboard Learn
+
+NOTE: 
+  Disable all ad-blockers plugins (ghostery, uBlock etc) in your browser.
 
 <hr>
 
