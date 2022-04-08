@@ -106,7 +106,7 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
 12. Follow the instruction to set up Blackboard Learn
 
 NOTE: 
-  Disable all ad-blockers plugins (ghostery, uBlock etc) in your browser.
+  Disable (or add an exception) all ad-blockers plugins (ghostery, uBlock etc) in your browser.
 
 <hr>
 
