@@ -555,9 +555,6 @@ $('#searchCourseForm').on('submit', function(e){
     console.log("COURSES SEARCH DATA[F]:\n" + JSON.stringify(formData));
 
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
-      ajaxURL = '/ajax/getCourses/'
-      formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
-      $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   } else {
     //use get course endpoint
     ajaxURL = '/ajax/getCourses/'
@@ -578,9 +575,12 @@ $('#searchCourseForm').on('submit', function(e){
       console.log("ajax/getCourse success...");
       console.log("Full responseData: \n" + JSON.stringify(responseData));
 
-      newResults = responseData["result_json"]["results"]
-      console.log("NEWRESULTS(DSK): " + newResults);
-      
+      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        newResults = responseData["result_json"]["results"]
+        console.log("NEWRESULTS(DSK): " + newResults);
+      } else {
+        newResults = responseData["result_json"]["results"]
+      }
 
       // console.log("Results Length: " + newResults.length);
       console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
@@ -595,7 +595,11 @@ $('#searchCourseForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        tableContents = setCoursesResultsTableBody(newResults);
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+          tableContents = setCoursesResultsTableBody(newResults);
+        } else {
+          tableContents = setCoursesResultsTableBody(newResults);
+        }
 
         // console.log("TABLE CONTENTS\n" + tableContents);
         $("#resultsTableBody").append(tableContents);
@@ -703,6 +707,7 @@ $('#processCourseForm').on('submit', function(e) {
     ajaxURL = '/ajax/updateCourses/'
     // we are already passing the list so set searchBy to DSK for python logic
     updateData["pmcCourseId[]"] = pmcCourseList;
+
   } else {
     // console.log("NOT DSK")
     //use update user endpoint
@@ -737,7 +742,11 @@ $('#processCourseForm').on('submit', function(e) {
         //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
-        tableContents = setUpdateCoursesResultsTableBody(newResults);
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+          tableContents = setUpdateCoursesResultsTableBody(newResults);
+        } else {
+          tableContents = setUpdateCoursesResultsTableBody(newResults);
+        }
         
         // $("#updateDetailsJSON").text(JSON.stringify(newResults));
         $('#updateResultsTableBody').append(tableContents);
