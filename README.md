@@ -87,7 +87,7 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
   <li>Add Course search by name, all searches are 'contains'</li>
   <li>Add search for Learn user by last name</li>
   <li>Add option to search by user name contains, case insensitive</li>
-  <li>Add date enrolled to the display</li>
+  <li>Add date enrolled to the membership display</li>
   <li>Add instructions on how to install on c host (c panel)</li>
   <li>Released comparable v1.2.1 docker image</li>
 </ul>
@@ -97,16 +97,9 @@ Special thanks to ajuszczyk for the search updates, date additions, and C Panel 
 ## ToDo
 <ul>
   <li>Clean up code redundancies</li>
-  <li>Added Role option to Course Membership updates</li>
+  <li>Add Role option to Course Membership updates</li>
 </ul>
 
-### v1.2.2 (03/23/2022)
-<ul>
-  <li>Since we are successfully refreshing access_tokens w/o re-authenticating, I have removed token time to expiration from index page</li>
-  <li>Added Availability option to Enrollments Course/User searches</li>
-  <li>Added Date option to Enrollments Course/User searches</li>
-  <li>Released comparable v1.2.1 docker image</li>
-</ul>
 
 ### v1.2.1 (03/23/2022)
 <ul>
