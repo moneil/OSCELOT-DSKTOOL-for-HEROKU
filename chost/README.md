@@ -9,7 +9,7 @@
 4. Update/create config.py file with all the values
     * Update allowed hosts with your site URI!
 
-5. Create Python app (cpanel option)
+5. Create Python app (cPanel option)
     * Set version to 3.8.6
     * App root: dsktool
     * App URL no change
@@ -21,7 +21,7 @@
 
 6. Update wsgi.py file as the cpanel overwrites it with its own data
 
-7. Go to virtual env: run the command dispalyed at the top in the terminal (exmpl: source /home/dsktooltest/virtualenv/dsktool/3.8/bin/activate && cd /home/dsktooltest/dsktool)
+7. Go to virtual env: run in the terminal the command dispalyed at the top (example: source /home/dsktooltest/virtualenv/dsktool/3.8/bin/activate && cd /home/dsktooltest/dsktool)
 
 8. Run: pip install --no-cache-dir -r requirements.txt
 
