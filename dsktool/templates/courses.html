@@ -594,11 +594,7 @@ $('#searchCourseForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
-          tableContents = setCoursesResultsTableBody(newResults);
-        } else {
-          tableContents = setCoursesResultsTableBody(newResults);
-        }
+        tableContents = setCoursesResultsTableBody(newResults);
 
         // console.log("TABLE CONTENTS\n" + tableContents);
         $("#resultsTableBody").append(tableContents);
@@ -741,11 +737,7 @@ $('#processCourseForm').on('submit', function(e) {
         //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
-          tableContents = setUpdateCoursesResultsTableBody(newResults);
-        } else {
-          tableContents = setUpdateCoursesResultsTableBody(newResults);
-        }
+        tableContents = setUpdateCoursesResultsTableBody(newResults);
         
         // $("#updateDetailsJSON").text(JSON.stringify(newResults));
         $('#updateResultsTableBody').append(tableContents);
