@@ -11,7 +11,9 @@
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
   <p>
-  Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
+  Enter Text in the textfield(s) to search.
+  <br><strong>Course/Organization Id</strong> and <strong>External Id</strong> searches are 'equal to' and case sensitive.
+  <br><strong>Course Name</strong> search is 'contain' and case insensitive
   </p>
   <form id="searchCourseForm" action="/courses">
     {% csrf_token %}
@@ -21,6 +23,7 @@
           <select name="searchBy" id="searchBy">
             <option value="courseId">Course/Organization Id</option>
             <option value="externalId">External Id</option>
+            <option value="name">Course Name</option>
             <option value="DSK">Data Source Key</option>
             <!-- <option value="allcourses">All Courses</option> -->
           </select>
@@ -552,6 +555,10 @@ $('#searchCourseForm').on('submit', function(e){
     console.log("COURSES SEARCH DATA[F]:\n" + JSON.stringify(formData));
 
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
+  } else if (document.getElementById("searchCourseForm").searchBy.value === 'name') {
+      ajaxURL = '/ajax/getCourses/'
+      formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
+      $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   } else {
     //use get course endpoint
     ajaxURL = '/ajax/getCourse/'
@@ -572,7 +579,7 @@ $('#searchCourseForm').on('submit', function(e){
       console.log("ajax/getCourse success...");
       console.log("Full responseData: \n" + JSON.stringify(responseData));
 
-      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' || document.getElementById("searchCourseForm").searchBy.value == 'name') {
         newResults = responseData["result_json"]["results"]
         console.log("NEWRESULTS(DSK): " + newResults);
       } else {
@@ -592,7 +599,7 @@ $('#searchCourseForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' || document.getElementById("searchCourseForm").searchBy.value == 'name') {
           tableContents = setCoursesResultsTableBody(newResults);
         } else {
           tableContents = setCourseResultsTableBody(newResults);
@@ -674,7 +681,7 @@ $('#processCourseForm').on('submit', function(e) {
   $('input[name="pmcCourseId[]"]:checked').each(function() {
     //pmcUserList.push($(this).val());
     pmcCourseList += $(this).val();
-    if ((searchBy == 'DSK') && (n < selectionCount)) {
+    if ((searchBy == 'DSK' || searchBy == 'name') && (n < selectionCount)) {
       pmcCourseList += ","
       n += 1;
     }
@@ -699,7 +706,7 @@ $('#processCourseForm').on('submit', function(e) {
     return;
   }
 
-  if (searchBy == 'DSK') {
+  if (searchBy == 'DSK' || searchBy == 'name') {
     //use update users endpoint
     ajaxURL = '/ajax/updateCourses/'
     // we are already passing the list so set searchBy to DSK for python logic
@@ -739,7 +746,7 @@ $('#processCourseForm').on('submit', function(e) {
         //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' || document.getElementById("searchCourseForm").searchBy.value == 'name') {
           tableContents = setUpdateCoursesResultsTableBody(newResults);
         } else {
           tableContents = setUpdateCourseResultsTableBody(newResults);
