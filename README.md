@@ -4,7 +4,14 @@ See [Release Notes](#Release-Notes) below.
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
+This project is built to be deployed in a variety of ways:
+  <ul>
+    <li>Heroku: You may read about Heroku here: [https://heroku.com](https://heroku.com).</li>
+    <li>Docker: You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.</li>
+    <li>cPanel: See this project's  `./cpanel/README.md` for cPanel details.</li>
+    <li>Localhost: See `./local/README.md` for running on localhost.</li>
+  </ul>
+  
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
