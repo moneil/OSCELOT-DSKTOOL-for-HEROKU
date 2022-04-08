@@ -1088,13 +1088,16 @@ def getUsers(request):
 
             if searchByAvailability: filterByAvailability = True
             else: filterByAvailability = False
+    elif searchBy == 'contains':
+        resp = bb.GetUsers(limit = 500000, params = {'userName': searchValueUsr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
+    elif (searchBy == 'familyName'):
+        resp = bb.GetUsers(limit = 500000, params = {'name.family': searchValueUsr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
     """ elif searchBy == "ALLUSERS": 
         # eventually we will support an allUsers search as below
         # do a normal search and return everything...
         resp = bb.GetUsers(limit = 500000, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True ) """
     
-    if searchBy == 'contains':
-        resp = bb.GetUsers(limit = 500000, params = {'userName': searchValueUsr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
+
 
     # Otherwise search is by specifics in which case getUser was called and which should just return single user.
 
@@ -1429,7 +1432,7 @@ def getCourseMemberships(request):
 # AJAX
 # [DONE] Reduce error opportunity by validating form entered values
 def validate_userIdentifier(request):
-    searchBy = request.GET.get('searchBy') #externalId || userName || contains
+    searchBy = request.GET.get('searchBy') #externalId || userName || contains || familyName
     searchValue = request.GET.get('searchValue')
     if (searchValue is not None):
         searchValue = searchValue.strip()
@@ -1441,7 +1444,7 @@ def validate_userIdentifier(request):
         usr = "externalId:" + searchValue
     elif (searchBy == 'userName'):
         usr = "userName:" + searchValue
-    elif (searchBy == 'contains'):
+    else:
         usr = searchValue
 
     print(f"user pattern: {usr}")
@@ -1466,6 +1469,8 @@ def validate_userIdentifier(request):
 
     if (searchBy == 'contains'):
         validationresult = bb.GetUsers(limit = 1, params = {'userName': usr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
+    elif (searchBy == 'familyName'):
+        validationresult = bb.GetUsers(limit = 1, params = {'name.family': usr, 'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, modified'}, sync=True )
     else:
         validationresult = bb.GetUser(userId = usr, params = {'fields':'id, userName, name.given, name.middle, name.family, externalId, contact.email, availability.available, dataSourceId, created'}, sync=True )
 
