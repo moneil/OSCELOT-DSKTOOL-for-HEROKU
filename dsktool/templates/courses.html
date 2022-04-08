@@ -578,7 +578,7 @@ $('#searchCourseForm').on('submit', function(e){
         newResults = responseData["result_json"]["results"]
         console.log("NEWRESULTS(DSK): " + newResults);
       } else {
-        newResults = responseData["result_json"]["results"]
+        newResults = responseData["result_json"]["results"];
       }
 
       // console.log("Results Length: " + newResults.length);
