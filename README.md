@@ -81,7 +81,6 @@ This URL is sticky so bookmark it for later use and you are done!
 ### v1.2.5 (04/08/2022)
 <ul>
   <li>Since we are successfully refreshing access_tokens w/o re-authenticating, I have removed token time to expiration from index page</li>
-  <li>Added Availability option to Enrollments Course/User searches</li>
   <li>Add Course search by name, all searches are 'contains'</li>
   <li>Add search for Learn user by last name</li>
   <li>Add option to search by user name contains, case insensitive</li>
@@ -92,10 +91,11 @@ This URL is sticky so bookmark it for later use and you are done!
 
 Special thanks to ajuszczyk for the search updates, date additions, and C Panel how-to!
 
-## ToDo
+## ToDo Next
 <ul>
-  <li>Clean up code redundancies</li>
   <li>Add Role option to Course Membership updates</li>
+  <li>Add Availability option to Enrollments searches</li>
+  <li>Clean up code redundancies</li>
 </ul>
 
 
