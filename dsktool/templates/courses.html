@@ -11,7 +11,8 @@
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
   <p>
-  Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
+  Enter Text in the textfield(s) to search.
+  <br>All searches are 'contain' and case insensitive
   </p>
   <form id="searchCourseForm" action="/courses">
     {% csrf_token %}
@@ -21,6 +22,7 @@
           <select name="searchBy" id="searchBy">
             <option value="courseId">Course/Organization Id</option>
             <option value="externalId">External Id</option>
+            <option value="name">Course Name</option>
             <option value="DSK">Data Source Key</option>
             <!-- <option value="allcourses">All Courses</option> -->
           </select>
@@ -561,7 +563,7 @@ $('#searchCourseForm').on('submit', function(e){
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
   } else {
     //use get course endpoint
-    ajaxURL = '/ajax/getCourse/'
+    ajaxURL = '/ajax/getCourses/'
     formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
     console.log("COURSE SEARCH DATA:\n" + JSON.stringify(formData));
 
@@ -583,7 +585,7 @@ $('#searchCourseForm').on('submit', function(e){
         newResults = responseData["result_json"]["results"]
         console.log("NEWRESULTS(DSK): " + newResults);
       } else {
-        newResults = responseData["result_json"];
+        newResults = responseData["result_json"]["results"];
       }
 
       // console.log("Results Length: " + newResults.length);
@@ -599,11 +601,7 @@ $('#searchCourseForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
-          tableContents = setCoursesResultsTableBody(newResults);
-        } else {
-          tableContents = setCourseResultsTableBody(newResults);
-        }
+        tableContents = setCoursesResultsTableBody(newResults);
 
         // console.log("TABLE CONTENTS\n" + tableContents);
         $("#resultsTableBody").append(tableContents);
@@ -682,7 +680,7 @@ $('#processCourseForm').on('submit', function(e) {
   $('input[name="pmcCourseId[]"]:checked').each(function() {
     //pmcUserList.push($(this).val());
     pmcCourseList += $(this).val();
-    if ((searchBy == 'DSK') && (n < selectionCount)) {
+    if (n < selectionCount) {
       pmcCourseList += ","
       n += 1;
     }
@@ -722,7 +720,7 @@ $('#processCourseForm').on('submit', function(e) {
   } else {
     // console.log("NOT DSK")
     //use update user endpoint
-    ajaxURL = '/ajax/updateCourse/'
+    ajaxURL = '/ajax/updateCourses/'
     //set searchBy and searchValueUsr
     searchBy = document.getElementById("searchCourseForm").searchBy.value;
     searchValue = document.getElementById("searchCourseForm").searchValue.value;
@@ -753,11 +751,7 @@ $('#processCourseForm').on('submit', function(e) {
         //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
-          tableContents = setUpdateCoursesResultsTableBody(newResults);
-        } else {
-          tableContents = setUpdateCourseResultsTableBody(newResults);
-        }
+        tableContents = setUpdateCoursesResultsTableBody(newResults);
         
         // $("#updateDetailsJSON").text(JSON.stringify(newResults));
         $('#updateResultsTableBody').append(tableContents);
