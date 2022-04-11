@@ -1,17 +1,10 @@
-# OSCELOT DSKTOOL for HEROKU v1.2.5 (04/08/2022)
+# OSCELOT DSKTOOL for HEROKU v1.2.1 (03/23/2022)
 
 See [Release Notes](#Release-Notes) below.
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
 
-This project is built to be deployed in a variety of ways:
-  <ul>
-    <li>Heroku: You may read about Heroku here: [https://heroku.com](https://heroku.com).</li>
-    <li>Docker: You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.</li>
-    <li>cPanel: See this project's  `./cpanel/README.md` for cPanel details.</li>
-    <li>Localhost: See `./local/README.md` for running on localhost.</li>
-  </ul>
-  
+This project is built to be deployed on Heroku and as a Docker container. You may read about Heroku here: [https://heroku.com](https://heroku.com). You may read about Docker here: [https://www.docker.com](https://www.docker.com/). See this project's  `./docker/README.md` for Docker details.
 
 The DSKTOOL uses 3LO and as such requires a Learn account and use is restricted based on Learn account privileges.
 
@@ -75,36 +68,25 @@ This URL is sticky so bookmark it for later use and you are done!
 
 **IMPORTANT:** After significant testing I have found that the 3LO redirect to login, which this tool uses, may not work correctly if you are using Direct Portal Entry (where your login is on the community/institution landing page). I believe v1.0.5 mediates this issue. 
 
+Additionally, it appears that your 3LO session may expire hourly (check the "Who am I" link) requiring you to log out of the DSKTOOL via the "Learn Logout" link, return to the DSKTOOL homepage and when prompted relogin to Learn.
+
 <hr>
 
 ## Release Notes
-### v1.2.5 (04/08/2022)
-<ul>
-  <li>Since we are successfully refreshing access_tokens w/o re-authenticating, I have removed token time to expiration from index page</li>
-  <li>Add Course search by name, all searches are 'contains'</li>
-  <li>Add search for Learn user by last name</li>
-  <li>Add option to search by user name contains, case insensitive</li>
-  <li>Add date enrolled to the membership display</li>
-  <li>Add instructions on how to install on c host (c panel)</li>
-  <li>Released comparable v1.2.1 docker image</li>
-</ul>
-
-Special thanks to ajuszczyk for the search updates, date additions, and C Panel how-to!
-
-## ToDo Next
-<ul>
-  <li>Add Role option to Course Membership updates</li>
-  <li>Add Availability option to Enrollments searches</li>
-  <li>Clean up code redundancies</li>
-</ul>
-
-
 ### v1.2.1 (03/23/2022)
 <ul>
   <li>Removed token information from index page</li>
   <li>Added token expiration time to index page.</li>
   <li>Altered 3LO behavior with 'offline' scope: Admin is no longer required to log in hourly on API access_token refresh.</li>
   <li>Released comparable v1.2.1 docker image</li>
+</ul>
+
+## ToDo
+<ul>
+  <li>Add Availability option to Enrollments Course/User searches</li>
+  <li>Add Date option to Enrollments Course/User searches</li>
+  <li>Add Role option to Course Membership updates</li>
+  <li>Clean up code redundancies</li>
 </ul>
 
 ### v1.2.0 (03/14/2022)

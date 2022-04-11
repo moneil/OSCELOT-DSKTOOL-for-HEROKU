@@ -10,17 +10,14 @@
 <h1>Search for Users</h1>
 <!-- SEARCH DIVS -->
 <div name="userSearchForm" id="userSearchForm">
-  <p>Enter Text in the textfield to search.
-    <br><br>Searches by "External ID" and "User Name" are 'equal to' and case sensitive.
-    <br>Searches by "Contains", "Family Name" look for the value contained in the search option and is case <strong>insensitive</strong>.
+  <p>
+    Enter Text in the textfield to search. All searches are 'equal to' and case sensitive.
   </p>
   <form id="searchUserForm">
     {% csrf_token %}
     <select name="searchBy" id="searchBy">
       <option value="externalId">External Id</option>
-      <option value="userName">User Name</option>
-      <option value="contains">User Name Contains</option>
-      <option value="familyName">Family Name</option>
+      <option value="userName">Username</option>
       <!-- <option value="givenName">Given Name</option> -->
       <!-- <option valxue="familyName">Family Name</option> -->
       <option value="DSK">Data Source Key</option>
@@ -536,10 +533,6 @@ $('#searchUserForm').on('submit', function(e){
         // }
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
     // console.log("DSK INSTRUCTIONS: " + $("#instructions").text());
-  } else if (document.getElementById("searchUserForm").searchBy.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
-    ajaxURL = '/ajax/getUsers/'
-    formData["searchValueUsr"] = document.getElementById("searchUserForm").searchValueUsrtoSearch.value
-    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   } else {
     //use get user endpoint
     ajaxURL = '/ajax/getUser/'
@@ -559,7 +552,7 @@ $('#searchUserForm').on('submit', function(e){
     success: function(responseData) {
       console.log("ajax/getUsers success...");
       // console.log("Full responseData: \n" + JSON.stringify(responseData));
-      if (document.getElementById("searchUserForm").searchBy.value == 'DSK' || document.getElementById("searchUserForm").searchBy.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
+      if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
         newResults = responseData["users_json"]["results"]
       } else {
       newResults = responseData["user_json"];
@@ -577,7 +570,7 @@ $('#searchUserForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchUserForm").searchBy.value == 'DSK' || document.getElementById("searchUserForm").searchBy.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
+        if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
           $("#resultsTableBody").empty();
           tableContents = setUsrsResultsTableBody(newResults);
         } else {
@@ -607,7 +600,7 @@ $('#searchUserForm').on('submit', function(e){
       }
       // $("#searchDetailsJSON").text(JSON.stringify(newResults));
       $("#processBlock").show();
-        if (document.getElementById("searchUserForm").searchBy.value == "DSK" || document.getElementById("searchUserForm").searchBy.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
+        if (document.getElementById("searchUserForm").searchBy.value == "DSK") {
           $("#selectAllInput").show();
           $("#checkAll").prop("checked", false);
         } else {
