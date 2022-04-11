@@ -15,3 +15,6 @@ settings.json
 
 #pyenv project name
 odfh*
+dsktool/lib/*
+dsktool/bin/*
+dsktool/pyvenv.cfg
