@@ -1,10 +1,10 @@
-$(function () {
-    console.log("Hello!");
-});
+// $(function () {
+//     console.log("Hello!");
+// });
 
-$(function () {
-    toggleDivs("byCrsUsr");
-});
+// $(function () {
+//     toggleDivs("byCrsUsr");
+// });
 
 function toggleDivs(anyDiv) {
     divArray = ['byCrsUsr', 'byCrs', 'byUsr'];
@@ -14,6 +14,7 @@ function toggleDivs(anyDiv) {
         document.getElementById(divArray[index]).style.display = "inline";
         // console.log("ACTIVE DIV: " + divArray[index]);
         activeDiv = divArray[index];
+        $("#byCrsUsrRb").prop("checked", true);
         $("#resultsTableBody").empty();
         $("#updateTableBody").empty();
         $("#searchValueCrstoSearch").val("");
