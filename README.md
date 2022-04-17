@@ -1,5 +1,7 @@
 # OSCELOT DSKTOOL for HEROKU v1.2.5 (04/11/2022)
 
+Note: I am temporarially disabling the Heroku Deploy buttons and docker container build update until I sort out some deployment issues... the project runs locally outside of Heroku and Docker just fine - use the Localhost instructions.
+
 See [Release Notes](#Release-Notes) below.
 
 This project is a Django/Python and Learn REST replacement for the Original York DSK Building Block for Learn.
@@ -42,13 +44,15 @@ Learn is now ready and you may proceed with the installation by clicking the bel
 
 ## Heroku
 
-Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
+Note: I have temporarially disabled the Heroku Deploy buttons and docker container build until I sort out some deployment issues... the project runs locally outside of Heroku and Docker just fine - use the Localhost instructions.
+
+<!-- Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
 
 Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
 
 <a href="https://heroku.com/deploy">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
-</a>
+</a> -->
 
 ### Configuring your application
 On the setup screen you will need to name your application dyno, select a region and set the configuration variables:
