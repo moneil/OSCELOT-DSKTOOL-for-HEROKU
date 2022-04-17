@@ -10,19 +10,25 @@
 <h1>Search for Users</h1>
 <!-- SEARCH DIVS -->
 <div name="userSearchForm" id="userSearchForm">
-  <p>
-    Enter Text in the textfield to search. All searches are 'equal to' and case sensitive.
-  </p>
+  <p>Enter Text in the textfield to search.
+    <br>Searches by "Contains" look for the value contained in the search option and are case <strong>insensitive</strong>.
+    <br>Searches by "Exact" look for the exact value and are case <strong>sensitive</strong>
+
   <form id="searchUserForm">
     {% csrf_token %}
     <select name="searchBy" id="searchBy">
       <option value="externalId">External Id</option>
-      <option value="userName">Username</option>
+      <option value="userName">User Name</option>
       <!-- <option value="givenName">Given Name</option> -->
-      <!-- <option valxue="familyName">Family Name</option> -->
+      <option value="familyName">Family Name</option>
       <option value="DSK">Data Source Key</option>
     </select>
-
+    <div name="searchOpSelect" id="searchOpSelect" style="display: inline;">
+      <select name="searchOperator" id="searchOperator">
+        <option value="contains" selected>Contains</option>
+        <option value="exact">Exact</option>
+      </select>
+    </div>
     <div name="dskOptions" id="dskOptions" style="display: inline;">Search for all users with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions">
     </select> <!-- <br>
     <label for="manualDSK">or enter a specific DSK: </label> <input type="text" id="manualDSK" name="manualDSK"><br> -->
@@ -140,7 +146,15 @@
             <thead>
               <tr style="padding:10px">
                 <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+                <!-- <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>  -->
+                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>
+                   <p>
+                     <strong>Reason for change</strong>
+                     <br>
+                     Please comment the change in plain text. Comments entered here will be stored in a local database table.
+                     <br>
+                     <textarea id="comment" name="comment" rows="6" cols="100"></textarea>
+                   </p> 
                 </th>
                 <th style="padding:10px">
                   <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
@@ -234,6 +248,7 @@ $("#checkAll").click(function(){
   $(':checkbox.pmcUserId').not(this).prop('checked', this.checked);
 });
 
+
 $(document).ready(function(){
       if ( '#searchBy'.value == 'DSK')
       {
@@ -263,6 +278,8 @@ $(document).ready(function(){
         $("#nonDSKSearch").hide();
         $("#searchOptions").show();
         $("#searchByDateChkBx").show();
+        $("#searchOpSelect").hide();
+
         alert("Please note: Searching for Users based on Data Source may result in a longer processing time due to the possible number of users associated with the Data Source. \n\nApproximately 30sec to process and display 10K records (500K max).");
         if (x == 0) {
           dsklist = getDataSourceKeys();
@@ -278,11 +295,16 @@ $(document).ready(function(){
           }
         }
       }
+      else if ( this.value == 'familyName') {
+        $("#searchOpSelect").hide();
+        alert("Family Name searches always use the 'contains' search operator.")
+      }
       else {
         $("#dskOptions").hide();
         $("#nonDSKSearch").show();
         $("#searchOptions").hide();
         $("#searchByDateChkBx").hide();
+        $("#searchOpSelect").show();
       }
     });
 });
@@ -355,11 +377,12 @@ $("#searchValueUsrtoSearch").change(function(){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
-  
+  $("#comment").val('');
 
   var data = {
     "searchBy": document.getElementById("searchUserForm").searchBy.value, 
-    "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+    "searchValue": document.getElementById("searchUserForm").searchValueUsrtoSearch.value,
+    "searchOperator": document.getElementById("searchUserForm").searchOperator.value
   }
 
   //searchAvailabilityOption
@@ -407,7 +430,7 @@ $("#searchValueUsrtoSearch").change(function(){
     $("#overlay").fadeOut(300);
     console.log("HASFOCUS: " + document.activeElement.id);
     if ((!document.activeElement.id) ||(document.activeElement.id !== "submitSearchUserForm")) {
-      alert("I DON'T KNOW WHAT YOU CLICKED");
+      // alert("I DON'T KNOW WHAT YOU CLICKED");
       document.getElementById("submitSearchUserForm").focus();
     }
   });
@@ -416,7 +439,7 @@ $("#searchValueUsrtoSearch").change(function(){
 
 
 // usr searchBy change cleanup: 
-// [DONE] clears forms when changing from externalId to userName
+// [DONE] clears forms when changing searchBy term
 $("#searchBy").change(function () {
   // console.log("searchUserForm: searchBy changed");
   // manage divs - clear and hide because we have a new search
@@ -434,16 +457,20 @@ $("#searchBy").change(function () {
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
+  
   if ( this.value == 'DSK') {
     $("#dskOptions").show();
     $("#nonDSKSearch").hide();
     $("#searchOptions").show();
     $("#searchByDateChkBx").show();
+    $("#searchOpSelect").hide();
   } else {
     $("#dskOptions").hide();
     $("#nonDSKSearch").show();
     $("#searchOptions").hide();
     $("#searchByDateChkBx").hide();
+    $("#searchOpSelect").show();
   }
   
 });
@@ -463,7 +490,7 @@ $("#dataSourceKeyOptions").change(function () {
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
-  
+  $("#comment").val('');
 });
 
 // [DONE] user search request
@@ -482,6 +509,7 @@ $('#searchUserForm').on('submit', function(e){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").checked=false;
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
 
   if ( (document.getElementById("searchUserForm").searchValueUsrtoSearch.value === "") 
     && 
@@ -533,6 +561,10 @@ $('#searchUserForm').on('submit', function(e){
         // }
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
     // console.log("DSK INSTRUCTIONS: " + $("#instructions").text());
+  } else if (document.getElementById("searchUserForm").searchOperator.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
+    ajaxURL = '/ajax/getUsers/'
+    formData["searchValueUsr"] = document.getElementById("searchUserForm").searchValueUsrtoSearch.value
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   } else {
     //use get user endpoint
     ajaxURL = '/ajax/getUser/'
@@ -550,13 +582,15 @@ $('#searchUserForm').on('submit', function(e){
     data: formData, 
     dataType: 'json',
     success: function(responseData) {
-      console.log("ajax/getUsers success...");
-      // console.log("Full responseData: \n" + JSON.stringify(responseData));
-      if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+      console.log("Success: " + ajaxURL);
+      console.log("Full responseData: \n" + JSON.stringify(responseData));
+      if (document.getElementById("searchUserForm").searchBy.value == 'DSK' || document.getElementById("searchUserForm").searchOperator.value == 'contains' ||document.getElementById("searchUserForm").searchBy.value == 'familyName') {
         newResults = responseData["users_json"]["results"]
       } else {
       newResults = responseData["user_json"];
       }
+
+      // https://demo.blackboard.com:443 "GET /learn/api/public/v1/users/name.family:O'Neil?fields=id%2C+userName%2C+name.given%2C+name.middle%2C+name.family%2C+externalId%2C+contact.email%2C+availability.available%2C+dataSourceId%2C+created%2C+modified HTTP/1.1" 404 84
 
       console.log("Results Length: " + newResults.length);
       console.log("PASSED RESULTS:\n" + JSON.stringify(newResults));
@@ -570,7 +604,7 @@ $('#searchUserForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+        if (document.getElementById("searchUserForm").searchBy.value == 'DSK' || document.getElementById("searchUserForm").searchOperator.value == 'contains' || document.getElementById("searchUserForm").searchBy.value == 'familyName') {
           $("#resultsTableBody").empty();
           tableContents = setUsrsResultsTableBody(newResults);
         } else {
@@ -600,7 +634,7 @@ $('#searchUserForm').on('submit', function(e){
       }
       // $("#searchDetailsJSON").text(JSON.stringify(newResults));
       $("#processBlock").show();
-        if (document.getElementById("searchUserForm").searchBy.value == "DSK") {
+        if (document.getElementById("searchUserForm").searchBy.value == "DSK" || document.getElementById("searchUserForm").searchOperator.value == 'contains') {
           $("#selectAllInput").show();
           $("#checkAll").prop("checked", false);
         } else {
@@ -631,10 +665,15 @@ $('#processUserForm').on('submit', function(e) {
   $("#updateResultsTableBody").empty();
 
   selectionCount=$(this).find('input[name="pmcUserId[]"]:checked').length;
+  commentExists=document.getElementById("processUserForm").comment.value;
+
+  console.log("selectionCount:" + selectionCount)
+
 
   // get form data based on active div
   let searchBy = document.getElementById("searchUserForm").searchBy.value;
   let searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
+  let searchOperator = document.getElementById("searchUserForm").searchOperator.value;
   // console.log("searchBy: " + searchBy);
   // console.log("searchValueUsr " + searchValueUsr);
 
@@ -643,15 +682,15 @@ $('#processUserForm').on('submit', function(e) {
   $('input[name="pmcUserId[]"]:checked').each(function() {
     //pmcUserList.push($(this).val());
     pmcUserList += $(this).val();
-    if ((searchBy == 'DSK') && (n < selectionCount)) {
+    if ((searchBy == 'DSK' || searchBy == 'familyName' || searchOperator == 'contains') && (n < selectionCount)) {
       pmcUserList += ","
       n += 1;
     }
-    // console.log("PMCUSERLIST ADD: " + $(this).val() )
+    console.log("PMCUSERLIST ADD: " + $(this).val() )
   });
 
-  // console.log("PMCUSERLIST: COUNT:" + pmcUserList.length)
-
+  console.log("PMCUSERLIST: COUNT:" + pmcUserList.length)
+  console.log("PMCUSERLIST:" + pmcUserList)
 
   var updateData = {
       "isUpdateRequired1": document.getElementById("processUserForm").isUpdateRequired1.checked,
@@ -659,6 +698,7 @@ $('#processUserForm').on('submit', function(e) {
       "selectedAvailability": document.getElementById("processUserForm").selectedAvailability.value,
       "isDataSourceKeyUpdateRequired1": document.getElementById("processUserForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processUserForm").selectedDataSourceKey.value,
+      "comment": document.getElementById("processUserForm").comment.value,
       }
   
   // console.log("SEARCHDATA:\n" + JSON.stringify(updateData));
@@ -669,11 +709,18 @@ $('#processUserForm').on('submit', function(e) {
     alert("You must select at least one record.")
     return;
   }
+
+  if (commentExists === '' ) {
+    alert("You must provide a reason for change.")
+    return;
+  }
+
   // searchBy = document.getElementById("searchUserForm").searchBy.value;
   // searchValueUsr = document.getElementById("searchUserForm").searchValueUsrtoSearch.value;
-
-  if (searchBy == 'DSK') {
+  console.log("OPERATOR: " + searchOperator)
+  if (searchBy == 'DSK' || searchBy=='familyName' || searchOperator == 'contains') {
     //use update users endpoint
+    console.log("CALLING AJAX/UPDATEUSERS")
     ajaxURL = '/ajax/updateUsers/'
     // we are already passing the list so set searchBy to DSK for python logic
     updateData["pmcUserId[]"] = pmcUserList;
@@ -681,6 +728,8 @@ $('#processUserForm').on('submit', function(e) {
   } else {
     // console.log("NOT DSK")
     //use update user endpoint
+    console.log("CALLING AJAX/UPDATEUSER")
+
     ajaxURL = '/ajax/updateUser/'
     //set searchBy and searchValueUsr
     searchBy = document.getElementById("searchUserForm").searchBy.value;
@@ -716,7 +765,7 @@ $('#processUserForm').on('submit', function(e) {
         newResults = data["result_json"];
         console.log("PROCESS USR: NEWRESULTS_JSON: \n" + JSON.stringify(newResults));
 
-        if (document.getElementById("searchUserForm").searchBy.value == 'DSK') {
+        if (searchBy == 'DSK' || searchBy=='familyName' || searchOperator == 'contains') {
           tableContents = setUpdateUsrsResultsTableBody(newResults);
         } else {
           tableContents = setUpdateUsrResultsTableBody(newResults);

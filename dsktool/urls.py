@@ -14,9 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from dsktool import views
-from django.conf.urls import url
+# from django.conf.urls import url
+
 
 
 urlpatterns = [
@@ -32,25 +33,26 @@ urlpatterns = [
     path('notauthorized', views.notauthorized, name='notauthorized'),
     path('users', views.users, name='users'),
     path('whoami', views.whoami, name='whoami'),
+    path('rfcreport', views.rfcreport, name='rfcreport'),
     
-    url(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
-    url(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
-    url(r'^ajax/validate_courseIdentifier/$', views.validate_courseIdentifier, name='validate_courseIdentifier'),
-    url(r'^ajax/getCourseMembership/$', views.getCourseMembership, name='getCourseMembership'),
-    url(r'^ajax/updateCourseMembership/$', views.updateCourseMembership, name='updateCourseMembership'),
-    url(r'^ajax/getCourseMemberships/$', views.getCourseMemberships, name='getCourseMemberships'),
-    url(r'^ajax/updateCourseMemberships/$', views.updateCourseMemberships, name='updateCourseMemberships'),
-    url(r'^ajax/getUserMemberships/$', views.getUserMemberships, name='getUserMemberships'),
-    url(r'^ajax/updateUserMemberships/$', views.updateUserMemberships, name='updateUserMemberships'),
-    url(r'^ajax/getUsers/$', views.getUsers, name='getUsers'),
-    url(r'^ajax/updateUsers/$', views.updateUsers, name='updateUsers'),
-    url(r'^ajax/getUser/$', views.getUser, name='getUser'),
-    url(r'^ajax/updateUser/$', views.updateUser, name='updateUser'),
-    url(r'^ajax/getCourse/$', views.getCourse, name='getCourse'),
-    url(r'^ajax/updateCourse/$', views.updateCourse, name='updateCourse'),
-    url(r'^ajax/getCourses/$', views.getCourses, name='getCourses'),
-    url(r'^ajax/updateCourses/$', views.updateCourses, name='updateCourses'),
-    url(r'^ajax/getMembershipsByDSK/$', views.getMembershipsByDSK, name='getMembershipsByDSK'),
+    re_path(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
+    re_path(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
+    re_path(r'^ajax/validate_courseIdentifier/$', views.validate_courseIdentifier, name='validate_courseIdentifier'),
+    re_path(r'^ajax/getCourseMembership/$', views.getCourseMembership, name='getCourseMembership'),
+    re_path(r'^ajax/updateCourseMembership/$', views.updateCourseMembership, name='updateCourseMembership'),
+    re_path(r'^ajax/getCourseMemberships/$', views.getCourseMemberships, name='getCourseMemberships'),
+    re_path(r'^ajax/updateCourseMemberships/$', views.updateCourseMemberships, name='updateCourseMemberships'),
+    re_path(r'^ajax/getUserMemberships/$', views.getUserMemberships, name='getUserMemberships'),
+    re_path(r'^ajax/updateUserMemberships/$', views.updateUserMemberships, name='updateUserMemberships'),
+    re_path(r'^ajax/getUsers/$', views.getUsers, name='getUsers'),
+    re_path(r'^ajax/updateUsers/$', views.updateUsers, name='updateUsers'),
+    re_path(r'^ajax/getUser/$', views.getUser, name='getUser'),
+    re_path(r'^ajax/updateUser/$', views.updateUser, name='updateUser'),
+    re_path(r'^ajax/getCourse/$', views.getCourse, name='getCourse'),
+    re_path(r'^ajax/updateCourse/$', views.updateCourse, name='updateCourse'),
+    re_path(r'^ajax/getCourses/$', views.getCourses, name='getCourses'),
+    re_path(r'^ajax/updateCourses/$', views.updateCourses, name='updateCourses'),
+    re_path(r'^ajax/getMembershipsByDSK/$', views.getMembershipsByDSK, name='getMembershipsByDSK'),
 ]
 
 handler500 = views.error_500

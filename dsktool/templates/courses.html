@@ -10,8 +10,9 @@
 <h1>Search for Courses or Organizations</h1>
 <!-- SEARCH DIV -->
 <div name="courseSearchForm" id="courseSearchForm">
-  <p>
-  Enter Text in the textfield(s) to search. All searches are 'equal to' and case sensitive.
+  <p>Enter Text in the textfield to search.
+      <br>Searches by "Contains" look for the value contained in the search option and are case <strong>insensitive</strong>.
+      <br>Searches by "Exact" look for the exact value and are case <strong>sensitive</strong>
   </p>
   <form id="searchCourseForm" action="/courses">
     {% csrf_token %}
@@ -21,12 +22,19 @@
           <select name="searchBy" id="searchBy">
             <option value="courseId">Course/Organization Id</option>
             <option value="externalId">External Id</option>
+            <option value="courseName">Course Name</option>
             <option value="DSK">Data Source Key</option>
             <!-- <option value="allcourses">All Courses</option> -->
           </select>
           &nbsp;
         </div>
-
+        <div name="searchOpSelect" id="searchOpSelect" style="display: inline;">
+          <select name="searchOperator" id="searchOperator">
+            <option value="contains" selected>Contains</option>
+            <option value="exact">Exact</option>
+          </select>
+          &nbsp;
+        </div>
         <div name="dskOptions" id="dskOptions" style="display: inline;">
           Search for all courses with the selected DSK: <select id="dataSourceKeyOptions" name="dataSourceKeyOptions"> </select> <!-- <br>
           <label for="manualDSK">or enter a specific DSK: </label> <input type="text" id="manualDSK" name="manualDSK"><br>-->
@@ -104,7 +112,7 @@
   <h3>Search Results</h3>    
   <p>Select a row for processing.</p>
   <div id="selectAllInput" style="display:none;">
-    <input type="checkbox" id="checkAll" name="checkAll"><label for="checkAll">&nbsp;&lt;-- Click to toggle all records for processing. <i><b>Note:</b> Parent/Child courses are included in results even if they are not associated with the searched data source key.</i></label> <a href="#updateSection">[&darr;]</a>
+    <input type="checkbox" id="checkAll" name="checkAll"><label for="checkAll">&nbsp;&lt;-- Click to toggle all records for processing. </label> <div id="parentChildMsg" style="display:n one; display:inline;"><i><b>Note:</b> Parent/Child courses are included in results even if they are not associated with the searched data source key.</i></div> <a href="#updateSection">[&darr;]</a>
   </div>
   <form id="processCourseForm" name="processCourseForm">
     <div class="divTable ajaxTable" id="resultsTableHeader">
@@ -142,7 +150,15 @@
           <thead>
             <tr style="padding:10px">
               <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-              <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+              <!-- <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>  -->
+              <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>
+                 <p>
+                   <strong>Reason for change</strong>
+                   <br>
+                   Please comment the change in plain text. Comments entered here will be stored in a local database table.
+                   <br>
+                   <textarea id="comment" name="comment" rows="6" cols="100"></textarea>
+                 </p>
               </th>
               <th style="padding:10px">
                 <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
@@ -235,13 +251,14 @@ $("#checkAll").click(function(){
   $(':checkbox.pmcCourseId').not(this).prop('checked', this.checked);
 });
 
-  $(document).ready(function(){
-      if ( '#searchBy'.value == 'DSK' ) {
+$(document).ready(function(){
+      if ( '#searchBy'.value == 'DSK' || '#searchBy'.value == 'courseName' ) {
         console.log("SEARCHBY DSK")
         $("#dskOptions").show();
         $("#nonDSKSearch").hide();
         $("#searchOptions").show();
         $("#searchByDateChkBx").show();
+        $("#searchOpSelect").hide();
       //} else if ('#searchBy'.value == 'allcourses') {
       //  console.log("SEARCHBY ALLCOURSES")
       //  $("#dskOptions").hide();
@@ -253,6 +270,7 @@ $("#checkAll").click(function(){
         $("#nonDSKSearch").show();
         $("#searchOptions").hide();
         $("#searchByDateChkBx").hide();
+        $("#searchOpSelect").show();
       }
 });
 
@@ -269,6 +287,7 @@ $(document).ready(function(){
       $("#nonDSKSearch").hide();
       $("#searchOptions").show();
       $("#searchByDateChkBx").show();
+      $("#searchOpSelect").hide();
 
       alert("Please note: Searching for Courses based on Data Source may result in a longer processing time due to the possible number of courses associated with the Data Source.\n\nApproximately 30sec to process and display 10K records (500K max).");
       
@@ -287,20 +306,29 @@ $(document).ready(function(){
           }
         }
       }
-    } else if (this.value == 'allcourses') {
-      console.log("SEARCHBY ALLCOURSES")
+    } else if ( this.value == 'courseName') {
       $("#dskOptions").hide();
-      $("#nonDSKSearch").hide();
-      $("#searchOptions").show();
-      $("#searchByDateChkBx").show();
+      $("#nonDSKSearch").show();
+      $("#searchOptions").hide();
+      $("#searchByDateChkBx").hide();
+      $("#searchOpSelect").hide();
+      alert("Course Name searches always use the 'contains' search operator.")
+    // }
+    // else if (this.value == 'allcourses') {
+    //   console.log("SEARCHBY ALLCOURSES")
+    //   $("#dskOptions").hide();
+    //   $("#nonDSKSearch").hide();
+    //   $("#searchOptions").show();
+    //   $("#searchByDateChkBx").show();
 
-      alert("Please note: Searching for all Courses will result in a longer processing time due to the possible number of courses. Note that additional search options will additionally increase processing time.\n\nApproximately 30sec to process and display 10K records (500K max).");
+    //   alert("Please note: Searching for all Courses will result in a longer processing time due to the possible number of courses. Note that additional search options will additionally increase processing time.\n\nApproximately 30sec to process and display 10K records (500K max).");
     } else {
       console.log("SEARCHBY COURSE or EXTERNAL ID")
       $("#dskOptions").hide();
       $("#nonDSKSearch").show();
       $("#searchOptions").hide();
       $("#searchByDateChkBx").hide();
+      $("#searchOpSelect").show();
     }
   });
 });
@@ -353,7 +381,7 @@ $(document).ready(function(){
     });
 
 // usr searchBy change cleanup: 
-// [DONE] clears forms when changing from externalId to userName
+// [DONE] clears forms when changing from externalId to courseName
   $("#searchBy").change(function () {
   // console.log("searchCourseForm: searchBy changed");
   // manage divs - clear and hide because we have a new search
@@ -368,7 +396,7 @@ $(document).ready(function(){
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
-  
+  $("#comment").val('');
 });
 
 // course Id validation request
@@ -389,11 +417,13 @@ $("#searchValue").change(function(){
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
   
 
   var data = {
     "searchBy": document.getElementById("searchCourseForm").searchBy.value, 
-    "searchValue": document.getElementById("searchCourseForm").searchValue.value
+    "searchValue": document.getElementById("searchCourseForm").searchValue.value,
+    "searchOperator": document.getElementById("searchCourseForm").searchOperator.value
   }
 
   //searchAvailabilityOption
@@ -459,7 +489,7 @@ $("#dataSourceKeyOptions").change(function () {
   $("#isAvailabilityUpdateRequired1").prop("checked", false);;
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
-  
+  $("#comment").val('');
 });
 
 
@@ -482,8 +512,8 @@ $('#searchCourseForm').on('submit', function(e){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
 
-  
   if ( (document.getElementById("searchCourseForm").searchBy.value == "courseId" || document.getElementById("searchCourseForm").searchBy.value == "externalId") && document.getElementById("searchCourseForm").searchValue.value === "") {
     alert("You must provide a Course identifier.");
     return;
@@ -544,14 +574,18 @@ $('#searchCourseForm').on('submit', function(e){
     }
   }
 
-  if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' ||
-    document.getElementById("searchCourseForm").searchBy.value == 'allcourses') {
+  if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
     //use get courses endpoint
     ajaxURL = '/ajax/getCourses/'
     //formData["searchValue"] = document.getElementById("searchCourseForm").dataSourceKeyOptions.value
     console.log("COURSES SEARCH DATA[F]:\n" + JSON.stringify(formData));
 
     $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
+  } else if (document.getElementById("searchCourseForm").searchOperator.value == 'contains' || document.getElementById("searchCourseForm").searchBy.value == 'courseName') {
+    ajaxURL = '/ajax/getCourses/'
+    formData["searchValue"] = document.getElementById("searchCourseForm").searchValue.value
+    
+    $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively.<br><br>');
   } else {
     //use get course endpoint
     ajaxURL = '/ajax/getCourse/'
@@ -571,8 +605,7 @@ $('#searchCourseForm').on('submit', function(e){
     success: function(responseData) {
       console.log("ajax/getCourse success...");
       console.log("Full responseData: \n" + JSON.stringify(responseData));
-
-      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+      if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' || document.getElementById("searchCourseForm").searchOperator.value == 'contains' ||document.getElementById("searchCourseForm").searchBy.value == 'courseName') {
         newResults = responseData["result_json"]["results"]
         console.log("NEWRESULTS(DSK): " + newResults);
       } else {
@@ -592,7 +625,9 @@ $('#searchCourseForm').on('submit', function(e){
       let tableContents = "";
       if (typeof newResults === 'undefined') {
       } else {
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK' || 
+        document.getElementById("searchCourseForm").searchBy.value == 'courseName' || 
+        document.getElementById("searchCourseForm").searchOperator.value == 'contains') {
           tableContents = setCoursesResultsTableBody(newResults);
         } else {
           tableContents = setCourseResultsTableBody(newResults);
@@ -621,8 +656,15 @@ $('#searchCourseForm').on('submit', function(e){
         }
         // $("#searchDetailsJSON").text(JSON.stringify(newResults));
         $("#processBlock").show();
-        if (document.getElementById("searchCourseForm").searchBy.value == "DSK") {
+        if (document.getElementById("searchCourseForm").searchBy.value == "DSK" ||
+        document.getElementById("searchCourseForm").searchOperator.value == 'contains' ||
+        document.getElementById("searchCourseForm").searchBy.value == 'courseName') {
           $("#selectAllInput").show();
+          if (document.getElementById("searchCourseForm").searchBy.value == "DSK"){
+            $("#parentChildMsg").show()
+          } else {
+            $("#parentChildMsg").hide()
+          }
           $("#checkAll").prop("checked", false); 
         } else {
           $("#selectAllInput").hide();
@@ -650,31 +692,27 @@ $('#processCourseForm').on('submit', function(e) {
   e.preventDefault();
   console.log("processCourseForm");
   let t0 = performance.now();
-  // console.log("FORM: \n" + $("#processCourseForm").serialize());
-  // console.log("SET results div display to visible");
 
   $("#updateResults").hide();
   $("#updateResultsTableBody").empty();
 
+  selectionCount=$(this).find('input[name="pmcCourseId[]"]:checked').length;
+  commentExists=document.getElementById("processCourseForm").comment.value;
+
+  console.log("selectionCount:" + selectionCount)
 
   // get form data based on active div
   let searchBy = document.getElementById("searchCourseForm").searchBy.value;
   let searchValue = document.getElementById("searchCourseForm").searchValue.value;
+  let searchOperator = document.getElementById("searchCourseForm").searchOperator.value;
   
-  let pmcIdList = [];
-
-  // $('input[name="pmcId[]"]:checked').each(function() {
-  //   pmcIdList.push($(this).val());
-  // });
-
   let pmcCourseList = "";
-  selectionCount=$(this).find('input[name="pmcCourseId[]"]:checked').length;
 
   n = 1;
   $('input[name="pmcCourseId[]"]:checked').each(function() {
     //pmcUserList.push($(this).val());
     pmcCourseList += $(this).val();
-    if ((searchBy == 'DSK') && (n < selectionCount)) {
+    if ((searchBy == 'DSK' || searchBy == 'courseName' || searchOperator == 'contains') && (n < selectionCount)) {
       pmcCourseList += ","
       n += 1;
     }
@@ -689,8 +727,11 @@ $('#processCourseForm').on('submit', function(e) {
       "selectedAvailability": document.getElementById("processCourseForm").selectedAvailability.value,
       "isDataSourceKeyUpdateRequired1": document.getElementById("processCourseForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processCourseForm").selectedDataSourceKey.value,
+      "comment": document.getElementById("processCourseForm").comment.value,
       }
   
+  console.log("PMCCOURSELIST: COUNT:" + pmcCourseList.length)
+  console.log("PMCCOURSELIST:" + pmcCourseList)
 
   let ajaxURL = '';
 
@@ -699,7 +740,12 @@ $('#processCourseForm').on('submit', function(e) {
     return;
   }
 
-  if (searchBy == 'DSK') {
+  if (commentExists === '' ) {
+    alert("You must provide a reason for change.")
+    return;
+  }
+
+  if (searchBy == 'DSK' || searchBy == 'courseName' || searchOperator == 'contains') {
     //use update users endpoint
     ajaxURL = '/ajax/updateCourses/'
     // we are already passing the list so set searchBy to DSK for python logic
@@ -739,7 +785,7 @@ $('#processCourseForm').on('submit', function(e) {
         //tableContents = setCourseResultsTableBody(newResults);
         // console.log("PROCESS: BYUSR: tableContents: \n" + tableContents);
 
-        if (document.getElementById("searchCourseForm").searchBy.value == 'DSK') {
+        if (searchBy == 'DSK' || searchBy == 'courseName' || searchOperator == 'contains') {
           tableContents = setUpdateCoursesResultsTableBody(newResults);
         } else {
           tableContents = setUpdateCourseResultsTableBody(newResults);

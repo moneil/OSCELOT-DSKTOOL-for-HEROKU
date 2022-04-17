@@ -195,7 +195,15 @@
             <table>
               <thead>
                 <th></th> <input id="isUpdateRequired1" name="isUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
-                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label> 
+                <!-- <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>  -->
+                <label for="isUpdateRequired1">&nbsp;<b>&lt; Update the above selected records.</b></label>
+                   <p>
+                     <strong>Reason for change</strong>
+                     <br>
+                     Please comment the change in plain text. Comments entered here will be stored in a local database table.
+                     <br>
+                     <textarea id="comment" name="comment" rows="6" cols="100"></textarea>
+                   </p>
                 </th>
                 <th style="padding:10px">
                   <input id="isAvailabilityUpdateRequired1" name="isAvailabilityUpdateRequired1" type="checkbox" value="true" onclick="setIsProcessable();"/>
@@ -329,6 +337,7 @@ $("#searchEnrollmentByCrsandUsrIdByCRSID").change(function () {
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
 });
 
 // [DONE] Manage divs: searchEnrollmentByCrsandUsrForm:searchEnrollmentByCrsandUserIdByUSRID
@@ -344,8 +353,9 @@ $("#searchEnrollmentByCrsandUserIdByUSRID").change(function () {
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
 });
 
 // [DONE] Manage divs: searchEnrollmentByDSKForm:searchEnrollmentByDSK
@@ -363,6 +373,7 @@ $("#searchEnrollmentByDSK").change(function () {
   $("#isUpdateRequired1").prop("checked", false);
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
 });
 
 // [DONE] Validate course: searchEnrollmentByCrsandUsrForm:search:searchEnrollmentByCrsandUserIdByCRSID
@@ -378,8 +389,9 @@ $("#searchValueCrstoSearch").change(function(){
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
   
   var data = {
     "searchBy": document.getElementById("searchEnrollmentByCrsandUsrForm").searchEnrollmentByCrsandUsrIdByCRSID.value, 
@@ -420,8 +432,9 @@ $("#searchValueUsrtoSearch").change(function(){
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
   
 
   var data = {
@@ -463,8 +476,9 @@ $("#searchValue").change(function () {
       $("#updateResults").hide();
       $("#processBlock").hide();
       $("#isUpdateRequired1").prop("checked", false);
-      $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+      $("#isAvailabilityUpdateRequired1").prop("checked", false);
       $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+      $("#comment").val('');
 
       $.ajax({
         //type: 'POST',
@@ -495,10 +509,11 @@ $("#searchByCrsCRSID").change(function () {
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("filterCourseByDSKCheckbox").prop("checked", false);
   $("#userDSKFilterOptions").empty();
+  $("#comment").val('');
 });
 
 // [DONE] Validate: entered crsId searchEnrollmentsByCrsForm:searchValueCrs
@@ -513,8 +528,9 @@ $("#searchValueCrs").change(function(){
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
   // Validate CrsId: call ajax function that validates course ids based on serialized form data
 
   var data = {
@@ -551,8 +567,9 @@ $("#searchValueUsr").change(function(){
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+  $("#comment").val('');
   // Validate CrsId: call ajax function that validates course ids based on serialized form data
 
   var data = {
@@ -589,9 +606,10 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
   $("#searchUpdate").hide();
   $("#updateResults").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
   console.log("submitSearchByCrsAndUser");
 
   if (document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueCrstoSearch.value === "" || document.getElementById("searchEnrollmentByCrsandUsrForm").searchValueUsrtoSearch.value === "") {
@@ -642,6 +660,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           email = newResults["user"]["contact"]["email"];
         }
         var dsk = newResults["dataSourceId"];
+        var enrolled = (newResults["created"]).substring(0, 10);
         var modified = (newResults["modified"]).substring(0, 10);
         var pmcId="pmc"+userId;
 
@@ -657,6 +676,7 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
@@ -682,9 +702,9 @@ $('#searchEnrollmentByCrsandUsrForm').on('submit', function(e){
           $("#resultsTable").show();
           $("#searchUpdate").show();
           $("#isUpdateRequired1").prop("checked", false);
-          $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+          $("#isAvailabilityUpdateRequired1").prop("checked", false);
           $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
-          
+          $("#comment").val('');
         }
       }
     }).done(function() {
@@ -705,6 +725,7 @@ $('#searchEnrollmentByCrsForm').on('submit', function(e){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").checked=false;
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
 
   if (document.getElementById("searchEnrollmentByCrsForm").searchValueCrs.value === "") {
     alert("You must provide a Course/Org identifier.");
@@ -788,6 +809,7 @@ $('#searchEnrollmentsByUsrForm').on('submit', function(e){
   $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
   $("#selectedDataSourceKey")[0].selectedIndex = 0;
+  $("#comment").val('');
 
   if (document.getElementById("searchEnrollmentsByUsrForm").searchValueUsr.value === "") {
     alert("You must provide a User identifier.");
@@ -873,7 +895,6 @@ $('#searchEnrollmentsByDSKForm').on('submit', function(e){
                 }
 
   ajaxURL = '/ajax/getMembershipsByDSK/';
-
   
   $("#instructions").html('First check \'Update the above selected records\', then check Availability and/or Data Source Key and select a value to update the Availability and/or Data Source Key respectively. <a href="#top">[&uarr;]</a><br><br>');
 
@@ -959,9 +980,9 @@ $("#searchByUsrUSRID").change(function () {
   $("#updateResults").hide();
   $("#processBlock").hide();
   $("#isUpdateRequired1").prop("checked", false);
-  $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+  $("#isAvailabilityUpdateRequired1").prop("checked", false);
   $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
-
+  $("#comment").val('');
 });
 
 // Validate: searchEnrollmentsByUsrForm:searchValueUsr
@@ -1024,6 +1045,7 @@ $('#selectCourseForm').on('submit', function(e) {
                   email = newResults[row]["user"]["contact"]["email"];
                 }
                 var dsk = newResults[row]["dataSourceId"];
+                var enrolled = (newResults[row]["created"]).substring(0, 10);
                 var modified = (newResults[row]["modified"]).substring(0, 10);
                 var pmcId="pmc"+userId;
 
@@ -1037,6 +1059,7 @@ $('#selectCourseForm').on('submit', function(e) {
                   '<div class="divTableCell">' + lastName + '</div>'+
                   '<div class="divTableCell">' + email + '</div>'+
                   '<div class="divTableCell">' + dsk + '</div>' +
+                  '<div class="divTableCell">' + enrolled + '</div>' +
                   '<div class="divTableCell">' + modified + '</div>' +
                   '</div>';
 
@@ -1084,6 +1107,7 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
   $("#updateTableBody").empty();
 
   selectionCount=$(this).find('input[name="pmcUserId[]"]:checked').length;
+  commentExists=document.getElementById("processSelectedMembershipsForm").comment.value;
 
   // get form data based on active div
   let crsorusrForm = "";
@@ -1131,7 +1155,8 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
       "isDataSourceKeyUpdateRequired1": document.getElementById("processSelectedMembershipsForm").isDataSourceKeyUpdateRequired1.checked,
       "selectedDataSourceKey": document.getElementById("processSelectedMembershipsForm").selectedDataSourceKey.value,
       "pmcUserId[]": pmcUserList,
-      "crsorusr": activeDiv
+      "crsorusr": activeDiv,
+       "comment": document.getElementById("processSelectedMembershipsForm").comment.value,
     }
   
   console.log("REQUEST DATA:\n" + JSON.stringify(searchData));
@@ -1154,6 +1179,11 @@ $('#processSelectedMembershipsForm').on('submit', function(e) {
   
   if (!selectionCount > 0 ) {
     alert("You must select at least one record.")
+    return;
+  }
+
+  if (commentExists === '' ) {
+    alert("You must provide a reason for change.")
     return;
   }
 
@@ -1219,8 +1249,9 @@ $("#searchValue").change(function () {
       $("#updateResults").hide();
       $("#processBlock").hide();
       $("#isUpdateRequired1").prop("checked", false);
-      $("#isAvailabilityUpdateRequired1").prop("checked", false);;
+      $("#isAvailabilityUpdateRequired1").prop("checked", false);
       $("#isDataSourceKeyUpdateRequired1").prop("checked", false);
+      $("#comment").val('');
       
       
 
@@ -1320,10 +1351,8 @@ function toggleDivs(anyDiv) {
       $("#filterUserByDSKDiv").hide();
       $("#filterCourseByDSKCheckbox").prop("checked", false);
       $("#filterUserByDSKCheckbox").prop("checked", false);
-
-
-
-
+      $("#comment").val('');
+      
       // if byCrsUsr or byCrs set result-table-header and update-table-header to what they are now - user info centric
       // if byUsr set result-table-header and update-table-header to reflect course info \not\ user-centric info
 
@@ -1341,6 +1370,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">Course External Id</div>' +
           '<div class="divTableHead">Course Name</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
 
@@ -1349,6 +1379,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">Course External Id</div>' +
           '<div class="divTableHead">Course Name</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
       } else {
@@ -1367,6 +1398,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">User Last Name</div>' +
           '<div class="divTableHead">User Email</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#resp-table-header").append(respTableHdr);
         
@@ -1379,6 +1411,7 @@ function toggleDivs(anyDiv) {
           '<div class="divTableHead">User Last Name</div>' +
           '<div class="divTableHead">User Email</div>' +
           '<div class="divTableHead">Membership Data Source</div>' +
+          '<div class="divTableHead">Date&nbsp;Enrolled</div>' +
           '<div class="divTableHead">Date Membership Modified</div>';
         $("#update-table-header").append(updateTableHdr);
 
@@ -1441,6 +1474,7 @@ function setCrsMembershipResultsTableBody(newResults) {
     // console.log("email: " + email);
     let dsk = newResults[row]["dataSourceId"];
     // console.log("dsk: " + dsk);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
     let pmcId="pmc"+userId;
@@ -1457,6 +1491,7 @@ function setCrsMembershipResultsTableBody(newResults) {
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
     contents += tableRow;
@@ -1492,6 +1527,7 @@ function setCrsMembershipUpdatesTableBody(newResults) {
       email = newResults[row]["user"]["contact"]["email"];
     }
     let dsk = newResults[row]["dataSourceId"];
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     let pmcId="pmc"+userId;
 
@@ -1505,6 +1541,7 @@ function setCrsMembershipUpdatesTableBody(newResults) {
           '<div class="divTableCell">' + lastName + '</div>'+
           '<div class="divTableCell">' + email + '</div>'+
           '<div class="divTableCell">' + dsk + '</div>' +
+          '<div class="divTableCell">' + enrolled + '</div>' +
           '<div class="divTableCell">' + modified + '</div>' +
           '</div>';
 
@@ -1537,6 +1574,7 @@ function setUsrMembershipResultsTableBody(newResults) {
     // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     // console.log("role: " + role);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
 
@@ -1549,6 +1587,7 @@ function setUsrMembershipResultsTableBody(newResults) {
           '<div class="divTableCell">'+ externalId +'</div>' +
           '<div class="divTableCell">'+ name +'</div>' +
           '<div class="divTableCell">'+ dsk +'</div>' +
+          '<div class="divTableCell">'+ enrolled +'</div>' +
           '<div class="divTableCell">'+ modified +'</div>' +
           '</div>';
 
@@ -1581,6 +1620,7 @@ function setUsrMembershipUpdatesTableBody(newResults) {
     // console.log("dsk: " + dsk);
     let role = newResults[row]["courseRoleId"];
     // console.log("role: " + role);
+    let enrolled = (newResults[row]["created"]).substring(0, 10);
     let modified = (newResults[row]["modified"]).substring(0, 10);
     // console.log("modified: " + modified);
 
@@ -1590,6 +1630,7 @@ function setUsrMembershipUpdatesTableBody(newResults) {
           '<div class="divTableHead">'+ externalId +'</div>' +
           '<div class="divTableHead">'+ name +'</div>' +
           '<div class="divTableHead">'+ dsk +'</div>' +
+          '<div class="divTableHead">'+ enrolled +'</div>' +
           '<div class="divTableHead">'+ modified +'</div>' +
           '</div>';
     contents = contents + tableRow;
