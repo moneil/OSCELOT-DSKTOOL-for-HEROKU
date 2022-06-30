@@ -44,20 +44,20 @@ Learn is now ready and you may proceed with the installation by clicking the bel
 
 ## Heroku
 
-<!-- Note: I have temporarially disabled the Heroku Deploy buttons and docker container build until I sort out some deployment issues... the project runs locally outside of Heroku and Docker just fine - use the Localhost instructions. -->
+Note: I have temporarially disabled the Heroku Deploy buttons and docker container build until I sort out some deployment issues... the project runs locally outside of Heroku and Docker just fine - use the Localhost instructions.
 
-Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
+<!-- Clicking the below 'Deploy to Heroku' button will open Heroku to your application setup screen. 
 
 Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
 
 
-##### Deploy Latest Stable Release (v1.2.1): 
+##### Deploy Latest Stable Release (v1.2.1):  -->
 
 <!-- <a href="https://heroku.com/deploy?template=https://github.com//OSCELOT-DSKTOOL-for-HEROKU/tree/main">
   <img src="https://www.herokucdn.com/deploy/button.png" alt="Deploy"> 
 </a> -->
 
-<a href="https://heroku.com/deploy?template=https://github.com//OSCELOT-DSKTOOL-for-HEROKU"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"></a>
+<!-- <a href="https://heroku.com/deploy?template=https://github.com//OSCELOT-DSKTOOL-for-HEROKU"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"></a> -->
 
 
 ### Configuring your application
