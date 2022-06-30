@@ -57,7 +57,7 @@ Note: if you do not have a Heroku account you will be prompted to create one. Yo
   <img src="https://www.herokucdn.com/deploy/button.png" alt="Deploy"> 
 </a> -->
 
-<a href="https://heroku.com/deploy"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"></a>
+<a href="https://heroku.com/deploy?template=https://github.com//OSCELOT-DSKTOOL-for-HEROKU"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"></a>
 
 
 ### Configuring your application
