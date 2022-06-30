@@ -53,7 +53,7 @@ Note: if you do not have a Heroku account you will be prompted to create one. Yo
 
 ##### Deploy Latest Stable Release (v1.2.1): 
 
-<a href="https://heroku.com/deploy">
+<a href="https://heroku.com/deploy?template=https://github.com/moneil/OSCELOT-DSKTOOL-for-HEROKU/tree/main">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"> 
 </a>
 
