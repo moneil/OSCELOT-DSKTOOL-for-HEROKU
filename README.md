@@ -50,9 +50,12 @@ Note: I have temporarially disabled the Heroku Deploy buttons and docker contain
 
 Note: if you do not have a Heroku account you will be prompted to create one. You will be directed to the setup screen on account create completion.
 
+
+##### Deploy Latest Stable Release (v1.2.1): 
 <a href="https://heroku.com/deploy">
-  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
-</a> -->
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy"> 
+</a>
+
 
 ### Configuring your application
 On the setup screen you will need to name your application dyno, select a region and set the configuration variables:
