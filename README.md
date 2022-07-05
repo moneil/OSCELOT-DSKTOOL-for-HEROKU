@@ -88,12 +88,17 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
   <li>Upgraded Python to 3.10.5</li>
   <li>Upgraded Django to latest stable (4.0.6 as of this release).</li>
   <li>Removed OSCELOT references</li>
-  <li>Moved to new git site with new project name "DSKTOOL for Learn" [https://github.com/moneil/DSKTOOL-for-Learn](https://github.com/moneil/DSKTOOL-for-Learn).</li>
+  <li>Moving to new github site with the new project name of "DSKTOOL for Learn" :: https://github.com/moneil/DSKTOOL-for-Learn.</li>
   <li>Fixed change report error on empty database.</li>
   <li>Added capability to clear report database.</li>
   <li>Added capability to download .zip of report database</li>
-  <li>Released comparable v1.2.6 docker image [https://hub.docker.com/r/oscelot/oscelot-dsktool/tags](https://hub.docker.com/r/oscelot/oscelot-dsktool/tags) (**Note:** As I continue to migrate away from OSCELOT naming, this URL will permanently change in the future. Watch release notes and docker-compose.yml file.)</li>
+  <li>Released comparable v1.2.6 docker image to https://hub.docker.com/r/oscelot/oscelot-dsktool/tags</li>
 </ul>
+
+Project URL changes:
+As I continue to migrate away from OSCELOT naming, I will be moving to new github site with the new project name of [DSKTOOL for Learn](https://github.com/moneil/DSKTOOL-for-Learn).
+I will also be changing the the docker hub URL. Watch release notes and docker-compose.yml file.
+
 
 ## ToDo
 <ul>
