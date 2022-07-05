@@ -95,7 +95,7 @@ Additionally, it appears that your 3LO session may expire hourly (check the "Who
   <li>Released comparable v1.2.6 docker image to https://hub.docker.com/r/oscelot/oscelot-dsktool/tags</li>
 </ul>
 
-Project URL changes:
+### Project URL changes:
 As I continue to migrate away from OSCELOT naming, I will be moving to new github site with the new project name of [DSKTOOL for Learn](https://github.com/moneil/DSKTOOL-for-Learn).
 I will also be changing the the docker hub URL. Watch release notes and docker-compose.yml file.
 
@@ -108,6 +108,7 @@ I will also be changing the the docker hub URL. Watch release notes and docker-c
   <li>Clean up code redundancies</li>
 </ul>
 
+## Prior Releases
 ### v1.2.5 (04/11/2022) ###
 <ul>
   <li>Removed token expiration time from index page.</li>
