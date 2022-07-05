@@ -1,9 +1,11 @@
-from django.http import HttpResponseRedirect
+from syslog import LOG_CONS
+from django.http import HttpResponseRedirect,HttpResponse
 from bbrest import BbRest
 import jsonpickle
 import json
 from dsktool.models import Messages
 from dsktool.models import Logs
+from django.shortcuts import render,redirect
 
 class Rfc(object):
 	"""
@@ -167,3 +169,5 @@ class Rfc(object):
 		do = f"get_{call_name}"
 		if hasattr(self, do) and callable(func := getattr(self, do)):
 			return func(self, **kwargs)
+
+	

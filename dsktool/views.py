@@ -1,4 +1,7 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
+from urllib import response
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+# from django.http import HttpRequest
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -17,9 +20,18 @@ import pytz
 from dsktool.rfc import Rfc
 from dsktool.models import Messages
 from dsktool.models import Logs
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from django.http import JsonResponse
+
+import csv
+from zipfile import *
+import io
+from wsgiref.util import FileWrapper
+from django.http import StreamingHttpResponse
+
+
 
 # Globals
 # BB: BbRest object - required for all BbRest requests
@@ -2605,8 +2617,47 @@ def availabilityPurge(resp, searchAvailabilityOption):
     return purgedResponse
 
 def rfcreport(request):
-    BB_JSON = request.session.get('BB_JSON')
-    
+    global BB
+    global BB_JSON
+    global ISVALIDROLE
+    global EXPIRE_AT
+
+    # BB_JSON = request.session.get('BB_JSON')
+    logging.info('RFCREPORT: ENTER ')
+    logging.info('RFCREPORT: ISVALIDROLE: ' + str(ISVALIDROLE))
+    if "BB_JSON" not in request.session.keys() or BB_JSON is None:
+        logging.info('RFCREPORT: BbRest not found in session')
+        try:
+            BB = BbRest(KEY, SECRET, f"https://{LEARNFQDN}" )
+            BB_JSON = jsonpickle.encode(BB)
+            logging.info('RFCREPORT: Pickled BbRest added to session.')
+            request.session['BB_JSON'] = BB_JSON
+            request.session['target_view'] = 'rfcreport' 
+            return HttpResponseRedirect(reverse('get_3LO_token'))
+        except:
+            logging.critical('RFCREPORT: Could not set BbREST in Session, Check Configuration KEY and SECRET.')
+    else:
+        logging.info('RFCREPORT: Found BbRest in session')
+        BB = jsonpickle.decode(BB_JSON)
+        logging.debug("RFCREPORT: BB_JSON: Original Token Info: " + str(BB.token_info))
+        if ISVALIDROLE is None: 
+            logging.info('RFCREPORT: NO VALID ROLE - Get 3LO and confirm role.')
+            logging.info('RFCREPORT: CALL get_3LO_token')
+            logging.debug("RFCREPORT: ISVALIDROLE=FALSE: Updated Token Info: " + str(BB.token_info))
+            return HttpResponseRedirect(reverse('get_3LO_token'))
+        if BB.is_expired():
+            logging.info('RFCREPORT: Expired API Auth Token.')
+            logging.info('RFCREPORT: GET A NEW API Auth Token')
+            BB.refresh_token()
+            # EXPIRE_AT = None
+            BB_JSON = jsonpickle.encode(BB)
+            request.session['BB_JSON'] = BB_JSON
+            request.session['target_view'] = 'rfcreport'
+        BB.supported_functions() # This and the following are required after
+        BB.method_generator()    # unpickling the pickled object.    
+    logging.debug("RFCREPORT: BB_JSON: Final Token Info: " + str(BB.token_info))
+    logging.info(f'RFCREPORT: Token expiration: {BB.expiration()}')
+
     if not isValidRole(request.session.get('BB_JSON')):
         context = {
         }
@@ -2619,13 +2670,220 @@ def rfcreport(request):
 
     try:
         messages = paginator.page(page)
-    except PageNotAnInteger:
+    except (PageNotAnInteger):
         messages = paginator.page(1)
-    except EmptyPage:
+    except (EmptyPage):
         messages = paginator.page(paginator.num_pages)
+    except: 
+        logging.error("RFCREPORT:NO RECORDS")
+        messages = ""
 
     context = {
         'messages': messages,
     }
 
     return render(request, 'rfcreport.html', context=context)
+
+# exportcsv returns only the messages table csv
+def exportcsv(request):
+    print("ENTER EXPORTCSV")
+    response = exportmessagescsv(request)
+    # # exportLogs(request)
+    # return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return response
+
+# exportcsvzip returns a zipfile containing both
+# messages and logs csv files
+def exportcsvzip(request):
+    # from dsktool.exportzip import exportzip
+    print("ENTER EXPORTCSVZIP")
+
+
+    # response = HttpResponse(
+    #     content_type='application/zip',
+    #     headers={'Content-Disposition': 'attachment; filename="DSKLogs.zip"'},
+    # )
+
+    # # get data from the database
+    # messages = Messages.objects.all()
+    # logs = Logs.objects.all()
+
+    # #take streams and add to this zip
+
+
+    # # write messages to the zip file
+
+    
+
+    # response = exportmessagescsv(request)
+    response = exportzip(request)
+    return response
+
+def exportmessagescsv(request):
+    print("ENTER EXPORTMESSAGES")
+    items = Messages.objects.all()
+    print ("items")
+    for obj in items:
+        print (obj.id)
+        print (obj.created_at)
+        print (obj.user_id)
+        print (obj.change_type)
+        print (obj.change_comment)
+
+# ^^^ okay we are good to here output:
+#   ENTER EXPORTMESSAGES
+#   items
+#   1
+#   2022-04-18 22:55:27.551710+00:00
+#   moneil
+#   user
+#   test
+
+    print ("PRE RESPONSE SETUP")
+
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="DSKMessages.csv"'},
+    )
+
+    print ("POST RESPONSE SETUP")
+
+    print ("PRE WRITER INSTANTIATION")
+    writer = csv.writer(response, delimiter=',')
+    print ("WRITER INSTANTIATED")
+    print ("WRITE HEADER")
+    writer.writerow(['Time Stamp', 'User Id', 'Change Type', 'Change Comment'])
+
+    # writer = csv.writer(response)
+    # print ("WRITER INSTANTIATED")
+    # print ("WRITE HEADER")
+    # writer.writerow(['First row', 'Foo', 'Bar', 'Baz'])
+    # print ("WRITE DATA ROW")
+    # writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
+
+    # messagesEntries = messagesExport.values_list('id', 'created_at', 'user_id', 'change_type', 'change_comment')
+
+    for obj in items:
+        writer.writerow([obj.id, obj.created_at, obj.user_id, obj.change_type, obj.change_comment])
+    
+    return response
+
+def exportlogscsv(request):
+    items = Logs.objects.all()
+    print ("items")
+    for obj in items:
+        print (obj.id)
+        print (obj.message_id)
+        print (obj.external_id)
+        print (obj.course_id)
+        print (obj.course_role)
+        print (obj.availability_status)
+        print (obj.datasource_id)
+        print (obj.state)
+        print (obj.created_at)
+
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="DSKLogs.csv"'},
+    )
+    writer = csv.writer(response, delimiter=',')
+    writer.writerow(['Id', 'Message Id', 'External Id', 'Course Id', 'Course Role', 'Availability Status', 'Data Source', 'State','Created Date'])
+    # logEntries = logExport.values_list('id','message_id', 'external_id', 'course_id', 'course_role', 'availability_status', 'datasource_id', 'state', 'created_at')
+    for obj in items:
+        writer.writerow([obj.id, obj.message_id, obj.external_id, obj.course_id, obj.course_role, obj.availability_status, obj.datasource_id, obj.state, obj.created_at])
+    
+    return response
+
+def purgeData(request):
+    logging.error("PURGEDATA:START")
+
+    items = Messages.objects.all()
+    items.delete()
+    items = Logs.objects.all()
+    items.delete()
+
+    logging.error("PURGEDATA:END, returning to rfcreport.")
+
+    return HttpResponseRedirect(reverse('rfcreport'))
+
+
+def exportzip(request):
+    csv_datas = build_multiple_csv_files()
+    for datum in csv_datas:
+        print (datum)
+    timestr = time.strftime("%Y%m%d-%H%M")
+    zip_file_name = "DSKTOOL_CVS__(" + timestr + ").zip"
+    print ("ZIPFILENAME: ", zip_file_name)
+
+    inMemoryFile = io.BytesIO()
+
+    # zf = zipfile.ZipFile("sample.zip", mode="w", compression=zipfile.ZIP_DEFLATED)
+
+    # with ZipFile(inMemoryFile, "w", ZIP_DEFLATED) as inMemoryFileOpened:
+        # add csv files each library
+    logArchiveFile = "DSKTOOL_LOGS_(" + timestr + ").csv"
+    msgArchiveFile = "DSKTOOL_MSGS_(" + timestr + ").csv"
+    os.environ["TZ"] = "UTC"
+    for x, data in enumerate(csv_datas):
+        if (x == 0):
+            msgContents = ""
+            csvname = "Messages.csv"
+            print ("setting csv name for messages")                    
+            print ("CSNAME: ", csvname)
+            print ("DATA[X] TYPE: ", type(data[x]))
+            msgContents = "Id,User Name,Change Type,Comment,Change Date\n"
+            items = Messages.objects.all()
+            for obj in items:
+                changeDate =  obj.created_at.strftime("%m/%d/%Y %H:%M:%S %Z")
+
+                # 'Time Stamp', 'User Id', 'Change Type', 'Change Comment'
+                objdata = [str(obj.id), str(obj.user_id), str(obj.change_type), str(obj.change_comment), changeDate]
+                msgContents = msgContents + ",".join(objdata) + "\n"
+                
+            # print ("MSGCONTENTS: ", msgContents)
+            # inMemoryFileOpened.writestr("DSKTOOL_MSGS.csv", msgContents)
+
+        elif (x == 1):
+            logsContents = ""
+            csvname = "Logs.csv"
+            print ("CSNAME: ", csvname)
+            print ("DATA[X] TYPE (logs expected): ", type(data[x]))
+            logsContents = " ,Id,Message Id,External Id,Course Id,Course Role, Availability Status,DataSource Id,Change Date\n"
+            items = Logs.objects.all()
+            for obj in items:
+                changeDate =  obj.created_at.strftime("%m/%d/%Y %H:%M:%S %Z")
+                print ("CHANGEDATE: ", changeDate)
+                objdata = [str(obj.state), str(obj.id), str(obj.message_id), str(obj.external_id), str(obj.course_id), str(obj.course_role), str(obj.availability_status), str(obj.datasource_id), changeDate]
+                logsContents = logsContents + ",".join(objdata) + "\n"
+                
+            # print ("LOGCONTENTS: ", logContents)
+            # print ("inMemoryFileOpened TYPE: ", inMemoryFile)
+            # inMemoryFileOpened.writestr('DSKTOOL_LOGS.csv', logContents)
+        else:
+            print ("should never ever see this")            
+
+        BinaryZipPath = "DSKTOOL_CSV_(" + timestr + ").zip"
+        
+    cb = io.BytesIO()
+    cbzf = ZipFile(cb, mode='w')
+    cbzf.writestr(msgArchiveFile, msgContents)
+    cbzf.writestr(logArchiveFile, logsContents)
+    cbzf.close()
+    # write buffer to disk for testing only - cannot save to disk with docker or heroku...
+    # open(BinaryZipPath, 'wb').write(cb.getbuffer()) 
+    # with ZipFile(cb) as zip_archive:
+    #     for item in zip_archive.filelist:
+    #         print(f'\nThere are {len(zip_archive.filelist)} ZipInfo objects present in archive')
+    
+    response = HttpResponse(cb.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    response['Content-Disposition'] = 'attachment; filename='+zip_file_name
+
+    return response
+
+def build_multiple_csv_files():
+        messagesCSV = Messages.objects.all()
+        logsCSV = Logs.objects.all()
+        
+        csv_files = [messagesCSV, logsCSV]
+        return csv_files

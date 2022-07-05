@@ -25,13 +25,13 @@ multidict>=4.7.6
 parse>=1.16.0
 pendulum>=2.1.2
 psycopg2-binary>=2.8.5
-pyee>=8.2.2 
+pyee<9.0.0
 pyppeteer>=0.2.6
 pyquery>=1.4.1
 python-dateutil>=2.8.1
 pytz>=2020.1
 pytzdata>=2020.1
-regex>=2020.7.14
+regex<2022.3.15
 requests-html>=0.10.0
 requests>=2.24.0
 selenium>=3.141.0

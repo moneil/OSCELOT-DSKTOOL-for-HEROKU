@@ -1,6 +1,6 @@
 # Dockerfile
 
-FROM python:3
+FROM python:latest
 
 # copy source and install dependencies
 RUN mkdir -p /dsktool

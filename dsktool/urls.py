@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 from dsktool import views
+from dsktool import rfc
+from dsktool.views import exportcsv
+
 # from django.conf.urls import url
 
 
@@ -34,6 +37,12 @@ urlpatterns = [
     path('users', views.users, name='users'),
     path('whoami', views.whoami, name='whoami'),
     path('rfcreport', views.rfcreport, name='rfcreport'),
+    path('exportcsvzip/', views.exportcsvzip, name="exportcsvzip"),
+
+    path('exportcsv/', views.exportcsv, name='exportcsv'),
+    path('exportmessagescsv/', views.exportmessagescsv, name='exportmessagescsv'),
+    path('exportlogscsv/', views.exportlogscsv, name='exportlogscsv'),
+    re_path(r'^ajax/purgereportdata/$', views.purgeData, name='purgereportdata'),
     
     re_path(r'^ajax/getDataSourceKeys/$', views.getDataSourceKeys, name='getDataSourceKeys'),
     re_path(r'^ajax/validate_userIdentifier/$', views.validate_userIdentifier, name='validate_userIdentifier'),
