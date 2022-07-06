@@ -1,6 +1,8 @@
 # DSKTOOL for Learn v1.2.6 (07/05/2022)
 
-Please note that this project is being deprecated in favor of [moneil/DSKTOOL for Learn](https://github.com/moneil/DSKTOOL-for-Learn)
+Please note that this project is being deprecated in favor of [moneil/DSKTOOL for Learn](https://github.com/moneil/DSKTOOL-for-Learn). This project is current as of release v1.2.6. All future releases will be published on the above project. Please adjust your bookmarks and git forks/clones accordingly.
+
+Thank you! -m
 
 See [Release Notes](#Release-Notes) below.
 
