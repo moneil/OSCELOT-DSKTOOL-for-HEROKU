@@ -72,7 +72,7 @@
         </thead>
         <tbody>
           {% for message in messages %}
-            <tr>
+            <tr class="hide-bottom-border">
               <td>{{message.id}}</td>
               <td>{{message.user_id}}</td>
               <td>{{message.change_type}}</td>
@@ -200,6 +200,10 @@
     content: "";
     clear: both;
     display: table;
+  }
+
+  .hide-bottom-border {
+    border-bottom: 2px solid white;
   }
 </style>
 {% block javascript %}
