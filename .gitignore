@@ -15,3 +15,7 @@ settings.json
 
 #pyenv project name
 odfh*
+key.pem
+cert.crt
+cert.key
+cert.pem
